@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Sprite</title>
+</head>
+
+<body>
+
+    <canvas id="cas"></canvas>
+
+</body>
+<pre>
+   
+
+</pre>
+
+</html>
+<script src="../build/mmGL.js"></script>
+<script>
+    let canvas = document.getElementById('cas');
+    let renderer = new mmGL.WebGLRenderer({
+        canvas: canvas,
+        antialias: true
+    })
+
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.setSize(400, 400, true);
+    renderer.setClearColor('pink');
+
+    let scene = new mmGL.Scene();
+
+
+    let texture = new mmGL.Texture();
+    let material = new mmGL.SpriteMaterial({
+        color: 0xffffff,
+        transparent:true,
+        depthTest:false,
+        opacity:0.8,
+       // rotation: Math.PI / 2
+    });
+    let material1 = new mmGL.SpriteMaterial({
+        color: 0xffffff,
+        transparent: true,
+        depthTest:false,
+        opacity:0.8,
+       // rotation: Math.PI / 2
+    });
+    let material2 = new mmGL.SpriteMaterial({
+        color: 0xffffff,
+        transparent: true,
+        depthTest:false,
+        opacity:0.8,
+       // rotation: Math.PI / 2
+    });
+
+    var image = document.createElementNS('http://www.w3.org/1999/xhtml', 'img');
+
+    image.addEventListener('load', function () {
+        texture.image = this;
+        texture.needsUpdate = true;
+        material.map = texture;
+    }, false);
+
+ texture.format = mmGL.RGBAFormat;
+    image.src = './assets/sprite1.png';
+
+
+
+    let sprite = new mmGL.Sprite(material);
+    let sprite1 = new mmGL.Sprite(material1);
+    sprite1.position.x=-0.5;
+    let sprite2 = new mmGL.Sprite(material2);
+    sprite2.position.x=0.5;
+
+    sprite.scale.set(0.5, 0.5, 1.0);
+    sprite1.scale.set(0.5, 0.5, 1.0);
+    sprite2.scale.set(0.5, 0.5, 1.0);
+    //sprite.center.set(1,1);
+
+    scene.add(sprite);
+    scene.add(sprite1);
+    scene.add(sprite2);
+
+
+    let camera = new mmGL.Camera();
+
+    (function tick() {
+        renderer.render(scene, camera);
+        //sprite.material.rotation += 0.1;
+        scene.rotation.y += 0.01;
+        //scene.rotation.x += 0.01;
+
+        window.requestAnimationFrame(tick)
+    })()
+
+
+
+
+
+
+</script>

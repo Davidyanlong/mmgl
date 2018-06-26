@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>bufferGeometry</title>
+</head>
+
+<body>
+    <canvas id="cas"></canvas>
+</body>
+<p>
+    测试:简单几何体的绘制,通过bufferGeometry 进行
+    <div>1、顶点着色</div>
+    <div>2、面着色</div>
+    <div>3、绘制网格线</div>
+    <div>4、测试BufferGeometry的相关方法</div>
+
+
+</p>
+
+</html>
+<script src="../build/mmGL2.js"></script>
+<script>
+    let canvas = document.getElementById('cas');
+    let renderer = new mmGL.WebGLRenderer({
+        canvas: canvas,
+        antialias: true
+    })
+
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.setSize(400, 400, true);
+
+
+
+    let scene = new mmGL.Scene();
+
+    let bufferGeometry = new mmGL.BufferGeometry();
+
+
+
+    let triangleVertices = [
+        // X , Y , Z 
+        0.0, 0.5, 0,
+        - 0.5, -0.5, 0,
+        0.5, -0.5, 0,
+
+        0.0, 0.25, 0,
+        - 0.25, -0.25, 0,
+        0.25, -0.25, 0,
+    ]
+    let positionBuffer = new mmGL.Float32BufferAttribute(triangleVertices, 3);
+    bufferGeometry.addAttribute('position', positionBuffer);
+
+    let color = [
+        //R,   G,  B 
+        1.0, 0, 0,
+        0, 1.0, 0,
+        0, 0, 1.0,
+
+        1.0, 0, 0,
+        0, 1.0, 0,
+        0, 0, 1.0
+    ]
+
+
+    let colorBuffer = new mmGL.Float32BufferAttribute(color, 3);
+    bufferGeometry.addAttribute('color', colorBuffer);
+
+    let indices = [
+        0, 1, 2,
+        3, 4, 5
+    ]
+
+
+    bufferGeometry.setIndex(indices);
+
+    bufferGeometry.addGroup(0, 3, 0);
+    bufferGeometry.addGroup(3, 3, 1);
+
+    //测试buffGeometry 
+    let indexs = bufferGeometry.getIndex()
+    console.info('test getIndex indexs', indexs);
+    let positionTest = bufferGeometry.getAttribute('position');
+
+    console.info('test getAttribute position', indexs);
+
+
+    bufferGeometry.computeBoundingBox();
+
+    console.info('test computeBoundingBox', bufferGeometry.boundingBox);
+
+    bufferGeometry.computeBoundingSphere();
+
+    console.info('test computeBoundingSphere', bufferGeometry.boundingSphere);
+
+
+    let materialLine = new mmGL.MeshBasicMaterial({
+        vertexColors: mmGL.VertexColors,
+        wireframe: true
+    });
+
+    let mesh = new mmGL.Mesh(bufferGeometry, materialLine);
+
+    scene.add(mesh);
+
+    let materialFace1 = new mmGL.MeshBasicMaterial({
+        color: 0xaaaaaa,
+        vertexColors: mmGL.FaceColors,
+    });
+    let materialFace2 = new mmGL.MeshBasicMaterial({
+        color: 0xffffff,
+        vertexColors: mmGL.FaceColors,
+    });
+
+    let mesh2 = new mmGL.Mesh(bufferGeometry, [materialFace1, materialFace2]);
+    scene.add(mesh2);
+
+    let camera = new mmGL.Camera();
+
+   (function tick(){
+        renderer.render(scene, camera);
+        window.requestAnimationFrame(tick)
+    })()
+
+
+
+
+
+
+</script>

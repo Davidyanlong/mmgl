@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>perspective</title>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <canvas id="cas"></canvas>
+</body>
+<pre>
+    1、相机沿着球转(上下键调整镜头的距离)
+
+</pre>
+
+</html>
+<script src="../build/mmGL2.js"></script>
+<script>
+    let canvas = document.getElementById('cas');
+    let renderer = new mmGL.WebGLRenderer({
+        canvas: canvas,
+        antialias: true
+    })
+
+    let force = false;
+
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.setSize(400, 400, true);
+
+    renderer.setClearColor('grey');
+    renderer.clearColor();
+
+    let scene = new mmGL.Scene();
+
+
+    let camera = new mmGL.PerspectiveCamera(45, 1, 0.1, 2000);
+    camera.position.set(0, 0, 2000);
+
+    camera.lookAt(0, 0, 0);
+
+
+
+
+    let ambientLight = new mmGL.AmbientLight(0xffffff, 0.5, 0);
+    ambientLight.position.set(100, 100, 100);
+
+    scene.add(ambientLight);
+
+    let directionLight = new mmGL.DirectionalLight(0xffffff, 0.5, 0);
+
+    directionLight.position.set(0, 0, 100);
+
+    scene.add(directionLight);
+
+
+
+    let materialSphere = new mmGL.MeshPhongMaterial({
+        color: 0xFFFFFF,
+    });
+
+
+    let texture = new mmGL.Texture();
+    let image = document.createElementNS('http://www.w3.org/1999/xhtml', 'img');
+
+    image.addEventListener('load', function () {
+        texture.image = this;
+        texture.needsUpdate = true;
+        materialSphere.map = texture;
+        materialSphere.needsUpdate = true;
+        force = true;
+    }, false);
+
+    image.src = './assets/0005082044980897_b.jpg';
+
+
+
+    let sphereGeometry = new mmGL.SphereGeometry(100, 32, 32);
+    let sphereMesh = new mmGL.Mesh(sphereGeometry, materialSphere);
+    sphereMesh.position.set(0, 0, 0)
+    scene.add(sphereMesh);
+
+    force = true;
+
+
+    document.addEventListener('keyup', function (e) {
+        //up
+        if (e.keyCode === 38) {
+            camera.position.z += 5;
+            force = true;
+        }
+        //down
+        if (e.keyCode === 40) {
+            camera.position.z -= 5;
+            force = true;
+        }
+
+        //left 
+
+        if (e.keyCode === 37) {
+            camera.position.x -= 5;
+            force = true;
+        }
+
+        //right
+        if (e.keyCode === 39) {
+            camera.position.x += 5;
+            force = true;
+        }
+
+        console.log(camera.position.x, camera.position.z)
+
+    });
+
+    let animation = function () {
+        let lastTime = Date.now();
+        let currTime = Date.now();
+
+        function update(tick,angle) {
+            currTime = Date.now();
+            if (currTime - lastTime > tick) {
+                sphereMesh.rotateY(angle);
+                force = true;
+                lastTime = currTime;
+            }
+        }
+
+        return {
+            update: update
+        }
+
+
+
+    }
+
+    let ani = animation();
+
+    function tick() {
+
+
+        window.requestAnimationFrame(tick)
+        
+        ani.update(50,Math.PI/90);
+
+        if (!force) return;
+        renderer.render(scene, camera);
+        force = false;
+
+    }
+    tick();
+
+
+
+
+
+
+
+
+</script>

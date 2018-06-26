@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>视眼范围测试</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            font-family: Monospace;
+            background-color: #f0f0f0;
+            margin: 0px;
+            /* overflow: hidden; */
+        }
+    </style>
+</head>
+
+<body>
+
+    <script src="../../build/mmGL.js"></script>
+    <script src="./RenderFont.js"></script>
+
+    <script>
+
+
+        var container;
+        var camera, scene, raycaster, renderer, parentTransform, sphereInter;
+        var mouse = new mmGL.Vector2();
+        var radius = 100, theta = 0;
+        var currentIntersected;
+        let aspect = window.innerWidth / window.innerHeight;
+        let frustumSize = 180;
+        let boxWidth = 100 * aspect;
+        let lights;
+
+        let r = 200;
+        let i = 360;
+        var rootLayout = new mmGL.Group();
+
+        // let  temp = new mmGL.Object3D();
+        //     temp.position.z=-130;
+
+        init();
+        animate();
+        function init() {
+            container = document.createElement('div');
+            document.body.appendChild(container);
+
+            //camera = new mmGL.PerspectiveCamera(70, aspect, 1, 10000);
+
+            camera = new mmGL.OrthographicCamera(frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, -1000, 10000);
+
+            camera.position.z = 130;
+            camera.position.y = 30;
+            // camera.position.x = boxWidth / 2;
+            scene = new mmGL.Scene();
+            scene.background = new mmGL.Color(0xf0f0f0);
+
+            //基础box数据    
+            var geometry = new mmGL.BoxGeometry(1, 1, 1);
+            geometry.vertices.forEach(vertice => {
+                vertice.addScalar(0.5);
+            });
+
+            //定义根容器,存放所有的绘制图形,通过跟容器将坐标系统转化为图标的坐标,0点在左下角
+
+            rootLayout.translateX(-boxWidth / 2);
+            rootLayout.translateY(-50);
+            rootLayout.translateZ(-50);
+
+
+
+            scene.add(rootLayout);
+
+            //变换坐标系
+
+            // let materialArr = [];
+
+            // for (let i = 0; i < 6; i++) {
+
+            //     materialArr.push(
+            //         new mmGL.MeshLambertMaterial({
+            //             color: 0xeeeeee,
+            //             polygonOffset: true,
+            //             polygonOffsetFactor: 1,
+            //             polygonOffsetUnits: 3,
+            //             opacity: 0,
+            //             transparent: false,
+            //             side: mmGL.BackSide,
+            //             //  wireframe:true
+
+            //         }))
+            //     // if (i == 0 || i==2 || i ==4) {
+            //     //     materialArr[i].transparent = true;
+            //     // }
+
+
+            // }
+
+
+            // boxMesh = new mmGL.Mesh(geometry, materialArr);
+
+            // boxMesh.scale.set(boxWidth, 100, 100);
+
+            // boxMesh.position.x = - boxWidth / 2;
+            // boxMesh.position.y = - 100 / 2;
+            // boxMesh.position.z = - 100 / 2;
+            //boxMesh.visible=false;
+
+            // scene.add(boxMesh);
+
+
+
+            //原点
+            let pointMaterial = new mmGL.PointsMaterial({
+                color: 0xff0000,
+                size: 2
+            });
+
+            let pointGeometry = new mmGL.BufferGeometry();
+            pointGeometry.addAttribute('position', new mmGL.Float32BufferAttribute([0, 0, 0], 3));
+
+            let point = new mmGL.Points(pointGeometry, pointMaterial);
+            rootLayout.add(point);
+
+
+            //基本图形     
+            let currMesh;
+            let graphicLayout = new mmGL.Group();
+            let padding = 1
+            graphicLayout.translateX(padding);
+            //graphicLayout.translateY(padding);
+            graphicLayout.translateZ(-padding);
+
+            rootLayout.add(graphicLayout);
+
+            for (let i = 0; i < 10; i++) {
+                for (let j = 0; j < 10; j++) {
+                    currMesh = new mmGL.Mesh(geometry.clone(), new mmGL.MeshLambertMaterial({ color: 0x00ff00 * Math.random() }));
+                    currMesh.scale.set(10, 100 * Math.random(), 10);
+                    currMesh.position.x = j * 15;
+                    currMesh.position.z = -10 + i * -15;
+                    graphicLayout.add(currMesh);
+                }
+
+            }
+
+
+            //绘制坐标轴
+
+            let axisLayout = new mmGL.Group();
+            rootLayout.add(axisLayout);
+
+
+            function createAxis(dir, length) {
+
+                dir.normalize()
+                let lineMaterial = new mmGL.LineBasicMaterial({
+                    color: 0xff0000,
+                    side: mmGL.BackSide
+                });
+
+                let lineGeometry = new mmGL.Geometry();
+                let origin = new mmGL.Vector3(0, 0, 0);
+
+                lineGeometry.vertices.push(origin);
+                lineGeometry.vertices.push(dir);
+
+                let line = new mmGL.Line(lineGeometry, lineMaterial);
+                line.scale.set(length, length, length);
+
+                return line;
+
+            }
+
+            function createSpanLine(dir, length, num, segmentLength, segmentDir) {
+
+                segmentDir.normalize();
+                dir.normalize();
+                let segmentLayout = new mmGL.Group();
+                let lineMaterial = new mmGL.LineBasicMaterial({
+                    color: 0xff0000,
+                    side: mmGL.BackSide,
+                });
+
+                let lineGeometry = null;
+                let line = null;
+
+                let reciprocal = 1 / num;
+                let origin = new mmGL.Vector3();
+                origin.set(0, 0, 0);
+
+
+                let firstPoint = new mmGL.Vector3();
+                let secondPoint = new mmGL.Vector3();
+
+                for (let i = 0; i < num; i++) {
+                    firstPoint.lerpVectors(origin, dir, reciprocal * i);
+                    secondPoint.copy(firstPoint);
+
+                    secondPoint.add(segmentDir.clone().multiplyScalar(segmentLength / length));
+
+                    lineGeometry = new mmGL.Geometry();
+                    lineGeometry.vertices.push(firstPoint.clone());
+                    lineGeometry.vertices.push(secondPoint.clone());
+
+                    line = new mmGL.Line(lineGeometry, lineMaterial);
+                    line.scale.set(length, length, length);
+
+                    segmentLayout.add(line);
+                }
+
+                return segmentLayout;
+            }
+
+
+            function createSpanText(lineMesh, offset, text, adjustment) {
+                let renderFont = null;
+                let spanLineGeometry = lineMesh.geometry;
+                let firstPoint = spanLineGeometry.vertices[0].clone();
+                let secondPoint = spanLineGeometry.vertices[1].clone();
+                let dir = new mmGL.Vector3();
+                let position = new mmGL.Vector3();
+                let texture = new mmGL.Texture();
+                let spriteMatrial = new mmGL.SpriteMaterial({
+                    //color:new mmGL.Color('#ff0000'),
+                    map: texture,
+                   // transparent:true,
+                    //blending: mmGL.AdditiveBlending
+                });
+                let height = 8;
+
+                let sprite = new mmGL.Sprite(spriteMatrial);
+                lineMesh.updateMatrixWorld(true);
+                secondPoint = lineMesh.localToWorld(secondPoint);
+                firstPoint = lineMesh.localToWorld(firstPoint);
+                dir.subVectors(secondPoint, firstPoint);
+                dir.normalize();
+
+
+                position.addVectors(secondPoint, dir.clone().multiplyScalar(offset));
+                adjustment = adjustment || new mmGL.Vector3(0, 0, 0);
+                position.add(adjustment);
+
+                //createTexture
+
+                renderFont = new RenderFont({
+                    //color:new mmGL.Color('#ff0000'),
+                    textAlign: 'center',
+                    fontSize:18
+                });
+                renderFont.drawText(text);
+                let size = renderFont.measureText(text);
+                let scaleWidth = size.width/size.height * height; 
+                
+
+
+                texture.image = renderFont.canvas;
+                texture.needsUpdate = true;
+
+                sprite.position.copy(position);
+                sprite.scale.set(scaleWidth, height, 1);
+
+                return sprite;
+
+
+            }
+
+
+            let lineX = createAxis(new mmGL.Vector3(1, 0, 0), 200);
+
+            axisLayout.add(lineX);
+
+            let segmentX = createSpanLine(new mmGL.Vector3(1, 0, 0), 200, 10, 2, new mmGL.Vector3(0, -1, 0));
+            axisLayout.add(segmentX);
+
+            let axisXFontLayout = new mmGL.Group();
+            axisLayout.add(axisXFontLayout);
+            segmentX.children.forEach(mesh => {
+
+                let sprite = createSpanText(mesh, 3, Math.round(Math.random() * 100000));
+                axisXFontLayout.add(sprite);
+            })
+
+
+            let lineY = createAxis(new mmGL.Vector3(0, 1, 0), 200);
+
+            axisLayout.add(lineY);
+
+
+
+            let segmentY = createSpanLine(new mmGL.Vector3(0, 1, 0), 200, 10, 2, new mmGL.Vector3(-1, 0, 0));
+            axisLayout.add(segmentY);
+
+            let axisYFontLayout = new mmGL.Group();
+            axisLayout.add(axisYFontLayout);
+            segmentY.children.forEach(mesh => {
+                
+                let sprite = createSpanText(mesh, 1, Math.round(Math.random() * 100000));
+                axisYFontLayout.add(sprite);
+            })
+
+
+            let lineZ = createAxis(new mmGL.Vector3(0, 0, -1), 200);
+
+            axisLayout.add(lineZ);
+
+
+            let segmentZ = createSpanLine(new mmGL.Vector3(0, 0, -1), 200, 10, 2, new mmGL.Vector3(-1, 0, 0));
+            axisLayout.add(segmentZ);
+
+
+            let axisZFontLayout = new mmGL.Group();
+            axisLayout.add(axisZFontLayout);
+            segmentZ.children.forEach(mesh => {
+                let sprite = createSpanText(mesh, 5, Math.round(Math.random() * 100000), new mmGL.Vector3(0,-2,0));
+                axisZFontLayout.add(sprite);
+            })
+
+
+
+            lights = addLight(rootLayout);
+            scene.add(lights);
+
+
+            renderer = new mmGL.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            let resizeTimer = null;
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+
+        function onWindowResize() {
+            var aspect = window.innerWidth / window.innerHeight;
+            console.log(aspect);
+            if (camera.isPerspectiveCamera) {
+                camera.aspect = aspect;
+            } else {
+
+                camera.left = - frustumSize * aspect / 2;
+                camera.right = frustumSize * aspect / 2;
+                camera.top = frustumSize / 2;
+                camera.bottom = - frustumSize / 2;
+
+            }
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        //
+
+
+        function animate() {
+            requestAnimationFrame(animate);
+            render();
+        }
+
+
+
+        let cPos = new mmGL.Vector3();
+        cPos.copy(camera.position);
+        r = cPos.sub(scene.position).length();
+
+        //temp.add(camera);
+
+
+        function render() {
+
+            i -= 0.1;
+            i = i == 0 ? 360 : i;
+            camera.position.x = r * Math.sin(mmGL.Math.degToRad(i));
+            camera.position.z = r * Math.cos(mmGL.Math.degToRad(i));
+            // camera.position.y = r * Math.sin(mmGL.Math.degToRad(i));
+
+            //todo 旋转的中心是世界坐标的中心,需要切换到图表的中心位置
+            // temp.rotation.y+=0.01;
+            // temp.updateMatrixWorld();
+
+            camera.lookAt(scene.position);
+            renderer.render(scene, camera);
+        }
+
+
+        function addLight(target) {
+
+            let lightsLayout = new mmGL.Group();
+
+            //环境灯光
+            let ambientLight = new mmGL.AmbientLight(0xffffff, 0.5, 0);
+
+            lightsLayout.add(ambientLight);
+
+
+            let dirLight = new mmGL.DirectionalLight(0xffffff, 1, 0);
+            dirLight.position.set(200, 200, 200);
+            dirLight.target = target;
+
+            lightsLayout.add(dirLight);
+
+            let dirLight2 = new mmGL.DirectionalLight(0xffffff, 1, 0);
+            dirLight2.position.set(-200, 200, -200);
+            dirLight2.target = target;
+
+            lightsLayout.add(dirLight2);
+
+            return lightsLayout;
+
+
+        }
+
+
+
+        // let string = '0.01';
+        // let renderFont = new RenderFont();
+        // renderFont.drawText(string);
+        // document.body.appendChild(renderFont.canvas);
+
+
+
+        // let fontCanvas = null;
+        // let fontContext = null;
+        // let fontHeight = 24;
+        // let textureWidth = 512;
+        // let textureHeight = 512;
+        // let fontsize = 12;
+        // let bold = '';
+        // let fontFamily = "Arial"; //"微软雅黑,sans-serif"
+        // let rcpTextureWidth = 1 / textureWidth;
+        // let rcpTextureHeight = 1 / textureHeight;
+
+
+        // let CharInfo = function () {
+        //     var me = this;
+        //     me.char = "";
+        //     me.left = 0;
+        //     me.top = 0;
+        //     me.width = 0;
+        //     me.height = 0;
+        //     me.frame = 0;
+        // }
+
+        // function renderChar(charInfo) {
+        //     fontCanvas = fontCanvas || document.createElement('canvas');
+        //     fontCanvas.width = textureWidth * devicePixelRatio;
+        //     fontCanvas.height = textureHeight * devicePixelRatio;
+
+        //     fontCanvas.style.width = textureWidth + 'px';
+        //     fontCanvas.style.height = textureHeight + 'px';
+
+        //     fontContext = fontCanvas.getContext('2d');
+
+        //     fontContext.fillStyle = "#ff0000"; 	// This determines the text colour, it can take a hex value or rgba value (e.g. rgba(255,0,0,0.5))
+        //     fontContext.textAlign = "left";	// This determines the alignment of text, e.g. left, center, right
+        //     fontContext.textBaseline = "top";	// This determines the baseline of the text, e.g. top, middle, bottom
+        //     fontContext.font = fontsize * devicePixelRatio + 'px ' + fontFamily;	// This determines the size of the text and the font family used
+        //     fontContext.webkitImageSmoothingEnabled = true;
+
+        //     let textMatric = fontContext.measureText(charInfo.char);
+
+
+        //     textMatric = measureText(charInfo.char)
+
+        //     var offset = 0.8;
+        //     fontContext.fillStyle = "#222222";
+        //     fontContext.fillText(charInfo.char, charInfo.left - offset, charInfo.top - offset);
+        //     fontContext.fillStyle = "#222222";
+        //     fontContext.fillText(charInfo.char, charInfo.left + offset, charInfo.top - offset);
+        //     fontContext.fillStyle = "#222222";
+        //     fontContext.fillText(charInfo.char, charInfo.left - offset, charInfo.top + offset);
+        //     fontContext.fillStyle = "#222222";
+        //     fontContext.fillText(charInfo.char, charInfo.left + offset, charInfo.top + offset);
+        //     fontContext.fillStyle = "#ffffff";
+        //     fontContext.fillText(charInfo.char, charInfo.left, charInfo.top);
+
+
+        //     charInfo.width = textMatric.width;
+        //     charInfo.height = textMatric.height; 
+        //     charInfo.texcoords_left = (charInfo.left) * rcpTextureWidth;
+        //     charInfo.texcoords_right = (charInfo.left + charInfo.width) * rcpTextureWidth;
+        //     charInfo.texcoords_top = (charInfo.top) * rcpTextureHeight;
+        //     charInfo.texcoords_bottom = (charInfo.top + charInfo.height) * rcpTextureHeight;
+        //     //isTextureDirty = true;
+
+        //     // fontContext.strokeStyle = "#ff0000";
+        //     // fontContext.rect(0, 0, charInfo.width, charInfo.height);
+        //     // fontContext.stroke();
+
+        //     return fontCanvas;
+
+        // }
+
+        //  let charMap={};
+        // let lastTop = 0;
+        // let lastLeft = 0;
+        // let string = '我爱你中国,Hello China';
+        // for(let i=0;i<string.length;i++){
+        //      let char = string[i]; 
+        //      let textChar = new CharInfo();  
+        //      textChar.char = char;
+        //      textChar.top=lastLeft;
+        //      textChar.left = lastLeft;  
+        //      renderChar(textChar);
+        //      charMap[char] = textChar;
+        //      lastLeft = textChar.width;
+        //      console.log('width:',lastLeft);
+        //      lastTop = textChar.height;
+
+        // }
+
+
+        // function measureText(text) {
+
+        //     var div = document.createElement("div");
+        //     div.innerHTML = text;
+        //     div.style.position = 'absolute';
+        //     div.style.top = '-9999px';
+        //     div.style.left = '-9999px';
+        //     div.style.fontFamily = fontFamily;
+        //     div.style.fontWeight = bold ? 'bold' : 'normal';
+        //     div.style.fontSize = fontsize * devicePixelRatio + 'px'; // or 'px'
+        //     document.body.appendChild(div);
+        //     var size = [div.offsetWidth, div.offsetHeight];
+        //     document.body.removeChild(div);
+
+        //    return {
+        //        width:size[0],
+        //        height:size[1]
+        //    };
+        // }
+
+        // document.body.appendChild(fontCanvas);
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Geometry</title>
+</head>
+
+<body>
+    <canvas id="cas"></canvas>
+</body>
+<p>
+    测试:简单几何体的绘制<br>
+    
+    GPU的最终绘制是读取Buffer数据<br>
+    
+    创建createBuffer方法只接受Type Array 类BufferGeometry存放的就是类型数组的属性<br>
+
+    geometry类是一个顶层类,可以让开发者忽略这些类与buffer,只关心顶点,面,法线,UV等<br>
+
+</p>
+
+</html>
+<script src="../build/mmGL2.js"></script>
+<script>
+    let canvas = document.getElementById('cas');
+    let renderer = new mmGL.WebGLRenderer({
+        canvas: canvas,
+        antialias: true
+    })
+
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.setSize(400, 400, true);
+
+    renderer.setClearColor('grey');
+    renderer.clearColor();
+
+    let scene = new mmGL.Scene();
+
+    let geometry = new mmGL.Geometry();
+
+
+    geometry.vertices.push(
+        new mmGL.Vector3(0.0, 0.5, 0.0),
+        new mmGL.Vector3(- 0.5, -0.5, 0.0),
+        new mmGL.Vector3(0.5, -0.5, 0.0),
+
+        new mmGL.Vector3(0.0, 0.25, 0.0),
+        new mmGL.Vector3(- 0.25, -0.25, 0.0),
+        new mmGL.Vector3(0.25, -0.25, 0.0),
+    );
+
+    let face1Colors = [
+        new mmGL.Color(1.0, 0.0, 0.0),
+        new mmGL.Color(0.0, 1.0, 0.0),
+        new mmGL.Color(0.0, 0.0, 1.0)
+    ]
+
+    geometry.faces.push(new mmGL.Face3(0, 1, 2, null, face1Colors, 0))
+    geometry.faces.push(new mmGL.Face3(3, 4, 5, null, new mmGL.Color('grey'), 1))
+
+
+    let materialLine = new mmGL.MeshBasicMaterial({
+        vertexColors: mmGL.VertexColors,
+        wireframe: true
+    });
+
+    let mesh = new mmGL.Mesh(geometry, materialLine);
+
+    scene.add(mesh);
+
+    let materialFace1 = new mmGL.MeshBasicMaterial({
+        color: 0xff0000,
+        vertexColors: mmGL.VertexColors,
+    });
+    let materialFace2 = new mmGL.MeshBasicMaterial({
+        color: 0xFFFFFF,
+        vertexColors: mmGL.FaceColors,
+    });
+
+    let mesh2 = new mmGL.Mesh(geometry, [materialFace1, materialFace2]);
+    scene.add(mesh2);
+
+    let camera = new mmGL.Camera();
+
+    
+    (function tick(){
+        renderer.render(scene, camera);
+        window.requestAnimationFrame(tick)
+    })()
+    
+    
+
+
+
+
+
+
+</script>

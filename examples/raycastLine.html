@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>mmGL.js webgl - interactive lines</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            font-family: Monospace;
+            background-color: #f0f0f0;
+            margin: 0px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+
+    <script src="../build/mmGL.min.js"></script>
+
+    <script>
+        var container;
+        var camera, scene, raycaster, renderer, parentTransform, sphereInter;
+        var mouse = new mmGL.Vector2();
+        var radius = 100, theta = 0;
+        var currentIntersected;
+        init();
+        animate();
+        function init() {
+            container = document.createElement('div');
+            document.body.appendChild(container);
+            camera = new mmGL.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10000);
+            scene = new mmGL.Scene();
+            scene.background = new mmGL.Color(0xf0f0f0);
+            var geometry = new mmGL.SphereBufferGeometry(5);
+            var material = new mmGL.MeshBasicMaterial({ color: 0xff0000 });
+            sphereInter = new mmGL.Mesh(geometry, material);
+            sphereInter.visible = false;
+            scene.add(sphereInter);
+            var lineGeometry = new mmGL.BufferGeometry();
+            var points = [];
+            var point = new mmGL.Vector3();
+            var direction = new mmGL.Vector3();
+            for (var i = 0; i < 50; i++) {
+                direction.x += Math.random() - 0.5;
+                direction.y += Math.random() - 0.5;
+                direction.z += Math.random() - 0.5;
+                direction.normalize().multiplyScalar(10);
+                point.add(direction);
+                points.push(point.x, point.y, point.z);
+            }
+            lineGeometry.addAttribute('position', new mmGL.Float32BufferAttribute(points, 3));
+            parentTransform = new mmGL.Object3D();
+            parentTransform.position.x = Math.random() * 40 - 20;
+            parentTransform.position.y = Math.random() * 40 - 20;
+            parentTransform.position.z = Math.random() * 40 - 20;
+            parentTransform.rotation.x = Math.random() * 2 * Math.PI;
+            parentTransform.rotation.y = Math.random() * 2 * Math.PI;
+            parentTransform.rotation.z = Math.random() * 2 * Math.PI;
+            parentTransform.scale.x = Math.random() + 0.5;
+            parentTransform.scale.y = Math.random() + 0.5;
+            parentTransform.scale.z = Math.random() + 0.5;
+            for (var i = 0; i < 50; i++) {
+                var object;
+
+                object = new mmGL.Line(lineGeometry);
+
+                object.position.x = Math.random() * 400 - 200;
+                object.position.y = Math.random() * 400 - 200;
+                object.position.z = Math.random() * 400 - 200;
+                object.rotation.x = Math.random() * 2 * Math.PI;
+                object.rotation.y = Math.random() * 2 * Math.PI;
+                object.rotation.z = Math.random() * 2 * Math.PI;
+                object.scale.x = Math.random() + 0.5;
+                object.scale.y = Math.random() + 0.5;
+                object.scale.z = Math.random() + 0.5;
+                parentTransform.add(object);
+            }
+            scene.add(parentTransform);
+            raycaster = new mmGL.Raycaster();
+            raycaster.linePrecision = 3;
+            renderer = new mmGL.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            document.addEventListener('mousemove', onDocumentMouseMove, false);
+            //
+            window.addEventListener('resize', onWindowResize, false);
+        }
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        function onDocumentMouseMove(event) {
+            event.preventDefault();
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+        }
+        //
+        function animate() {
+            requestAnimationFrame(animate);
+            render();
+        }
+        function render() {
+            theta += 0.1;
+            camera.position.x = radius * Math.sin(mmGL.Math.degToRad(theta));
+            camera.position.y = radius * Math.sin(mmGL.Math.degToRad(theta));
+            camera.position.z = radius * Math.cos(mmGL.Math.degToRad(theta));
+            camera.lookAt(scene.position);
+            camera.updateMatrixWorld();
+            // find intersections
+            raycaster.setFromCamera(mouse, camera);
+            var intersects = raycaster.intersectObjects(parentTransform.children, true);
+            if (intersects.length > 0) {
+                if (currentIntersected !== undefined) {
+                    currentIntersected.material.color = currentIntersected.currentColor;
+                }
+                currentIntersected = intersects[0].object;
+                currentIntersected.currentColor =  currentIntersected.material.color
+                currentIntersected.material.color = new mmGL.Color(0xff0000);
+                sphereInter.visible = true;
+                sphereInter.position.copy(intersects[0].point);
+            } else {
+                if (currentIntersected !== undefined) {
+                    currentIntersected.material.color = currentIntersected.currentColor;
+                }
+               
+                currentIntersected = undefined;
+                sphereInter.visible = false;
+            }
+            renderer.render(scene, camera);
+        }
+    </script>
+
+</body>
+
+</html>

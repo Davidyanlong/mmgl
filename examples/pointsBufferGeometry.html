@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>pointsBufferGeometry</title>
+</head>
+
+<body>
+    <canvas id="cas"></canvas>
+</body>
+<pre>
+    测试内容:
+        1、粒子的顶点作色
+        2、shader作色
+
+      
+</pre>
+
+</html>
+<script src="../build/mmGL2.js"></script>
+<script>
+    let canvas = document.getElementById('cas');
+    let renderer = new mmGL.WebGLRenderer({
+        canvas: canvas,
+        antialias: true
+    })
+
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.setSize(400, 400, true);
+    renderer.setClearColor('pink')
+
+
+    let scene = new mmGL.Scene();
+
+    //随机粒子
+    let triangleVertices = [];
+    let color = [];
+    let pointCount = 10;
+
+    for (let i = 0; i < pointCount; i++) {
+        let x = Math.random() * 1.8 - 0.9;
+        let y = Math.random() * 1.8 - 0.9;
+        let z = 0;
+        triangleVertices.push(
+            x,
+            y,
+            z
+        )
+        color.push(
+            Math.random(),
+            Math.random(),
+            Math.random()
+        )
+    }
+
+    let positionBuffer = new mmGL.Float32BufferAttribute(triangleVertices, 3);
+    let bufferGeometry = new mmGL.BufferGeometry();
+    bufferGeometry.addAttribute('position', positionBuffer);
+
+
+    let colorBuffer = new mmGL.Float32BufferAttribute(color, 3);
+    bufferGeometry.addAttribute('color', colorBuffer);
+
+
+
+
+
+    //测试buffGeometry 
+    let indexs = bufferGeometry.getIndex()
+    console.info('test getIndex indexs', indexs);
+    let positionTest = bufferGeometry.getAttribute('position');
+
+    console.info('test getAttribute position', indexs);
+
+
+    bufferGeometry.computeBoundingBox();
+
+    console.info('test computeBoundingBox', bufferGeometry.boundingBox);
+
+    bufferGeometry.computeBoundingSphere();
+
+    console.info('test computeBoundingSphere', bufferGeometry.boundingSphere);
+
+
+    let texture = new mmGL.Texture();
+
+
+    var image = document.createElementNS('http://www.w3.org/1999/xhtml', 'img');
+
+    image.addEventListener('load', function () {
+
+        texture.image = this;
+        texture.needsUpdate = true;
+        material.map = texture;
+        material.needsUpdate = true;
+    }, false);
+
+    image.src = './assets/heart01.png';
+
+
+    let material = new mmGL.PointsMaterial({
+        color: 'grey',
+        //vertexColors: mmGL.VertexColors,
+        size: 50,
+        opacity:0.3,
+        transparent:true
+    });
+
+    let mesh = new mmGL.Points(bufferGeometry, material);
+
+    scene.add(mesh);
+
+
+    ///////  test effect /////
+    // 用例子画圆
+    let triangleVertices2 = [];
+    let color2 = [];
+    let pointCount2 = 360;
+
+    let turns = 10;
+    let minRadius = 0.05;
+
+    let radian = function (deg) {
+        return deg * Math.PI / 180;
+    }
+
+    for (t = 0; t < turns; t++) {
+        let r = minRadius + t * 0.1;
+        for (let i = 0; i < pointCount2; i += 20 - t * 1.5) {
+            let x = r * Math.cos(radian(i));
+            let y = r * Math.sin(radian(i));
+            let z = 0;
+            triangleVertices2.push(
+                x,
+                y,
+                z
+            )
+            let c = parseInt(r * 10) % 3;
+            if (c === 0) {
+                color2.push(1, 0, 0)
+            } else if (c === 1) {
+                color2.push(0, 1, 0)
+            } else if (c === 2) {
+                color2.push(0, 0, 1)
+            }
+
+        }
+
+    }
+
+
+
+
+    let positionBuffer2 = new mmGL.Float32BufferAttribute(triangleVertices2, 3);
+    let bufferGeometry2 = new mmGL.BufferGeometry();
+    bufferGeometry2.addAttribute('position', positionBuffer2);
+
+
+    let colorBuffer2 = new mmGL.Float32BufferAttribute(color2, 3);
+    bufferGeometry2.addAttribute('color', colorBuffer2);
+
+
+    let mesh2 = new mmGL.Points(bufferGeometry2, material);
+
+    // scene.add(mesh2);
+
+
+
+    let camera = new mmGL.Camera();
+
+    (function tick() {
+        renderer.render(scene, camera);
+        window.requestAnimationFrame(tick)
+    })()
+
+
+</script>

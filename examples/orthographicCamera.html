@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>ortho</title>
+<style>
+    body{
+        padding: 0;
+        margin: 0;
+    }
+</style>
+
+</head>
+
+<body>
+    <canvas id="cas"></canvas>
+</body>
+<pre>
+    1、相机沿着球转
+</pre>
+
+</html>
+<script src="../build/mmGL2.js"></script>
+<script>
+    let canvas = document.getElementById('cas');
+    let renderer = new mmGL.WebGLRenderer({
+        canvas: canvas,
+        antialias: true
+    })
+
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.setSize(400, 400, true);
+
+    renderer.setClearColor('grey');
+    renderer.clearColor();
+
+    let scene = new mmGL.Scene();
+
+    let geometry = new mmGL.Geometry();
+
+
+    geometry.vertices.push(
+        new mmGL.Vector3(0.0, 0.5, 0.0),
+        new mmGL.Vector3(- 0.5, -0.5, 0.0),
+        new mmGL.Vector3(0.5, -0.5, 0.0),
+
+        new mmGL.Vector3(0.0, 0.25, 0.0),
+        new mmGL.Vector3(- 0.25, -0.25, 0.0),
+        new mmGL.Vector3(0.25, -0.25, 0.0),
+    );
+
+
+    //scale
+
+    geometry.vertices.forEach(function (vec) {
+        vec.multiplyScalar(200);
+    });
+
+
+    let face1Colors = [
+        new mmGL.Color(1.0, 0.0, 0.0),
+        new mmGL.Color(0.0, 1.0, 0.0),
+        new mmGL.Color(0.0, 0.0, 1.0)
+    ]
+
+    geometry.faces.push(new mmGL.Face3(0, 1, 2, null, face1Colors, 0))
+    geometry.faces.push(new mmGL.Face3(3, 4, 5, null, new mmGL.Color('grey'), 1))
+
+
+    let materialLine = new mmGL.MeshBasicMaterial({
+        vertexColors: mmGL.VertexColors,
+        wireframe: true
+    });
+
+    let mesh = new mmGL.Mesh(geometry, materialLine);
+
+    scene.add(mesh);
+
+    let materialFace1 = new mmGL.MeshLambertMaterial({
+        color: 0xff0000,
+        vertexColors: mmGL.VertexColors,
+    });
+    let materialFace2 = new mmGL.MeshLambertMaterial({
+        color: 0xFFFFFF,
+        vertexColors: mmGL.FaceColors,
+    });
+
+    let mesh2 = new mmGL.Mesh(geometry, [materialFace1, materialFace2]);
+    //scene.add(mesh2);
+
+
+    let camera = new mmGL.OrthographicCamera(-2000, 2000, 2000, -2000, -2000, 2000);
+    camera.position.set(0, 0, 1500);
+
+
+
+
+
+
+    let ambientLight = new mmGL.AmbientLight(0xffffff, 0.5, 0);
+    ambientLight.position.set(100, 100, 100);
+
+    scene.add(ambientLight);
+
+    let directionLight = new mmGL.DirectionalLight(0xffffff, 0.5, 0);
+
+    directionLight.position.set(0, 0, 100);
+
+    scene.add(directionLight);
+
+
+
+    let materialSphere = new mmGL.MeshPhongMaterial({
+        color: 0xFFFFFF,
+    });
+
+
+    let texture = new mmGL.Texture();
+    let image = document.createElementNS('http://www.w3.org/1999/xhtml', 'img');
+
+    image.addEventListener('load', function () {
+        texture.image = this;
+        texture.needsUpdate = true;
+        materialSphere.map = texture;
+        materialSphere.needsUpdate = true;
+    }, false);
+
+    image.src = './assets/0005082044980897_b.jpg';
+
+
+
+    let cameraShere = new mmGL.BoxGeometry(300, 300, 300);
+    let cameraMaterial = new mmGL.MeshLambertMaterial({
+        color: 'red'
+    });
+
+    let cameraMesh = new mmGL.Mesh(cameraShere, cameraMaterial);
+
+    cameraMesh.position.set(1000, 0, 0);
+
+    scene.add(cameraMesh);
+
+
+    let sphereGeometry = new mmGL.SphereGeometry(300, 32, 32);
+    let sphereMesh = new mmGL.Mesh(sphereGeometry, materialSphere);
+    sphereMesh.position.set(-500,0,0)
+    //scene.add(sphereMesh);
+
+
+     let sphereGeometry2 = new mmGL.SphereGeometry(300, 32, 32);
+    let sphereMesh2 = new mmGL.Mesh(sphereGeometry2, cameraMaterial);
+    sphereMesh2.position.set(500,0,0)
+
+    //scene.add(sphereMesh2);
+
+
+    let group  = new mmGL.Group();
+    group.add(sphereMesh);
+    group.add(sphereMesh2)
+
+    scene.add(group);
+
+
+
+    //相机绕这球转动
+    let i = 0;
+    let updataCamera = function () {
+        let cos = Math.cos(i);
+        let sin = Math.sin(i);
+
+        let spherePos = sphereMesh.position;;
+        let camPos = camera.position;
+
+        let dt = new mmGL.Vector3();
+        dt.subVectors(camPos, spherePos);
+
+        let length = dt.length();
+
+        let x = length * cos;
+        let y = camera.position.y;
+        let z = length * sin;
+
+        camera.position.set(x, y, z);
+
+        // camera.rotation.x=i;
+        // camera.rotation.x=i;
+        // camera.rotation.z=i;
+        // camera.matrixWorldNeedsUpdate=true;
+
+        camera.lookAt(0, 0, 0);
+
+        console.log(camera.position.x, camera.position.y, camera.position.z);
+
+        i += 0.01;
+        cameraMesh.position.copy(camera.position);
+
+
+    }
+
+    let updateCamera2 = (function () {
+
+        //默认对象的位置是[0,0,0]
+      
+        var camera_pivot = new mmGL.Object3D()
+       
+        //让相机围着某个对象旋转
+        camera_pivot.position.copy(sphereMesh2.position);
+
+        var Y_AXIS = new mmGL.Vector3(0, 1, 0);
+
+        scene.add(camera_pivot);
+        camera_pivot.add(camera);
+        camera.position.set(0, 0, 500);
+        camera.lookAt(camera_pivot.position);
+        return function () {
+            camera_pivot.rotateY(0.01);
+            cameraMesh.position.copy(camera.position);
+        }
+
+    })()
+
+
+
+
+    function tick() {
+        renderer.render(scene, camera);
+
+
+
+        //updateCamera2();
+
+        //updataCamera();
+
+        sphereMesh.rotateOnWorldAxis(new mmGL.Vector3(1,0,0), 0.01);
+        group.rotateOnAxis(new mmGL.Vector3(0,1,0), 0.01);
+
+        camera.lookAt(0,0,0);
+
+        //cameraMesh.position.copy(camera.position);
+        window.requestAnimationFrame(tick)
+        
+    }
+    tick();
+
+
+
+
+
+
+
+
+</script>

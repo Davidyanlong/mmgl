@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>textureBufferGeometry</title>
+</head>
+
+<body>
+    <canvas id="cas"></canvas>
+</body>
+<pre>
+    测试:
+        重复贴图  
+            texture.wrapS = mmGL.RepeatWrapping;
+            texture.wrapT = mmGL.RepeatWrapping;
+            texture.repeat.set(3,3);
+        
+        自动生产纹理(generateMipmaps)设置为false,对应的纹理映射也需要设置,不然就渲染不出来
+            texture.generateMipmaps = false;
+            texture.magFilter = mmGL.LinearFilter;
+            texture.minFilter = mmGL.LinearFilter;  
+        
+        纹理Y轴反转    
+            texture.flipY = true; 
+
+
+</pre>
+
+</html>
+<script src="../build/mmGL2.js"></script>
+<script>
+    let canvas = document.getElementById('cas');
+    let renderer = new mmGL.WebGLRenderer({
+        canvas: canvas,
+        antialias: true
+    })
+
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.setSize(400, 400, true);
+
+
+
+    let scene = new mmGL.Scene();
+
+    let bufferGeometry = new mmGL.BufferGeometry();
+
+    let planeVertices = [
+        // X , Y , Z 
+        -0.5, -0.5, 0,
+        -0.5, 0.5, 0,
+        0.5, 0.5, 0,
+        0.5, -0.5, 0
+    ]
+    let positionBuffer = new mmGL.Float32BufferAttribute(planeVertices, 3);
+    bufferGeometry.addAttribute('position', positionBuffer);
+
+    let indices = [
+        0, 3, 1,
+        1, 3, 2
+    ]
+
+    bufferGeometry.setIndex(indices);
+
+
+    let uv = [
+        // U   V
+         0,     0,
+         0,     1,
+         1,     1,
+         1,      0
+    ]
+    let uvBuffer = new mmGL.Float32BufferAttribute(uv, 2);
+    bufferGeometry.addAttribute('uv', uvBuffer);
+
+
+    let texture = new mmGL.Texture();
+
+
+    var image = document.createElementNS('http://www.w3.org/1999/xhtml', 'img');
+
+    image.addEventListener('load', function () {
+
+        texture.image = this;
+        texture.needsUpdate = true;
+        material.map = texture;
+        material.needsUpdate = true;
+    }, false);
+
+
+
+    // texture.generateMipmaps = false;
+
+    // texture.magFilter = mmGL.LinearFilter;
+    // texture.minFilter = mmGL.LinearFilter;
+    //texture.flipY = true;
+
+    //texture.format = mmGL.RGBFormat;
+
+    texture.wrapS = mmGL.RepeatWrapping;
+    texture.wrapT = mmGL.RepeatWrapping;
+
+    texture.repeat.set(3,3);
+
+
+    image.src = './assets/0005082044980897_b.jpg';
+   
+
+
+    let material = new mmGL.MeshBasicMaterial({
+        color: 'grey',
+    })
+
+    let mesh = new mmGL.Mesh(bufferGeometry, material);
+
+    scene.add(mesh);
+
+
+
+
+    let camera = new mmGL.Camera();
+
+    
+    (function tick() {
+        renderer.render(scene, camera);
+
+        window.requestAnimationFrame(tick)
+    })()
+
+
+    
+
+
+
+</script>

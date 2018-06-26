@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>lineBufferGeometry</title>
+</head>
+
+<body>
+    <canvas id="cas"></canvas>
+</body>
+<pre>
+    测试内容:
+        1、基本的线条
+        2、基本的虚线
+        3、现代的绘制模式   LinesMode  LineLoopMode, LineStripMode 
+        3、平滑曲线
+</pre>
+
+</html>
+<script src="../build/mmGL2.js"></script>
+<script>
+    let canvas = document.getElementById('cas');
+    let renderer = new mmGL.WebGLRenderer({
+        canvas: canvas,
+        antialias: true
+    })
+
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.setSize(400, 400, true);
+
+
+
+    let scene = new mmGL.Scene();
+
+    
+
+
+    ///基本线段
+    let triangleVertices = [
+        // X , Y , Z 
+        0.0, 0.5, 0,
+        - 0.5, -0.5, 0,
+        0.5, -0.5, 0,
+
+        0.0, 0.25, 0,
+        - 0.25, -0.25, 0,
+        0.25, -0.25, 0,
+    ]
+    let positionBuffer = new mmGL.Float32BufferAttribute(triangleVertices, 3);
+    let bufferGeometry = new mmGL.BufferGeometry();
+    bufferGeometry.addAttribute('position', positionBuffer);
+
+    let color = [
+        //R,   G,  B 
+        1.0, 0, 0,
+        0, 1.0, 0,
+        0, 0, 1.0,
+
+        1.0, 0, 0,
+        0, 1.0, 0,
+        0, 0, 1.0
+    ]
+
+
+    let colorBuffer = new mmGL.Float32BufferAttribute(color, 3);
+    bufferGeometry.addAttribute('color', colorBuffer);
+
+    let indices = [
+        0, 1,
+        1, 2,
+        2, 0,
+
+        3, 4,
+        4, 5,
+        5, 3
+    ]
+
+
+    bufferGeometry.setIndex(indices);
+
+
+
+    //测试buffGeometry 
+    let indexs = bufferGeometry.getIndex()
+    console.info('test getIndex indexs', indexs);
+    let positionTest = bufferGeometry.getAttribute('position');
+
+    console.info('test getAttribute position', indexs);
+
+
+    bufferGeometry.computeBoundingBox();
+
+    console.info('test computeBoundingBox', bufferGeometry.boundingBox);
+
+    bufferGeometry.computeBoundingSphere();
+
+    console.info('test computeBoundingSphere', bufferGeometry.boundingSphere);
+
+
+    let materialLine = new mmGL.LineBasicMaterial({
+        color: 'blue',
+        // vertexColors: mmGL.VertexColors,
+        linewidth: 10
+    });
+
+    let mesh = new mmGL.Line(bufferGeometry,materialLine);
+
+   // scene.add(mesh);
+
+/// 基本虚线
+//// dash line demo ////////////////
+
+
+      let triangleVertices2 = [
+        // X , Y , Z 
+        0.0, 0.5, 0,
+        - 0.5, -0.5, 0,
+        - 0.5, -0.5, 0,
+        0.5, -0.5, 0,
+        0.5, -0.5, 0,
+        0.0, 0.5, 0,
+
+
+        0.0, 0.25, 0,
+        - 0.25, -0.25, 0,
+        - 0.25, -0.25, 0,
+        0.25, -0.25, 0,
+        0.25, -0.25, 0,
+        0.0, 0.25, 0,
+    ]
+    let positionBuffer2 = new mmGL.Float32BufferAttribute(triangleVertices2, 3);
+    let bufferGeometry2 = new mmGL.BufferGeometry();
+    bufferGeometry2.addAttribute('position', positionBuffer2);
+
+
+    let materialDashedLine=new mmGL.LineDashedMaterial({
+        color:'blue',
+        //linewidth:5,
+        scale :1,
+        dashSize :0.01,
+        gapSize :0.01
+    })
+
+    let meshDash = new mmGL.Line(bufferGeometry2,materialDashedLine);
+    //更改为绘制虚线自动调用
+    //meshDash.computeLineDistances();
+
+    scene.add(meshDash);
+
+
+
+    ////////// 测试线段的绘制方式 ////////////////////
+
+ /// LinesMode  
+ let triangleVertices3 = [
+        // X , Y , Z 
+        0.0, 0.5, 0,
+        - 0.5, -0.5, 0,
+        0.5, -0.5, 0,
+
+        0.0, 0.25, 0,
+        - 0.25, -0.25, 0,
+        0.25, -0.25, 0,
+    ]
+    let positionBuffer3 = new mmGL.Float32BufferAttribute(triangleVertices3, 3);
+    let bufferGeometry3 = new mmGL.BufferGeometry();
+    bufferGeometry3.addAttribute('position', positionBuffer3);
+
+    
+    let indices3 = [
+        0, 1,
+        1, 2,
+        2, 0,
+
+        3, 4,
+        4, 5,
+        5, 3
+    ]
+
+
+    bufferGeometry3.setIndex(indices3);
+
+
+    let mesh3 = new mmGL.Line(bufferGeometry3,materialLine);
+    mesh3.setDrawMode(mmGL.LinesMode);
+
+   // scene.add(mesh3);
+
+
+
+////LineLoopMode 
+
+//通过三个顶点实现一个三角,图形始终是封闭图形
+let triangleVertices4 = [
+        // X , Y , Z 
+        0.0, 0.5, 0,
+        - 0.5, -0.5, 0,
+        0.5, -0.5, 0,
+
+        // 0.0, 0.25, 0,
+        // - 0.25, -0.25, 0,
+        // 0.25, -0.25, 0,
+    ]
+    let positionBuffer4 = new mmGL.Float32BufferAttribute(triangleVertices4, 3);
+    let bufferGeometry4 = new mmGL.BufferGeometry();
+    bufferGeometry4.addAttribute('position', positionBuffer4);
+
+
+
+    let mesh4 = new mmGL.Line(bufferGeometry4,materialLine);
+    mesh4.setDrawMode(mmGL.LineLoopMode);
+
+    //scene.add(mesh4);
+
+
+///LineStripMode 
+
+//通过四个点绘制一个三角行,也可以用索引来表示 [0,1, 2, 0]
+let triangleVertices5 = [
+        // X , Y , Z 
+        0.0, 0.5, 0,
+        - 0.5, -0.5, 0,
+        0.5, -0.5, 0,
+        0.0, 0.5, 0,
+
+
+        // 0.0, 0.25, 0,
+        // - 0.25, -0.25, 0,
+        // 0.25, -0.25, 0,
+    ]
+    let positionBuffer5 = new mmGL.Float32BufferAttribute(triangleVertices5, 3);
+    let bufferGeometry5 = new mmGL.BufferGeometry();
+    bufferGeometry5.addAttribute('position', positionBuffer5);
+
+
+
+    let mesh5 = new mmGL.Line(bufferGeometry5,materialLine);
+    mesh5.setDrawMode(mmGL.LineStripMode);
+
+    //scene.add(mesh5);
+
+
+    //平滑曲线
+
+    let r=0.5;
+    let triangleVertices6=[];
+    let radian = function(deg){
+        return deg*Math.PI/180;
+    }
+    for(let i=0;i<360;i++){
+        let x = r * Math.cos(radian(i));
+        let y = r * Math.sin(radian(i));
+        let z = 0;
+        triangleVertices6.push(
+         x,
+         y,
+         z
+        )
+    }
+
+     let positionBuffer6 = new mmGL.Float32BufferAttribute(triangleVertices6, 3);
+    let bufferGeometry6 = new mmGL.BufferGeometry();
+    bufferGeometry6.addAttribute('position', positionBuffer6);
+
+
+
+    let mesh6 = new mmGL.Line(bufferGeometry6,materialLine);
+    mesh6.setDrawMode(mmGL.LineLoopMode);
+
+    scene.add(mesh6);
+
+
+
+
+    let camera = new mmGL.Camera();
+
+    (function tick() {
+        renderer.render(scene, camera);
+        window.requestAnimationFrame(tick)
+    })()
+
+
+</script>

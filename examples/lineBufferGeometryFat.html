@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>lineBufferGeometry</title>
+</head>
+
+<body>
+    <canvas id="cas"></canvas>
+</body>
+
+</html>
+<script src="../build/mmGL2.js"></script>
+<script>
+    let canvas = document.getElementById('cas');
+    let renderer = new mmGL.WebGLRenderer({
+        canvas: canvas,
+        antialias: true
+    })
+
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.setSize(400, 400, true);
+
+
+
+    let scene = new mmGL.Scene();
+
+
+
+    ///基本线段
+    let triangleVertices = [
+        // X , Y , Z 
+        0.0, 0.5, 0,
+        - 0.5, -0.5, 0,
+
+        - 0.5, -0.5, 0,
+        0.5, -0.5, 0,
+
+        0.5, -0.5, 0,
+        0.0, 0.5, 0,
+    ];
+
+    //mmGL.TriangleStripDrawMode
+    triangleVertices = [
+        // X , Y , Z 
+        0.0, 0.5, 0,
+        - 0.5, -0.5, 0,
+        0.5, -0.5, 0,
+        0.0, 0.5, 0,
+    ]
+
+    triangleVertices = triangleVertices.map(item=>{
+       return item * 10;
+    });
+
+    let color = [
+        //R,   G,  B 
+        1, 0, 0,
+        0, 0, 1,
+
+        0, 0, 1,
+        0, 1, 0,
+
+        0, 1, 0,
+        1, 0, 0
+    ]
+
+
+    let lineMeshGeometry = new mmGL.LineGeometry();
+    lineMeshGeometry.setPositions(triangleVertices);
+    //lineMeshGeometry.setColors(color);
+    //lineMeshGeometry.setIndex(index);
+
+    let matLine = new mmGL.LineMeshMaterial({
+        color: 0xf000f0,
+        linewidth: 30, // in pixels
+        dashSize:1,
+        gapSize:1,
+        scale:3,
+        vertexColors: mmGL.FaceColors,
+        resolution: new mmGL.Vector2(400, 400),
+        dashed: false
+
+    });
+
+    let line2 = new mmGL.Line2(lineMeshGeometry, matLine);
+    line2.drawMode = mmGL.TriangleStripDrawMode;
+    line2.computeLineDistances();
+    line2.scale.set(1, 1, 1);
+    scene.add(line2);
+
+
+    let camera = new mmGL.OrthographicCamera(10, -10, 10, -10, -10, 1000);
+
+    camera.position.set(0, 0, 10);
+
+    (function tick() {
+        renderer.render(scene, camera);
+        window.requestAnimationFrame(tick)
+    })()
+
+
+</script>

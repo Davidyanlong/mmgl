@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>ortho</title>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <canvas id="cas"></canvas>
+</body>
+<pre>
+    1、相机沿着球转
+</pre>
+
+</html>
+<script src="../build/mmGL2.js"></script>
+<script>
+    let canvas = document.getElementById('cas');
+    let renderer = new mmGL.WebGLRenderer({
+        canvas: canvas,
+        antialias: true
+    })
+
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.setSize(window.innerWidth, window.innerHeight, true);
+
+    renderer.setClearColor('grey');
+    renderer.clearColor();
+
+    let scene = new mmGL.Scene();
+
+    let geometry = new mmGL.Geometry();
+
+
+    geometry.vertices.push(
+        new mmGL.Vector3(0.0, 0.0, 0.0),
+        new mmGL.Vector3(1.0, 0.0, 0.0),
+        new mmGL.Vector3(1.0, 1.0, 0.0),
+        new mmGL.Vector3(0.0, 1.0, 0.0),
+    );
+
+
+    //scale
+
+    geometry.vertices.forEach(function (vec) {
+        vec.multiplyScalar(100);
+    });
+
+
+
+
+    geometry.faces.push(new mmGL.Face3(0, 1, 2, null, null, 0))
+    geometry.faces.push(new mmGL.Face3(0, 2, 3, null, null, 1))
+
+
+    let materialLine = new mmGL.MeshBasicMaterial({
+        //vertexColors: mmGL.VertexColors,
+    });
+
+
+
+
+
+    //投影到桌面坐标空间
+
+    let domCanvas = renderer.domElement;
+    let width = domCanvas.width;
+    let height = domCanvas.height;
+
+    let mesh = new mmGL.Mesh(geometry, materialLine);
+
+    mesh.position.set(0, -1 * 380, 0);
+
+    scene.add(mesh);
+
+
+
+    let camera = new mmGL.OrthographicCamera(0, width, 0, -height, -1000, 1000);
+    //camera.rotation.z = -0.2 
+
+
+    function tick() {
+        renderer.render(scene, camera);
+        
+        //mesh.translateX(1);
+
+        window.requestAnimationFrame(tick)
+
+    }
+    tick();
+
+
+
+
+
+
+
+
+</script>

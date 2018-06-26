@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>transparent</title>
+</head>
+
+<body>
+    <canvas id="cas"></canvas>
+</body>
+<p id='info'>
+
+
+</p>
+
+</html>
+<script src="../build/mmGL2.js"></script>
+<script>
+    let canvas = document.getElementById('cas');
+    let renderer = new mmGL.WebGLRenderer({
+        canvas: canvas,
+        antialias: true
+    })
+
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.setSize(400, 400, true);
+
+
+    renderer.setClearColor('#fdcba9');
+    renderer.clearColor();
+    //renderer._sortObjects=false;
+
+
+    let scene = new mmGL.Scene();
+
+    let bufferGeometry1 = new mmGL.BufferGeometry();
+    let bufferGeometry2 = new mmGL.BufferGeometry();
+
+
+
+    let triangleVertices1 = [
+        // X , Y , Z 
+        0.0, 0.5, 0,
+        - 0.5, -0.5, 0,
+        0.5, -0.5, 0,
+    ]
+
+    let triangleVertices2 = [
+        // X , Y , Z 
+        0.0, 0.75, 0,
+        - 0.25, -0.25, 0,
+        0.75, -0.75, 0,
+    ]
+
+    bufferGeometry1.addAttribute('position', new mmGL.Float32BufferAttribute(triangleVertices1, 3));
+    bufferGeometry2.addAttribute('position', new mmGL.Float32BufferAttribute(triangleVertices2, 3));
+
+
+    let materialFace1 = new mmGL.MeshBasicMaterial({
+        color: 0x0000ff,
+        //transparent:true,
+        //opacity:0.5,
+
+    });
+    let materialFace2 = new mmGL.MeshBasicMaterial({
+        color: 0x00ff00,
+        transparent: true,
+        opacity: 0.5,
+
+    });
+
+
+
+    let mesh1 = new mmGL.Mesh(bufferGeometry1, materialFace1);
+    scene.add(mesh1);
+
+    let mesh2 = new mmGL.Mesh(bufferGeometry2, materialFace2);
+    scene.add(mesh2);
+
+
+    let camera = new mmGL.Camera();
+
+    function printInfo(text) {
+        document.getElementById('info').innerHTML = text;
+    }
+
+
+    (function tick() {
+        renderer.render(scene, camera);
+        printInfo(JSON.stringify(renderer._info.render));
+        window.requestAnimationFrame(tick);
+    })()
+
+
+</script>
