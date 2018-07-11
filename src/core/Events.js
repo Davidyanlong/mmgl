@@ -1,13 +1,18 @@
-
 /**
  * @class Events 事件对象
  * @description 事件对象
  * @author bujue
  */
+
 class Events {
+    constructor(){}
+    
     on(type, listener) {
 
-        if (this._listeners === undefined) this._listeners = {};
+        if (this._listeners === undefined){
+            this._listeners = {};
+        }
+          
 
         var listeners = this._listeners;
 

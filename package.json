@@ -1,17 +1,28 @@
 {
   "name": "mmgl",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "\"JavaScript 3D shape library\"",
-  "main": "build/mmgl.js",
+  "main": "./build/cjs/mmGL.js",
   "directories": {
     "example": "examples"
   },
+  "keywords": [
+    "mmgl",
+    "webgl",
+    "three",
+    "3d",
+    "Data",
+    "Visualization"
+  ],
   "scripts": {
     "build": "rollup -c",
     "build-uglify": "rollup -c && uglifyjs build/mmGL.js -cm > build/mmGL.min.js"
 
   },
-  "author": "bujue",
+  "author": {
+    "name": "yanlong.yang",
+    "email": "87141611@qq.com"
+  },
   "license": "MIT",
   "devDependencies": {
     "babel-core": "^6.13.0",
@@ -23,7 +34,7 @@
     "rollup-plugin-uglify": "^1.0.1",
     "onchange": "^3.0.2",
     "der-server": "",
-    "uglify-js": "^3.0.23",
+    "uglify-js": "^3.3.28",
     "gulp":""
   }
 }

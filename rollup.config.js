@@ -41,18 +41,23 @@ export default {
             format: 'umd',
             moduleName:'mmGL',
             name: 'mmGL',
-            dest: 'build/mmGL.js'
+            dest: 'build/umd/mmGL.js'
         },
         {
             format: 'es',
-            dest: 'build/mmGL.module.js'
+            dest: 'build/es/mmGL.js'
         },
 
         {
             format: 'iife',
             name: 'mmGL',
             moduleName:'mmGL',
-            dest: 'build/mmGL2.js'
+            dest: 'build/mmGL.js'
+        },
+        {
+            format: 'cjs',
+            moduleName: 'mmGL',
+            dest: 'build/cjs/canvax.js',
         }
     ]
 };

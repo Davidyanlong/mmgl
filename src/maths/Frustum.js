@@ -207,4 +207,4 @@ var intersectsBox = (function () {
 
 })()
 
-export { Frustum };Î
+export { Frustum };

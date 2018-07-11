@@ -1,5 +1,8 @@
-(function (exports) {
-	'use strict';
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(factory((global.mmGL = global.mmGL || {})));
+}(this, (function (exports) { 'use strict';
 
 	var classCallCheck = function (instance, Constructor) {
 	  if (!(instance instanceof Constructor)) {
@@ -108,6 +111,7 @@
 	 * @description 事件对象
 	 * @author bujue
 	 */
+
 	var Events = function () {
 	    function Events() {
 	        classCallCheck(this, Events);
@@ -117,7 +121,9 @@
 	        key: "on",
 	        value: function on(type, listener) {
 
-	            if (this._listeners === undefined) this._listeners = {};
+	            if (this._listeners === undefined) {
+	                this._listeners = {};
+	            }
 
 	            var listeners = this._listeners;
 
@@ -10162,9 +10168,6 @@
 	            };
 	        }
 
-	        this._currentRenderState = this._renderStates.get(scene, camera);
-	        this._currentRenderState.init();
-
 	        material.onBeforeCompile(materialProperties.shader, this);
 
 	        //WebGLProgram 对象
@@ -15788,6 +15791,7 @@
 	    }
 	}
 
+	exports.Events = Events;
 	exports.WebGLRenderer = WebGLRenderer;
 	exports.Scene = Scene;
 	exports.Group = Group;
@@ -15809,7 +15813,6 @@
 	exports.InstancedBufferAttribute = InstancedBufferAttribute;
 	exports.Face3 = Face3;
 	exports.Object3D = Object3D;
-	exports.Events = Events;
 	exports.Raycaster = Raycaster$$1;
 	exports.Triangle = Triangle;
 	exports.Math = _Math;
@@ -15945,4 +15948,6 @@
 	exports.FaceColors = FaceColors;
 	exports.VertexColors = VertexColors;
 
-}((this.mmGL = this.mmGL || {})));
+	Object.defineProperty(exports, '__esModule', { value: true });
+
+})));

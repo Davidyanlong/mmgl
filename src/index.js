@@ -1,3 +1,4 @@
+export { Events } from './core/Events';
 export { WebGLRenderer } from './renderers/WebGLRenderer.js';
 export { Scene } from './scenes/Scene.js';
 export { Group } from './objects/Group.js';
@@ -28,7 +29,7 @@ export { InterleavedBuffer } from './core/InterleavedBuffer.js';
 export { InstancedBufferAttribute } from './core/InstancedBufferAttribute.js';
 export { Face3 } from './core/Face3.js';
 export { Object3D } from './core/Object3D.js';
-export { Events } from './core/Events';
+
 export { Raycaster } from './core/Raycaster.js';
 
 export { Triangle } from './maths/Triangle.js';

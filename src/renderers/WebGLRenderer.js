@@ -959,8 +959,6 @@ function initMaterial(material, fog, object) {
 
         }
 
-        this._currentRenderState = this._renderStates.get(scene, camera);
-        this._currentRenderState.init();
 
         material.onBeforeCompile(materialProperties.shader, this);
 

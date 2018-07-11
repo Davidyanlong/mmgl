@@ -1,3 +1,7 @@
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -105,6 +109,7 @@ var possibleConstructorReturn = function (self, call) {
  * @description 事件对象
  * @author bujue
  */
+
 var Events = function () {
     function Events() {
         classCallCheck(this, Events);
@@ -114,7 +119,9 @@ var Events = function () {
         key: "on",
         value: function on(type, listener) {
 
-            if (this._listeners === undefined) this._listeners = {};
+            if (this._listeners === undefined) {
+                this._listeners = {};
+            }
 
             var listeners = this._listeners;
 
@@ -10159,9 +10166,6 @@ function initMaterial(material, fog, object) {
             };
         }
 
-        this._currentRenderState = this._renderStates.get(scene, camera);
-        this._currentRenderState.init();
-
         material.onBeforeCompile(materialProperties.shader, this);
 
         //WebGLProgram 对象
@@ -15785,4 +15789,159 @@ function _intersectObject(object, raycaster, intersects, recursive) {
     }
 }
 
-export { WebGLRenderer, Scene, Group, Mesh, Line, Line2, Points, Sprite, Texture, Camera, PerspectiveCamera, OrthographicCamera, BufferGeometry, Geometry, InstancedBufferGeometry, InterleavedBufferAttribute, InstancedInterleavedBuffer, InterleavedBuffer, InstancedBufferAttribute, Face3, Object3D, Events, Raycaster$$1 as Raycaster, Triangle, _Math as Math, Plane, Frustum, Sphere, Ray, Matrix4, Matrix3, Box3, Line3, Euler, Vector4, Vector3$1 as Vector3, Vector2, Quaternion, Color$1 as Color, CircleGeometry, CircleBufferGeometry, PlaneGeometry, PlaneBufferGeometry, BoxGeometry, BoxBufferGeometry, SphereGeometry, SphereBufferGeometry, CylinderGeometry, CylinderBufferGeometry, LineSegmentsGeometry, LineGeometry, MeshBasicMaterial$$1 as MeshBasicMaterial, MeshLambertMaterial, MeshPhongMaterial, LineBasicMaterial, LineDashedMaterial, LineMeshMaterial, PointsMaterial, SpriteMaterial$$1 as SpriteMaterial, ShaderMaterial, RawShaderMaterial, SpotLight, PointLight, DirectionalLight, AmbientLight, Light, Float64BufferAttribute, Float32BufferAttribute, Uint32BufferAttribute, Int32BufferAttribute, Uint16BufferAttribute, Int16BufferAttribute, Uint8ClampedBufferAttribute, Uint8BufferAttribute, Int8BufferAttribute, BufferAttribute, REVISION, pointsMode, LinesMode, LineLoopMode, LineStripMode, TrianglesDrawMode, TriangleStripDrawMode, TriangleFanDrawMode, NeverDepth, AlwaysDepth, LessDepth, LessEqualDepth, EqualDepth, GreaterEqualDepth, GreaterDepth, NotEqualDepth, CullFaceNone, CullFaceBack, CullFaceFront, CullFaceFrontBack, FrontFaceDirectionCW, FrontFaceDirectionCCW, FrontSide, BackSide, DoubleSide, NoBlending, NormalBlending, AdditiveBlending, SubtractiveBlending, MultiplyBlending, CustomBlending, AddEquation, SubtractEquation, ReverseSubtractEquation, MinEquation, MaxEquation, ZeroFactor, OneFactor, SrcColorFactor, OneMinusSrcColorFactor, SrcAlphaFactor, OneMinusSrcAlphaFactor, DstAlphaFactor, OneMinusDstAlphaFactor, DstColorFactor, OneMinusDstColorFactor, SrcAlphaSaturateFactor, RepeatWrapping, ClampToEdgeWrapping, MirroredRepeatWrapping, NearestFilter, NearestMipMapNearestFilter, NearestMipMapLinearFilter, LinearFilter, LinearMipMapNearestFilter, LinearMipMapLinearFilter, UnsignedByteType, ByteType, ShortType, UnsignedShortType, IntType, UnsignedIntType, FloatType, HalfFloatType, UnsignedShort4444Type, UnsignedShort5551Type, UnsignedShort565Type, UnsignedInt248Type, AlphaFormat, RGBFormat, RGBAFormat, LuminanceFormat, LuminanceAlphaFormat, RGBEFormat, DepthFormat, DepthStencilFormat, UVMapping, NoColors, FaceColors, VertexColors };
+exports.Events = Events;
+exports.WebGLRenderer = WebGLRenderer;
+exports.Scene = Scene;
+exports.Group = Group;
+exports.Mesh = Mesh;
+exports.Line = Line;
+exports.Line2 = Line2;
+exports.Points = Points;
+exports.Sprite = Sprite;
+exports.Texture = Texture;
+exports.Camera = Camera;
+exports.PerspectiveCamera = PerspectiveCamera;
+exports.OrthographicCamera = OrthographicCamera;
+exports.BufferGeometry = BufferGeometry;
+exports.Geometry = Geometry;
+exports.InstancedBufferGeometry = InstancedBufferGeometry;
+exports.InterleavedBufferAttribute = InterleavedBufferAttribute;
+exports.InstancedInterleavedBuffer = InstancedInterleavedBuffer;
+exports.InterleavedBuffer = InterleavedBuffer;
+exports.InstancedBufferAttribute = InstancedBufferAttribute;
+exports.Face3 = Face3;
+exports.Object3D = Object3D;
+exports.Raycaster = Raycaster$$1;
+exports.Triangle = Triangle;
+exports.Math = _Math;
+exports.Plane = Plane;
+exports.Frustum = Frustum;
+exports.Sphere = Sphere;
+exports.Ray = Ray;
+exports.Matrix4 = Matrix4;
+exports.Matrix3 = Matrix3;
+exports.Box3 = Box3;
+exports.Line3 = Line3;
+exports.Euler = Euler;
+exports.Vector4 = Vector4;
+exports.Vector3 = Vector3$1;
+exports.Vector2 = Vector2;
+exports.Quaternion = Quaternion;
+exports.Color = Color$1;
+exports.CircleGeometry = CircleGeometry;
+exports.CircleBufferGeometry = CircleBufferGeometry;
+exports.PlaneGeometry = PlaneGeometry;
+exports.PlaneBufferGeometry = PlaneBufferGeometry;
+exports.BoxGeometry = BoxGeometry;
+exports.BoxBufferGeometry = BoxBufferGeometry;
+exports.SphereGeometry = SphereGeometry;
+exports.SphereBufferGeometry = SphereBufferGeometry;
+exports.CylinderGeometry = CylinderGeometry;
+exports.CylinderBufferGeometry = CylinderBufferGeometry;
+exports.LineSegmentsGeometry = LineSegmentsGeometry;
+exports.LineGeometry = LineGeometry;
+exports.MeshBasicMaterial = MeshBasicMaterial$$1;
+exports.MeshLambertMaterial = MeshLambertMaterial;
+exports.MeshPhongMaterial = MeshPhongMaterial;
+exports.LineBasicMaterial = LineBasicMaterial;
+exports.LineDashedMaterial = LineDashedMaterial;
+exports.LineMeshMaterial = LineMeshMaterial;
+exports.PointsMaterial = PointsMaterial;
+exports.SpriteMaterial = SpriteMaterial$$1;
+exports.ShaderMaterial = ShaderMaterial;
+exports.RawShaderMaterial = RawShaderMaterial;
+exports.SpotLight = SpotLight;
+exports.PointLight = PointLight;
+exports.DirectionalLight = DirectionalLight;
+exports.AmbientLight = AmbientLight;
+exports.Light = Light;
+exports.Float64BufferAttribute = Float64BufferAttribute;
+exports.Float32BufferAttribute = Float32BufferAttribute;
+exports.Uint32BufferAttribute = Uint32BufferAttribute;
+exports.Int32BufferAttribute = Int32BufferAttribute;
+exports.Uint16BufferAttribute = Uint16BufferAttribute;
+exports.Int16BufferAttribute = Int16BufferAttribute;
+exports.Uint8ClampedBufferAttribute = Uint8ClampedBufferAttribute;
+exports.Uint8BufferAttribute = Uint8BufferAttribute;
+exports.Int8BufferAttribute = Int8BufferAttribute;
+exports.BufferAttribute = BufferAttribute;
+exports.REVISION = REVISION;
+exports.pointsMode = pointsMode;
+exports.LinesMode = LinesMode;
+exports.LineLoopMode = LineLoopMode;
+exports.LineStripMode = LineStripMode;
+exports.TrianglesDrawMode = TrianglesDrawMode;
+exports.TriangleStripDrawMode = TriangleStripDrawMode;
+exports.TriangleFanDrawMode = TriangleFanDrawMode;
+exports.NeverDepth = NeverDepth;
+exports.AlwaysDepth = AlwaysDepth;
+exports.LessDepth = LessDepth;
+exports.LessEqualDepth = LessEqualDepth;
+exports.EqualDepth = EqualDepth;
+exports.GreaterEqualDepth = GreaterEqualDepth;
+exports.GreaterDepth = GreaterDepth;
+exports.NotEqualDepth = NotEqualDepth;
+exports.CullFaceNone = CullFaceNone;
+exports.CullFaceBack = CullFaceBack;
+exports.CullFaceFront = CullFaceFront;
+exports.CullFaceFrontBack = CullFaceFrontBack;
+exports.FrontFaceDirectionCW = FrontFaceDirectionCW;
+exports.FrontFaceDirectionCCW = FrontFaceDirectionCCW;
+exports.FrontSide = FrontSide;
+exports.BackSide = BackSide;
+exports.DoubleSide = DoubleSide;
+exports.NoBlending = NoBlending;
+exports.NormalBlending = NormalBlending;
+exports.AdditiveBlending = AdditiveBlending;
+exports.SubtractiveBlending = SubtractiveBlending;
+exports.MultiplyBlending = MultiplyBlending;
+exports.CustomBlending = CustomBlending;
+exports.AddEquation = AddEquation;
+exports.SubtractEquation = SubtractEquation;
+exports.ReverseSubtractEquation = ReverseSubtractEquation;
+exports.MinEquation = MinEquation;
+exports.MaxEquation = MaxEquation;
+exports.ZeroFactor = ZeroFactor;
+exports.OneFactor = OneFactor;
+exports.SrcColorFactor = SrcColorFactor;
+exports.OneMinusSrcColorFactor = OneMinusSrcColorFactor;
+exports.SrcAlphaFactor = SrcAlphaFactor;
+exports.OneMinusSrcAlphaFactor = OneMinusSrcAlphaFactor;
+exports.DstAlphaFactor = DstAlphaFactor;
+exports.OneMinusDstAlphaFactor = OneMinusDstAlphaFactor;
+exports.DstColorFactor = DstColorFactor;
+exports.OneMinusDstColorFactor = OneMinusDstColorFactor;
+exports.SrcAlphaSaturateFactor = SrcAlphaSaturateFactor;
+exports.RepeatWrapping = RepeatWrapping;
+exports.ClampToEdgeWrapping = ClampToEdgeWrapping;
+exports.MirroredRepeatWrapping = MirroredRepeatWrapping;
+exports.NearestFilter = NearestFilter;
+exports.NearestMipMapNearestFilter = NearestMipMapNearestFilter;
+exports.NearestMipMapLinearFilter = NearestMipMapLinearFilter;
+exports.LinearFilter = LinearFilter;
+exports.LinearMipMapNearestFilter = LinearMipMapNearestFilter;
+exports.LinearMipMapLinearFilter = LinearMipMapLinearFilter;
+exports.UnsignedByteType = UnsignedByteType;
+exports.ByteType = ByteType;
+exports.ShortType = ShortType;
+exports.UnsignedShortType = UnsignedShortType;
+exports.IntType = IntType;
+exports.UnsignedIntType = UnsignedIntType;
+exports.FloatType = FloatType;
+exports.HalfFloatType = HalfFloatType;
+exports.UnsignedShort4444Type = UnsignedShort4444Type;
+exports.UnsignedShort5551Type = UnsignedShort5551Type;
+exports.UnsignedShort565Type = UnsignedShort565Type;
+exports.UnsignedInt248Type = UnsignedInt248Type;
+exports.AlphaFormat = AlphaFormat;
+exports.RGBFormat = RGBFormat;
+exports.RGBAFormat = RGBAFormat;
+exports.LuminanceFormat = LuminanceFormat;
+exports.LuminanceAlphaFormat = LuminanceAlphaFormat;
+exports.RGBEFormat = RGBEFormat;
+exports.DepthFormat = DepthFormat;
+exports.DepthStencilFormat = DepthStencilFormat;
+exports.UVMapping = UVMapping;
+exports.NoColors = NoColors;
+exports.FaceColors = FaceColors;
+exports.VertexColors = VertexColors;
