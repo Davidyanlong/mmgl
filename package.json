@@ -1,6 +1,6 @@
 {
   "name": "mmgl",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "\"JavaScript 3D shape library\"",
   "main": "./build/cjs/mmGL.js",
   "directories": {

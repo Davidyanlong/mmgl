@@ -57,7 +57,7 @@ export default {
         {
             format: 'cjs',
             moduleName: 'mmGL',
-            dest: 'build/cjs/canvax.js',
+            dest: 'build/cjs/mmGL.js',
         }
     ]
 };
