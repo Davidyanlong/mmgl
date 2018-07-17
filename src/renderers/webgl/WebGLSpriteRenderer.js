@@ -8,6 +8,7 @@ class WebGLSpriteRenderer {
         this._gl = gl;
         this._state = state;
         this._textures = textures;
+        this._renderer = renderer;
         this._capabilities = capabilities;
 
         this._vertexBuffer = null;
@@ -97,7 +98,7 @@ class WebGLSpriteRenderer {
 
         }
 
-         uniforms = this._uniforms;
+        uniforms = this._uniforms;
 
         state.useProgram(this._program);
 
@@ -146,7 +147,7 @@ class WebGLSpriteRenderer {
 
             if (material.visible === false) continue;
 
-            sprite.onBeforeRender(renderer, scene, camera, undefined, material, undefined);
+            sprite.onBeforeRender(this._renderer, scene, camera, undefined, material, undefined);
 
             //gl.uniform1f(uniforms.alphaTest, material.alphaTest);
             gl.uniformMatrix4fv(uniforms.modelViewMatrix, false, sprite.modelViewMatrix.elements);
@@ -181,7 +182,7 @@ class WebGLSpriteRenderer {
             gl.uniform2fv(uniforms.scale, scale);
 
             state.setBlending(material.blending, material.blendEquation, material.blendSrc, material.blendDst, material.blendEquationAlpha, material.blendSrcAlpha, material.blendDstAlpha, material.premultipliedAlpha);
-           
+
             state.buffers.depth.setTest(material.depthTest);
             state.buffers.depth.setMask(material.depthWrite);
             state.buffers.color.setMask(material.colorWrite);
@@ -190,7 +191,7 @@ class WebGLSpriteRenderer {
 
             gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
 
-            sprite.onAfterRender(renderer, scene, camera, undefined, material, undefined);
+            sprite.onAfterRender(this._renderer, scene, camera, undefined, material, undefined);
 
         }
 
@@ -270,7 +271,7 @@ function createProgram() {
         'void main() {',
 
         '	vec4 texture = texture2D( map, vUV );',
-        
+
 
         '	gl_FragColor = vec4( color * texture.rgb, texture.a * opacity );',
 
