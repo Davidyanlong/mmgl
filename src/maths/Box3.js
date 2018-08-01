@@ -185,7 +185,7 @@ class Box3 {
     }
 
     expandByObject(object) {
-        return expandByObject(object);
+        return expandByObject.call(this, object);
     }
 
     containsPoint(point) {
