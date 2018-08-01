@@ -2585,7 +2585,7 @@ var Box3 = function () {
     }, {
         key: 'expandByObject',
         value: function expandByObject(object) {
-            return _expandByObject(object);
+            return _expandByObject.call(this, object);
         }
     }, {
         key: 'containsPoint',
@@ -8782,6 +8782,7 @@ var WebGLSpriteRenderer = function () {
         this._gl = gl;
         this._state = state;
         this._textures = textures;
+        this._renderer = renderer;
         this._capabilities = capabilities;
 
         this._vertexBuffer = null;
@@ -8914,7 +8915,7 @@ var WebGLSpriteRenderer = function () {
 
                 if (material.visible === false) continue;
 
-                _sprite.onBeforeRender(renderer, scene, camera, undefined, material, undefined);
+                _sprite.onBeforeRender(this._renderer, scene, camera, undefined, material, undefined);
 
                 //gl.uniform1f(uniforms.alphaTest, material.alphaTest);
                 gl.uniformMatrix4fv(uniforms.modelViewMatrix, false, _sprite.modelViewMatrix.elements);
@@ -8954,7 +8955,7 @@ var WebGLSpriteRenderer = function () {
 
                 gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
 
-                _sprite.onAfterRender(renderer, scene, camera, undefined, material, undefined);
+                _sprite.onAfterRender(this._renderer, scene, camera, undefined, material, undefined);
             }
 
             // restore gl
