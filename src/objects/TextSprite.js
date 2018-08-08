@@ -29,7 +29,7 @@ class TextSprite extends Sprite {
 
             let fontsize = this.fontSize;
             
-            let screenHeight = renderer.domElement.clientWidth;
+            let screenHeight = renderer.domElement.clientHeight;
             let dist = camera.position.distanceTo(this.position);
 
             var vFOV = _Math.degToRad(camera.fov); // convert vertical fov to radians

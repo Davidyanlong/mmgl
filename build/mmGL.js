@@ -202,7 +202,7 @@
 	    return Events;
 	}();
 
-	var REVISION = '0.0.1';
+	var REVISION = '0.0.8';
 
 	//draw Point
 	var pointsMode = 0;
@@ -13880,7 +13880,7 @@
 
 	            var fontsize = this.fontSize;
 
-	            var screenHeight = renderer.domElement.clientWidth;
+	            var screenHeight = renderer.domElement.clientHeight;
 	            var dist = camera.position.distanceTo(this.position);
 
 	            var vFOV = _Math.degToRad(camera.fov); // convert vertical fov to radians
