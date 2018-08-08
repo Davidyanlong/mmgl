@@ -237,8 +237,8 @@ function setTextureParameters(textureType, texture, isPowerOfTwoImage) {
 
         }
 
-        _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER, filterFallback(texture.magFilter));
-        _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER, filterFallback(texture.minFilter));
+        _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER, filterFallback.call(this,texture.magFilter));
+        _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER, filterFallback.call(this,texture.minFilter));
 
         if (texture.minFilter !== NearestFilter && texture.minFilter !== LinearFilter) {
 
@@ -256,7 +256,7 @@ function setTextureParameters(textureType, texture, isPowerOfTwoImage) {
 
 function filterFallback(f) {
 
-    let gl = this.gl;
+    let _gl = this.gl;
 
     if (f === NearestFilter || f === NearestMipMapNearestFilter || f === NearestMipMapLinearFilter) {
 

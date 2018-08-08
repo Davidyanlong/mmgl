@@ -86,12 +86,13 @@ class Object3D extends Events {
         this.frustumCulled = true;
         this.renderOrder = 0;
 
-        //渲染前调用
-        this.onBeforeRender = function (renderer, scene, camera, geometry, material, group) { };
-        //渲染后调用
-        this.onAfterRender = function (renderer, scene, camera, geometry, material, group) { }
     }
-
+    onBeforeRender(renderer, scene, camera, geometry, material, group) {
+        //继承实现 渲染前调用
+    }
+    onAfterRender(renderer, scene, camera, geometry, material, group) {
+        //继承实现 渲染后调用
+    }
 
     applyMatrix(matrix) {
 
@@ -193,9 +194,6 @@ class Object3D extends Events {
 
     }
 
-    getWorldQuaternion(target) {
-        return getWorldQuaternion.call(this, target);
-    }
 
     updateMatrixWorld(force) {
 
@@ -412,36 +410,43 @@ class Object3D extends Events {
         let m1 = new Matrix4();
         return vector.applyMatrix4(m1.getInverse(this.matrixWorld));
     }
+    getWorldPosition(target) {
+
+        if (target === undefined) {
+
+            console.warn('Object3D: .getWorldPosition() target is now required');
+            target = new Vector3();
+
+        }
+
+        this.updateMatrixWorld(true);
+
+        return target.setFromMatrixPosition(this.matrixWorld);
+
+    }
+
+    getWorldQuaternion(target) {
+
+        return getWorldQuaternion.call(this, target)
+
+    }
+
+    getWorldScale(target) {
+
+        return getWorldScale.call(this, target)
+
+    }
+    getWorldDirection(target) {
+        return getWorldDirection.call(this, target);
+
+    }
+
     raycast() { }
 
 }
 
 Object3D.DefaultUp = new Vector3(0, 1, 0);
 Object3D.DefaultMatrixAutoUpdate = true;
-
-let getWorldQuaternion = (function () {
-
-    let position = new Vector3();
-    let scale = new Vector3();
-
-    return function getWorldQuaternion(target) {
-
-        if (target === undefined) {
-
-            console.warn('Object3D: .getWorldQuaternion() target is now required');
-            target = new Quaternion();
-
-        }
-
-        this.updateMatrixWorld(true);
-
-        this.matrixWorld.decompose(position, target, scale);
-
-        return target;
-
-    };
-
-})()
 
 
 let lookAt = (function () {
@@ -478,5 +483,76 @@ let lookAt = (function () {
     };
 
 })()
+
+
+let getWorldQuaternion = (function () {
+
+    var position = new Vector3();
+    var scale = new Vector3();
+
+    return function getWorldQuaternion(target) {
+
+        if (target === undefined) {
+
+            console.warn('Object3D: .getWorldQuaternion() target is now required');
+            target = new Quaternion();
+
+        }
+
+        this.updateMatrixWorld(true);
+
+        this.matrixWorld.decompose(position, target, scale);
+
+        return target;
+
+    };
+
+})();
+
+
+let getWorldScale = (function () {
+
+    var position = new Vector3();
+    var quaternion = new Quaternion();
+
+    return function getWorldScale(target) {
+
+        if (target === undefined) {
+
+            console.warn('Object3D: .getWorldScale() target is now required');
+            target = new Vector3();
+
+        }
+
+        this.updateMatrixWorld(true);
+
+        this.matrixWorld.decompose(position, quaternion, target);
+
+        return target;
+
+    };
+
+})();
+
+let getWorldDirection = (function () {
+
+    var quaternion = new Quaternion();
+
+    return function getWorldDirection(target) {
+
+        if (target === undefined) {
+
+            console.warn('Object3D: .getWorldDirection() target is now required');
+            target = new Vector3();
+
+        }
+
+        this.getWorldQuaternion(quaternion);
+
+        return target.set(0, 0, 1).applyQuaternion(quaternion);
+
+    };
+
+})();
 
 export { Object3D };

@@ -41,6 +41,20 @@ var defineProperty = function (obj, key, value) {
   return obj;
 };
 
+var _extends = Object.assign || function (target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i];
+
+    for (var key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        target[key] = source[key];
+      }
+    }
+  }
+
+  return target;
+};
+
 var get = function get(object, property, receiver) {
   if (object === null) object = Function.prototype;
   var desc = Object.getOwnPropertyDescriptor(object, property);
@@ -2673,12 +2687,12 @@ var Box3 = function () {
     }, {
         key: 'distanceToPoint',
         value: function distanceToPoint(point) {
-            return _distanceToPoint(point);
+            return _distanceToPoint.call(this, point);
         }
     }, {
         key: 'getBoundingSphere',
         value: function getBoundingSphere(optionalTarget) {
-            return _getBoundingSphere(optionalTarget);
+            return _getBoundingSphere.call(this, optionalTarget);
         }
     }, {
         key: 'intersect',
@@ -8165,8 +8179,8 @@ function setTextureParameters(textureType, texture, isPowerOfTwoImage) {
             console.warn('WebGLRenderer: Texture is not power of two. Texture.wrapS and Texture.wrapT should be set to ClampToEdgeWrapping.', texture);
         }
 
-        _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER, filterFallback(texture.magFilter));
-        _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER, filterFallback(texture.minFilter));
+        _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER, filterFallback.call(this, texture.magFilter));
+        _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER, filterFallback.call(this, texture.minFilter));
 
         if (texture.minFilter !== NearestFilter && texture.minFilter !== LinearFilter) {
 
@@ -8179,7 +8193,7 @@ function setTextureParameters(textureType, texture, isPowerOfTwoImage) {
 
 function filterFallback(f) {
 
-    var gl = this.gl;
+    var _gl = this.gl;
 
     if (f === NearestFilter || f === NearestMipMapNearestFilter || f === NearestMipMapLinearFilter) {
 
@@ -10718,14 +10732,20 @@ var Object3D = function (_Events) {
         _this.frustumCulled = true;
         _this.renderOrder = 0;
 
-        //渲染前调用
-        _this.onBeforeRender = function (renderer, scene, camera, geometry, material, group) {};
-        //渲染后调用
-        _this.onAfterRender = function (renderer, scene, camera, geometry, material, group) {};
         return _this;
     }
 
     createClass(Object3D, [{
+        key: 'onBeforeRender',
+        value: function onBeforeRender(renderer, scene, camera, geometry, material, group) {
+            //继承实现 渲染前调用
+        }
+    }, {
+        key: 'onAfterRender',
+        value: function onAfterRender(renderer, scene, camera, geometry, material, group) {
+            //继承实现 渲染后调用
+        }
+    }, {
         key: 'applyMatrix',
         value: function applyMatrix(matrix) {
 
@@ -10816,11 +10836,6 @@ var Object3D = function (_Events) {
 
                 children[i].traverse(callback);
             }
-        }
-    }, {
-        key: 'getWorldQuaternion',
-        value: function getWorldQuaternion(target) {
-            return _getWorldQuaternion.call(this, target);
         }
     }, {
         key: 'updateMatrixWorld',
@@ -11032,6 +11047,37 @@ var Object3D = function (_Events) {
             return vector.applyMatrix4(m1.getInverse(this.matrixWorld));
         }
     }, {
+        key: 'getWorldPosition',
+        value: function getWorldPosition(target) {
+
+            if (target === undefined) {
+
+                console.warn('Object3D: .getWorldPosition() target is now required');
+                target = new Vector3$1();
+            }
+
+            this.updateMatrixWorld(true);
+
+            return target.setFromMatrixPosition(this.matrixWorld);
+        }
+    }, {
+        key: 'getWorldQuaternion',
+        value: function getWorldQuaternion(target) {
+
+            return _getWorldQuaternion.call(this, target);
+        }
+    }, {
+        key: 'getWorldScale',
+        value: function getWorldScale(target) {
+
+            return _getWorldScale.call(this, target);
+        }
+    }, {
+        key: 'getWorldDirection',
+        value: function getWorldDirection(target) {
+            return _getWorldDirection.call(this, target);
+        }
+    }, {
         key: 'raycast',
         value: function raycast() {}
     }]);
@@ -11040,27 +11086,6 @@ var Object3D = function (_Events) {
 
 Object3D.DefaultUp = new Vector3$1(0, 1, 0);
 Object3D.DefaultMatrixAutoUpdate = true;
-
-var _getWorldQuaternion = function () {
-
-    var position = new Vector3$1();
-    var scale = new Vector3$1();
-
-    return function getWorldQuaternion(target) {
-
-        if (target === undefined) {
-
-            console.warn('Object3D: .getWorldQuaternion() target is now required');
-            target = new Quaternion();
-        }
-
-        this.updateMatrixWorld(true);
-
-        this.matrixWorld.decompose(position, target, scale);
-
-        return target;
-    };
-}();
 
 var _lookAt = function () {
 
@@ -11088,6 +11113,66 @@ var _lookAt = function () {
         }
 
         this.quaternion.setFromRotationMatrix(m1);
+    };
+}();
+
+var _getWorldQuaternion = function () {
+
+    var position = new Vector3$1();
+    var scale = new Vector3$1();
+
+    return function getWorldQuaternion(target) {
+
+        if (target === undefined) {
+
+            console.warn('Object3D: .getWorldQuaternion() target is now required');
+            target = new Quaternion();
+        }
+
+        this.updateMatrixWorld(true);
+
+        this.matrixWorld.decompose(position, target, scale);
+
+        return target;
+    };
+}();
+
+var _getWorldScale = function () {
+
+    var position = new Vector3$1();
+    var quaternion = new Quaternion();
+
+    return function getWorldScale(target) {
+
+        if (target === undefined) {
+
+            console.warn('Object3D: .getWorldScale() target is now required');
+            target = new Vector3$1();
+        }
+
+        this.updateMatrixWorld(true);
+
+        this.matrixWorld.decompose(position, quaternion, target);
+
+        return target;
+    };
+}();
+
+var _getWorldDirection = function () {
+
+    var quaternion = new Quaternion();
+
+    return function getWorldDirection(target) {
+
+        if (target === undefined) {
+
+            console.warn('Object3D: .getWorldDirection() target is now required');
+            target = new Vector3$1();
+        }
+
+        this.getWorldQuaternion(quaternion);
+
+        return target.set(0, 0, 1).applyQuaternion(quaternion);
     };
 }();
 
@@ -13382,6 +13467,493 @@ var _raycast$3 = function () {
     };
 }();
 
+var TextTexture = function (_Texture) {
+    inherits(TextTexture, _Texture);
+
+    function TextTexture() {
+        var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+            _ref$autoRedraw = _ref.autoRedraw,
+            autoRedraw = _ref$autoRedraw === undefined ? true : _ref$autoRedraw,
+            _ref$text = _ref.text,
+            text = _ref$text === undefined ? '' : _ref$text,
+            _ref$textAlign = _ref.textAlign,
+            textAlign = _ref$textAlign === undefined ? 'center' : _ref$textAlign,
+            _ref$textLineHeight = _ref.textLineHeight,
+            textLineHeight = _ref$textLineHeight === undefined ? 1.15 : _ref$textLineHeight,
+            _ref$fontFamily = _ref.fontFamily,
+            fontFamily = _ref$fontFamily === undefined ? 'sans-serif' : _ref$fontFamily,
+            _ref$fontSize = _ref.fontSize,
+            fontSize = _ref$fontSize === undefined ? 16 : _ref$fontSize,
+            _ref$fontWeight = _ref.fontWeight,
+            fontWeight = _ref$fontWeight === undefined ? 'normal' : _ref$fontWeight,
+            _ref$fontVariant = _ref.fontVariant,
+            fontVariant = _ref$fontVariant === undefined ? 'normal' : _ref$fontVariant,
+            _ref$fontStyle = _ref.fontStyle,
+            fontStyle = _ref$fontStyle === undefined ? 'normal' : _ref$fontStyle,
+            _ref$fillStyle = _ref.fillStyle,
+            fillStyle = _ref$fillStyle === undefined ? 'white' : _ref$fillStyle,
+            _ref$lineWidth = _ref.lineWidth,
+            lineWidth = _ref$lineWidth === undefined ? 0 : _ref$lineWidth,
+            _ref$strokeStyle = _ref.strokeStyle,
+            strokeStyle = _ref$strokeStyle === undefined ? 'black' : _ref$strokeStyle,
+            _ref$padding = _ref.padding,
+            padding = _ref$padding === undefined ? 0.25 : _ref$padding,
+            _ref$magFilter = _ref.magFilter,
+            magFilter = _ref$magFilter === undefined ? LinearFilter : _ref$magFilter,
+            _ref$minFilter = _ref.minFilter,
+            minFilter = _ref$minFilter === undefined ? LinearFilter : _ref$minFilter,
+            mapping = _ref.mapping,
+            wrapS = _ref.wrapS,
+            wrapT = _ref.wrapT,
+            format = _ref.format,
+            type = _ref.type,
+            anisotropy = _ref.anisotropy;
+
+        classCallCheck(this, TextTexture);
+
+        var _this = possibleConstructorReturn(this, (TextTexture.__proto__ || Object.getPrototypeOf(TextTexture)).call(this, createCanvas(), mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy));
+
+        _this.autoRedraw = autoRedraw;
+        _this._text = text;
+        _this._textAlign = textAlign;
+        _this._textLineHeight = textLineHeight;
+        _this._fontFamily = fontFamily;
+        _this._fontSize = fontSize;
+        _this._fontWeight = fontWeight;
+        _this._fontVariant = fontVariant;
+        _this._fontStyle = fontStyle;
+        _this._fillStyle = fillStyle;
+        _this._lineWidth = lineWidth;
+        _this._strokeStyle = strokeStyle;
+        _this._padding = padding;
+
+        _this.redraw();
+
+        return _this;
+    }
+
+    createClass(TextTexture, [{
+        key: 'redraw',
+        value: function redraw() {
+            var _this2 = this;
+
+            var ctx = this.image.getContext('2d');
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            if (this.textWidthInPixels && this.textHeightInPixels) {
+                ctx.canvas.width = this.imageWidthInPixels;
+                ctx.canvas.height = this.imageHeightInPixels;
+
+                ctx.font = this.font;
+                ctx.textBaseline = 'middle';
+                var left = void 0;
+                switch (this.textAlign) {
+                    case 'left':
+                        ctx.textAlign = 'left';
+                        left = this.paddingInPixels + this.lineWidthInPixels / 2;
+                        break;
+                    case 'right':
+                        ctx.textAlign = 'right';
+                        left = this.paddingInPixels + this.lineWidthInPixels / 2 + this.textWidthInPixels;
+                        break;
+                    case 'center':
+                        ctx.textAlign = 'center';
+                        left = this.paddingInPixels + this.lineWidthInPixels / 4 + this.textWidthInPixels / 2;
+                        break;
+                }
+                var top = this.paddingInPixels + this.lineWidthInPixels / 2 + this.fontSize / 2;
+                ctx.fillStyle = this.fillStyle;
+                ctx.miterLimit = 1;
+                ctx.lineWidth = this.lineWidthInPixels;
+                ctx.strokeStyle = this.strokeStyle;
+
+                this.textLines.forEach(function (text) {
+                    if (_this2.lineWidth) {
+                        ctx.strokeText(text, left, top);
+                    }
+                    ctx.fillText(text, left, top);
+                    top += _this2.textLineHeightInPixels;
+                });
+            } else {
+                ctx.canvas.width = ctx.canvas.height = 1;
+            }
+            this.needsUpdate = true;
+        }
+    }, {
+        key: '_redrawIfAuto',
+        value: function _redrawIfAuto() {
+            if (this.autoRedraw) {
+                this.redraw();
+            }
+        }
+    }, {
+        key: 'isTextTexture',
+        get: function get$$1() {
+            return true;
+        }
+    }, {
+        key: 'text',
+        get: function get$$1() {
+            return this._text;
+        },
+        set: function set$$1(value) {
+            if (this._text !== value) {
+                this._text = value;
+                this._textLines = undefined;
+                this._textWidthInPixels = undefined;
+                this._redrawIfAuto();
+            }
+        }
+    }, {
+        key: 'textAlign',
+        get: function get$$1() {
+            return this._textAlign;
+        },
+        set: function set$$1(value) {
+            if (this._textAlign !== value) {
+                this._textAlign = value;
+                this._redrawIfAuto();
+            }
+        }
+    }, {
+        key: 'textLines',
+        get: function get$$1() {
+            if (Lang_isUndefined(this._textLines)) {
+                this._textLines = getTextLines(this.text);
+            }
+            return this._textLines;
+        }
+    }, {
+        key: 'textLineHeight',
+        get: function get$$1() {
+            return this._textLineHeight;
+        },
+        set: function set$$1(value) {
+            if (this._textLineHeight !== value) {
+                this._textLineHeight = value;
+                this._redrawIfAuto();
+            }
+        }
+    }, {
+        key: 'textLineHeightInPixels',
+        get: function get$$1() {
+            return this.fontSize * this.textLineHeight;
+        }
+    }, {
+        key: 'fontFamily',
+        get: function get$$1() {
+            return this._fontFamily;
+        },
+        set: function set$$1(value) {
+            if (this._fontFamily !== value) {
+                this._fontFamily = value;
+                this._textWidthInPixels = undefined;
+                this._redrawIfAuto();
+            }
+        }
+    }, {
+        key: 'fontSize',
+        get: function get$$1() {
+            return this._fontSize;
+        },
+        set: function set$$1(value) {
+            if (this._fontSize !== value) {
+                this._fontSize = value;
+                this._textWidthInPixels = undefined;
+                this._redrawIfAuto();
+            }
+        }
+    }, {
+        key: 'fontWeight',
+        get: function get$$1() {
+            return this._fontWeight;
+        },
+        set: function set$$1(value) {
+            if (this._fontWeight !== value) {
+                this._fontWeight = value;
+                this._textWidthInPixels = undefined;
+                this._redrawIfAuto();
+            }
+        }
+    }, {
+        key: 'fontVariant',
+        get: function get$$1() {
+            return this._fontVariant;
+        },
+        set: function set$$1(value) {
+            if (this._fontVariant !== value) {
+                this._fontVariant = value;
+                this._textWidthInPixels = undefined;
+                this._redrawIfAuto();
+            }
+        }
+    }, {
+        key: 'fontStyle',
+        get: function get$$1() {
+            return this._fontStyle;
+        },
+        set: function set$$1(value) {
+            if (this._fontStyle !== value) {
+                this._fontStyle = value;
+                this._textWidthInPixels = undefined;
+                this._redrawIfAuto();
+            }
+        }
+    }, {
+        key: 'font',
+        get: function get$$1() {
+            return getFont(this.fontStyle, this.fontVariant, this.fontWeight, this.fontSize, this.fontFamily);
+        }
+    }, {
+        key: 'fillStyle',
+        get: function get$$1() {
+            return this._fillStyle;
+        },
+        set: function set$$1(value) {
+            if (this._fillStyle !== value) {
+                this._fillStyle = value;
+                this._redrawIfAuto();
+            }
+        }
+    }, {
+        key: 'lineWidth',
+        get: function get$$1() {
+            return this._lineWidth;
+        },
+        set: function set$$1(value) {
+            if (this._lineWidth !== value) {
+                this._lineWidth = value;
+                this._redrawIfAuto();
+            }
+        }
+    }, {
+        key: 'lineWidthInPixels',
+        get: function get$$1() {
+            return this._lineWidth * this.fontSize;
+        }
+    }, {
+        key: 'strokeStyle',
+        get: function get$$1() {
+            return this._strokeStyle;
+        },
+        set: function set$$1(value) {
+            if (this._strokeStyle !== value) {
+                this._strokeStyle = value;
+                this._redrawIfAuto();
+            }
+        }
+    }, {
+        key: 'textWidthInPixels',
+        get: function get$$1() {
+            if (Lang_isUndefined(this._textWidthInPixels)) {
+                this._textWidthInPixels = _getTextWidth(this.textLines, this.font);
+            }
+            return this._textWidthInPixels;
+        }
+    }, {
+        key: 'textHeight',
+        get: function get$$1() {
+            return this.textLineHeight * (this.textLines.length - 1) + 1;
+        }
+    }, {
+        key: 'textHeightInPixels',
+        get: function get$$1() {
+            return this.textHeight * this.fontSize;
+        }
+    }, {
+        key: 'padding',
+        get: function get$$1() {
+            return this._padding;
+        },
+        set: function set$$1(value) {
+            if (this._padding !== value) {
+                this._padding = value;
+                this._redrawIfAuto();
+            }
+        }
+    }, {
+        key: 'paddingInPixels',
+        get: function get$$1() {
+            return this.padding * this.fontSize;
+        }
+    }, {
+        key: 'imageWidthInPixels',
+        get: function get$$1() {
+            return this.textWidthInPixels + this.lineWidthInPixels + this.paddingInPixels * 2;
+        }
+    }, {
+        key: 'imageHeight',
+        get: function get$$1() {
+            return this.textHeight + this.lineWidth + this.padding * 2;
+        }
+    }, {
+        key: 'imageHeightInPixels',
+        get: function get$$1() {
+            return this.imageHeight * this.fontSize;
+        }
+    }, {
+        key: 'imageAspect',
+        get: function get$$1() {
+            if (this.image.width && this.image.height) {
+                return this.image.width / this.image.height;
+            }
+            return 1;
+        }
+    }], [{
+        key: 'getTextWidth',
+        value: function getTextWidth(textLines, font) {
+            return _getTextWidth(textLines, font);
+        }
+    }]);
+    return TextTexture;
+}(Texture);
+
+function Lang_isUndefined(value) {
+    return value === undefined;
+}
+
+function getTextLines(text) {
+    return text ? text.split('\n') : [];
+}
+
+function getFont(fontStyle, fontVariant, fontWeight, fontSize, fontFamily) {
+    return [fontStyle, fontVariant, fontWeight, fontSize + 'px', fontFamily].join(' ');
+}
+
+function _getTextWidth(textLines, font) {
+    if (textLines.length) {
+        var ctx = createCanvas().getContext('2d');
+        ctx.font = font;
+        return Array_max(textLines.map(function (text) {
+            return ctx.measureText(text).width;
+        }));
+    }
+    return 0;
+}
+
+function Array_max(array) {
+    if (array.length > 0) {
+        return array.reduce(function (maxValue, value) {
+            return Math.max(maxValue, value);
+        });
+    }
+}
+
+function createCanvas() {
+    return document.createElementNS('http://www.w3.org/1999/xhtml', 'canvas');
+}
+
+var TextSprite = function (_Sprite) {
+    inherits(TextSprite, _Sprite);
+
+    function TextSprite() {
+        var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+            _ref$fontSize = _ref.fontSize,
+            fontSize = _ref$fontSize === undefined ? 16 : _ref$fontSize,
+            _ref$redrawInterval = _ref.redrawInterval,
+            redrawInterval = _ref$redrawInterval === undefined ? 1 : _ref$redrawInterval,
+            _ref$material = _ref.material,
+            material = _ref$material === undefined ? {} : _ref$material,
+            _ref$texture = _ref.texture,
+            texture = _ref$texture === undefined ? {} : _ref$texture;
+
+        classCallCheck(this, TextSprite);
+
+        var _this = possibleConstructorReturn(this, (TextSprite.__proto__ || Object.getPrototypeOf(TextSprite)).call(this, new SpriteMaterial$$1(_extends({}, material, { map: new TextTexture(texture) }))));
+
+        _this.fontSize = fontSize;
+        _this.redrawInterval = redrawInterval;
+        _this.lastRedraw = 0;
+        return _this;
+    }
+
+    createClass(TextSprite, [{
+        key: 'onBeforeRender',
+        value: function onBeforeRender(renderer, scene, camera) {
+            this.redraw(renderer, camera);
+        }
+    }, {
+        key: 'updateScale',
+        value: function updateScale(renderer, camera) {
+
+            var fontsize = this.fontSize;
+
+            var screenHeight = renderer.domElement.clientWidth;
+            var dist = camera.position.distanceTo(this.position);
+
+            var vFOV = _Math.degToRad(camera.fov); // convert vertical fov to radians
+
+            var height = 2 * Math.tan(vFOV / 2) * dist; // visible height
+
+
+            //投影位置全屏的Height 与 屏幕的高度比乘以字体的高度 
+            var actualFontSize = height / screenHeight * fontsize;
+
+            this.scale.set(this.material.map.imageAspect, 1, 1).multiplyScalar(Math.round(actualFontSize));
+        }
+
+        // updateMatrix(...args) {
+        //     this.updateScale(...args);
+        //     return super.updateMatrix(...args);
+        // }
+
+    }, {
+        key: 'redraw',
+        value: function redraw(renderer, camera) {
+            var _this2 = this;
+
+            if (this.lastRedraw + this.redrawInterval < Date.now()) {
+                if (this.redrawInterval) {
+                    setTimeout(function () {
+                        _this2.redrawNow(renderer, camera);
+                    }, 1);
+                } else {
+                    this.redrawNow(renderer, camera);
+                }
+            }
+        }
+    }, {
+        key: 'redrawNow',
+        value: function redrawNow(renderer, camera) {
+            this.updateScale(renderer, camera);
+            this.material.map.autoRedraw = true;
+
+            this.material.map.fontSize = _Math.ceilPowerOfTwo(getOptimalFontSize(this, renderer, camera));
+
+            this.lastRedraw = Date.now();
+        }
+    }, {
+        key: 'dispose',
+        value: function dispose() {
+            this.material.map.dispose();
+            this.material.dispose();
+        }
+    }, {
+        key: 'isTextSprite',
+        get: function get$$1() {
+            return true;
+        }
+    }]);
+    return TextSprite;
+}(Sprite);
+
+var getOptimalFontSize = function () {
+    var objectWorldPosition = new Vector3$1();
+    var cameraWorldPosition = new Vector3$1();
+    var objectWorldScale = new Vector3$1();
+    return function getOptimalFontSize(object, renderer, camera) {
+        if (renderer.domElement.width && renderer.domElement.height && object.material.map.textLines.length) {
+            var distance = object.getWorldPosition(objectWorldPosition).distanceTo(camera.getWorldPosition(cameraWorldPosition));
+            if (distance) {
+                var heightInPixels = object.getWorldScale(objectWorldScale).y * renderer.domElement.height / distance;
+                if (heightInPixels) {
+                    return Math.round(heightInPixels / object.material.map.imageHeight);
+                }
+            }
+        }
+        return 0;
+    };
+}();
+
 /**
  * @class BufferGeometry 三维几何体的基类
  * @description 实现三维几何体的一些基本操作
@@ -15517,13 +16089,13 @@ var Camera = function (_Object3D) {
     }, {
         key: 'getWorldDirection',
         value: function getWorldDirection(target) {
-            return _getWorldDirection.call(this, target);
+            return _getWorldDirection$1.call(this, target);
         }
     }]);
     return Camera;
 }(Object3D);
 
-var _getWorldDirection = function () {
+var _getWorldDirection$1 = function () {
 
     var quaternion = new Quaternion();
 
@@ -15786,4 +16358,4 @@ function _intersectObject(object, raycaster, intersects, recursive) {
     }
 }
 
-export { Events, WebGLRenderer, Scene, Group, Mesh, Line, Line2, Points, Sprite, Texture, Camera, PerspectiveCamera, OrthographicCamera, BufferGeometry, Geometry, InstancedBufferGeometry, InterleavedBufferAttribute, InstancedInterleavedBuffer, InterleavedBuffer, InstancedBufferAttribute, Face3, Object3D, Raycaster$$1 as Raycaster, Triangle, _Math as Math, Plane, Frustum, Sphere, Ray, Matrix4, Matrix3, Box3, Line3, Euler, Vector4, Vector3$1 as Vector3, Vector2, Quaternion, Color$1 as Color, CircleGeometry, CircleBufferGeometry, PlaneGeometry, PlaneBufferGeometry, BoxGeometry, BoxBufferGeometry, SphereGeometry, SphereBufferGeometry, CylinderGeometry, CylinderBufferGeometry, LineSegmentsGeometry, LineGeometry, MeshBasicMaterial$$1 as MeshBasicMaterial, MeshLambertMaterial, MeshPhongMaterial, LineBasicMaterial, LineDashedMaterial, LineMeshMaterial, PointsMaterial, SpriteMaterial$$1 as SpriteMaterial, ShaderMaterial, RawShaderMaterial, SpotLight, PointLight, DirectionalLight, AmbientLight, Light, Float64BufferAttribute, Float32BufferAttribute, Uint32BufferAttribute, Int32BufferAttribute, Uint16BufferAttribute, Int16BufferAttribute, Uint8ClampedBufferAttribute, Uint8BufferAttribute, Int8BufferAttribute, BufferAttribute, REVISION, pointsMode, LinesMode, LineLoopMode, LineStripMode, TrianglesDrawMode, TriangleStripDrawMode, TriangleFanDrawMode, NeverDepth, AlwaysDepth, LessDepth, LessEqualDepth, EqualDepth, GreaterEqualDepth, GreaterDepth, NotEqualDepth, CullFaceNone, CullFaceBack, CullFaceFront, CullFaceFrontBack, FrontFaceDirectionCW, FrontFaceDirectionCCW, FrontSide, BackSide, DoubleSide, NoBlending, NormalBlending, AdditiveBlending, SubtractiveBlending, MultiplyBlending, CustomBlending, AddEquation, SubtractEquation, ReverseSubtractEquation, MinEquation, MaxEquation, ZeroFactor, OneFactor, SrcColorFactor, OneMinusSrcColorFactor, SrcAlphaFactor, OneMinusSrcAlphaFactor, DstAlphaFactor, OneMinusDstAlphaFactor, DstColorFactor, OneMinusDstColorFactor, SrcAlphaSaturateFactor, RepeatWrapping, ClampToEdgeWrapping, MirroredRepeatWrapping, NearestFilter, NearestMipMapNearestFilter, NearestMipMapLinearFilter, LinearFilter, LinearMipMapNearestFilter, LinearMipMapLinearFilter, UnsignedByteType, ByteType, ShortType, UnsignedShortType, IntType, UnsignedIntType, FloatType, HalfFloatType, UnsignedShort4444Type, UnsignedShort5551Type, UnsignedShort565Type, UnsignedInt248Type, AlphaFormat, RGBFormat, RGBAFormat, LuminanceFormat, LuminanceAlphaFormat, RGBEFormat, DepthFormat, DepthStencilFormat, UVMapping, NoColors, FaceColors, VertexColors };
+export { Events, WebGLRenderer, Scene, Group, Mesh, Line, Line2, Points, Sprite, TextSprite, Texture, TextTexture, Camera, PerspectiveCamera, OrthographicCamera, BufferGeometry, Geometry, InstancedBufferGeometry, InterleavedBufferAttribute, InstancedInterleavedBuffer, InterleavedBuffer, InstancedBufferAttribute, Face3, Object3D, Raycaster$$1 as Raycaster, Triangle, _Math as Math, Plane, Frustum, Sphere, Ray, Matrix4, Matrix3, Box3, Line3, Euler, Vector4, Vector3$1 as Vector3, Vector2, Quaternion, Color$1 as Color, CircleGeometry, CircleBufferGeometry, PlaneGeometry, PlaneBufferGeometry, BoxGeometry, BoxBufferGeometry, SphereGeometry, SphereBufferGeometry, CylinderGeometry, CylinderBufferGeometry, LineSegmentsGeometry, LineGeometry, MeshBasicMaterial$$1 as MeshBasicMaterial, MeshLambertMaterial, MeshPhongMaterial, LineBasicMaterial, LineDashedMaterial, LineMeshMaterial, PointsMaterial, SpriteMaterial$$1 as SpriteMaterial, ShaderMaterial, RawShaderMaterial, SpotLight, PointLight, DirectionalLight, AmbientLight, Light, Float64BufferAttribute, Float32BufferAttribute, Uint32BufferAttribute, Int32BufferAttribute, Uint16BufferAttribute, Int16BufferAttribute, Uint8ClampedBufferAttribute, Uint8BufferAttribute, Int8BufferAttribute, BufferAttribute, REVISION, pointsMode, LinesMode, LineLoopMode, LineStripMode, TrianglesDrawMode, TriangleStripDrawMode, TriangleFanDrawMode, NeverDepth, AlwaysDepth, LessDepth, LessEqualDepth, EqualDepth, GreaterEqualDepth, GreaterDepth, NotEqualDepth, CullFaceNone, CullFaceBack, CullFaceFront, CullFaceFrontBack, FrontFaceDirectionCW, FrontFaceDirectionCCW, FrontSide, BackSide, DoubleSide, NoBlending, NormalBlending, AdditiveBlending, SubtractiveBlending, MultiplyBlending, CustomBlending, AddEquation, SubtractEquation, ReverseSubtractEquation, MinEquation, MaxEquation, ZeroFactor, OneFactor, SrcColorFactor, OneMinusSrcColorFactor, SrcAlphaFactor, OneMinusSrcAlphaFactor, DstAlphaFactor, OneMinusDstAlphaFactor, DstColorFactor, OneMinusDstColorFactor, SrcAlphaSaturateFactor, RepeatWrapping, ClampToEdgeWrapping, MirroredRepeatWrapping, NearestFilter, NearestMipMapNearestFilter, NearestMipMapLinearFilter, LinearFilter, LinearMipMapNearestFilter, LinearMipMapLinearFilter, UnsignedByteType, ByteType, ShortType, UnsignedShortType, IntType, UnsignedIntType, FloatType, HalfFloatType, UnsignedShort4444Type, UnsignedShort5551Type, UnsignedShort565Type, UnsignedInt248Type, AlphaFormat, RGBFormat, RGBAFormat, LuminanceFormat, LuminanceAlphaFormat, RGBEFormat, DepthFormat, DepthStencilFormat, UVMapping, NoColors, FaceColors, VertexColors };

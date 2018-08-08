@@ -7,8 +7,10 @@ export { Line } from './objects/Line';
 export { Line2 } from './objects/Line2';
 export { Points } from './objects/Points';
 export { Sprite } from './objects/Sprite';
+export { TextSprite }from './objects/TextSprite';
 
 export { Texture } from './textures/Texture.js';
+export { TextTexture } from './textures/TextTexture.js';
 
 export * from './geometries/Geometries.js';
 export * from './materials/Materials.js';

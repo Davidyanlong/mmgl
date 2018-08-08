@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Sprite</title>
+    <style>
+        canvas {
+            border: 1px solid red;
+        }
+    </style>
+</head>
+
+<body style="background: blue">
+
+    <canvas id="cas"></canvas>
+
+</body>
+<pre>
+   
+
+</pre>
+
+</html>
+<script src="../build/mmGL.js"></script>
+<script>
+    let canvas = document.getElementById('cas');
+    let renderer = new mmGL.WebGLRenderer({
+        canvas: canvas,
+        antialias: true
+    })
+    let camera = new mmGL.PerspectiveCamera(45, 1, 0.1, 1000);
+
+    camera.position.set(0, 0, 100);
+
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.setSize(400, 400);
+
+
+    let scene = new mmGL.Scene();
+    scene.background=new mmGL.Color('#ffffff');
+
+    let sprite = new mmGL.TextSprite({
+        fontSize: 32,
+        texture: {
+            padding: 0,
+            text: '测试汉字',
+            fontFamily: 'SimHei, Arial, Helvetica, sans-serif',
+        },
+        material: {
+            color: 0x000000,
+            transparent:true
+        }
+        });
+
+    sprite.position.set(10, 20, -200);
+
+
+    scene.add(sprite);
+
+    let lastTime = (new Date()).getTime();
+    (function tick() {
+        let now = (new Date()).getTime();
+
+        // if (lastTime + 1000*5  < now) {
+        //     // sprite.scale.set(textTexture.imageAspect, 1, 1).multiplyScalar(Math.random() * textTexture.imageHeight);
+        //     // spriteMaterial.map.fontSize = Math.min(mmGL.Math.ceilPowerOfTwo(getOptimalFontSize(sprite, renderer, camera)), Infinity);
+        //     // if (!spriteMaterial.map.autoRedraw) {
+        //     //     spriteMaterial.map.redraw();
+        //     // }
+        //     lastTime = now;
+        // }
+
+
+        renderer.render(scene, camera);
+        //sprite.material.rotation += 0.1;
+        //scene.rotation.y += 0.01;
+        //scene.rotation.x += 0.01;
+
+        window.requestAnimationFrame(tick)
+    })()
+
+
+
+
+
+    // function getOptimalFontSize(object, renderer, camera) {
+    //     const objectWorldPosition = new mmGL.Vector3();
+    //     const cameraWorldPosition = new mmGL.Vector3();
+    //     const objectWorldScale = new mmGL.Vector3();
+    //     if (renderer.domElement.width && renderer.domElement.height && object.material.map.textLines.length) {
+    //         let distance = object.getWorldPosition(objectWorldPosition).distanceTo(camera.getWorldPosition(cameraWorldPosition));
+    //         if (distance) {
+    //             let heightInPixels = object.getWorldScale(objectWorldScale).y * renderer.domElement.height / distance;
+    //             if (heightInPixels) {
+    //                 return Math.round(heightInPixels / object.material.map.imageHeight);
+    //             }
+    //         }
+    //     }
+    //     return 0;
+    // }
+
+
+
+
+</script>

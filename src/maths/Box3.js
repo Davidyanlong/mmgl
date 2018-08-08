@@ -287,11 +287,11 @@ class Box3 {
     }
 
     distanceToPoint(point) {
-        return distanceToPoint(point);
+        return distanceToPoint.call(this,point);
     }
 
     getBoundingSphere(optionalTarget) {
-        return getBoundingSphere(optionalTarget);
+        return getBoundingSphere.call(this,optionalTarget);
     }
 
     intersect(box) {
