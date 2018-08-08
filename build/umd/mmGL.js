@@ -205,7 +205,7 @@
 	    return Events;
 	}();
 
-	var REVISION = '0.0.8';
+	var REVISION = '0.0.10';
 
 	//draw Point
 	var pointsMode = 0;
