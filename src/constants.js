@@ -1,5 +1,5 @@
 
-export const REVISION = '0.0.8';
+export const REVISION = '0.0.10';
 
 //draw Point
 export const pointsMode = 0;
