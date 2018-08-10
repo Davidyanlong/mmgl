@@ -27,27 +27,21 @@ class TextSprite extends Sprite {
     }
     updateScale(renderer, camera) {
 
-            let actualFontSize = 1;
-            let fontsize = this.fontSize;
-            let height=0;
-            let screenHeight = renderer.domElement.clientHeight;
-            if(camera.isOrthographicCamera){
-                 height = camera.top - camera.bottom;
-            }else{
-                let dist = camera.position.distanceTo(this.position);
-                var vFOV = _Math.degToRad(camera.fov); // convert vertical fov to radians
-                  height = 2 * Math.tan(vFOV / 2) * dist; // visible height
-                 //投影位置全屏的Height 与 屏幕的高度比乘以字体的高度  
-            }
-            actualFontSize = height / screenHeight * fontsize;
-            
+        let actualFontSize = 1;
+        let fontsize = this.fontSize;
+        let height = 0;
+        let screenHeight = renderer.domElement.clientHeight;
+        if (camera.isOrthographicCamera) {
+            height = camera.top - camera.bottom;
+        } else {
+            let dist = camera.position.distanceTo(this.position);
+            var vFOV = _Math.degToRad(camera.fov); // convert vertical fov to radians
+            height = 2 * Math.tan(vFOV / 2) * dist; // visible height
+            //投影位置全屏的Height 与 屏幕的高度比乘以字体的高度  
+        }
+        actualFontSize = height / screenHeight * fontsize;
 
-            
-
-
-           
-
-            this.scale.set(this.material.map.imageAspect, 1, 1).multiplyScalar(Math.round(actualFontSize));
+        this.scale.set(this.material.map.imageAspect, 1, 1).multiplyScalar(Math.round(actualFontSize));
 
     }
 
@@ -71,8 +65,8 @@ class TextSprite extends Sprite {
     redrawNow(renderer, camera) {
         this.updateScale(renderer, camera);
         this.material.map.autoRedraw = true;
-        
-        this.material.map.fontSize =_Math.ceilPowerOfTwo(getOptimalFontSize(this, renderer, camera));
+
+        this.material.map.fontSize = _Math.ceilPowerOfTwo(getOptimalFontSize(this, renderer, camera));
 
         this.lastRedraw = Date.now();
     }
