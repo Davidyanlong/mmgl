@@ -22,6 +22,7 @@
     "name": "yanlong.yang",
     "email": "87141611@qq.com"
   },
+  "repository": "https://github.com/Davidyanlong/mmgl",
   "license": "MIT",
   "devDependencies": {
     "babel-core": "^6.13.0",
