@@ -27,18 +27,25 @@ class TextSprite extends Sprite {
     }
     updateScale(renderer, camera) {
 
+            let actualFontSize = 1;
             let fontsize = this.fontSize;
-            
+            let height=0;
             let screenHeight = renderer.domElement.clientHeight;
-            let dist = camera.position.distanceTo(this.position);
+            if(camera.isOrthographicCamera){
+                 height = camera.top - camera.bottom;
+            }else{
+                let dist = camera.position.distanceTo(this.position);
+                var vFOV = _Math.degToRad(camera.fov); // convert vertical fov to radians
+                  height = 2 * Math.tan(vFOV / 2) * dist; // visible height
+                 //投影位置全屏的Height 与 屏幕的高度比乘以字体的高度  
+            }
+            actualFontSize = height / screenHeight * fontsize;
+            
 
-            var vFOV = _Math.degToRad(camera.fov); // convert vertical fov to radians
-
-            var height = 2 * Math.tan(vFOV / 2) * dist; // visible height
+            
 
 
-            //投影位置全屏的Height 与 屏幕的高度比乘以字体的高度 
-            let actualFontSize = height / screenHeight * fontsize;
+           
 
             this.scale.set(this.material.map.imageAspect, 1, 1).multiplyScalar(Math.round(actualFontSize));
 
@@ -71,6 +78,7 @@ class TextSprite extends Sprite {
     }
 
     dispose() {
+        //todo 更改sprite 的渲染,不然回收有问题
         this.material.map.dispose();
         this.material.dispose();
     }

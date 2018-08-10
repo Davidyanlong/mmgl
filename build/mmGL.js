@@ -13878,18 +13878,19 @@
 	        key: 'updateScale',
 	        value: function updateScale(renderer, camera) {
 
+	            var actualFontSize = 1;
 	            var fontsize = this.fontSize;
-
+	            var height = 0;
 	            var screenHeight = renderer.domElement.clientHeight;
-	            var dist = camera.position.distanceTo(this.position);
-
-	            var vFOV = _Math.degToRad(camera.fov); // convert vertical fov to radians
-
-	            var height = 2 * Math.tan(vFOV / 2) * dist; // visible height
-
-
-	            //投影位置全屏的Height 与 屏幕的高度比乘以字体的高度 
-	            var actualFontSize = height / screenHeight * fontsize;
+	            if (camera.isOrthographicCamera) {
+	                height = camera.top - camera.bottom;
+	            } else {
+	                var dist = camera.position.distanceTo(this.position);
+	                var vFOV = _Math.degToRad(camera.fov); // convert vertical fov to radians
+	                height = 2 * Math.tan(vFOV / 2) * dist; // visible height
+	                //投影位置全屏的Height 与 屏幕的高度比乘以字体的高度  
+	            }
+	            actualFontSize = height / screenHeight * fontsize;
 
 	            this.scale.set(this.material.map.imageAspect, 1, 1).multiplyScalar(Math.round(actualFontSize));
 	        }
@@ -13927,6 +13928,7 @@
 	    }, {
 	        key: 'dispose',
 	        value: function dispose() {
+	            //todo 更改sprite 的渲染,不然回收有问题
 	            this.material.map.dispose();
 	            this.material.dispose();
 	        }
