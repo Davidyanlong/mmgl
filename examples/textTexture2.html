@@ -31,7 +31,7 @@
     })
     let camera = new mmGL.PerspectiveCamera(45, 1, 0.1, 1000);
 
-    camera = new mmGL.OrthographicCamera(-200,200,200,-200,0.1,1000);
+    camera = new mmGL.OrthographicCamera(-200, 200, 200, -200, 0.1, 1000);
 
     camera.position.set(0, 0, 100);
 
@@ -40,76 +40,75 @@
 
 
     let scene = new mmGL.Scene();
-    scene.background=new mmGL.Color('#ffffff');
-//    for(i=0;i<100;i++){
-//     let sprite = new mmGL.TextSprite({
-//         fontSize: 20*Math.random(),
-//         texture: {  //纹理中需要的文字大小不需要指定,TextSprite会自动计算
-//             padding: 0,
-//             text: Math.random().toString(),
-//             fontFamily: 'SimHei, Arial, Helvetica, sans-serif',
-//         },
-//         material: {
-//             color: 0x000000,
-//             transparent:true
-//         }
-//         });
-
-//     sprite.position.set(300*Math.random()-150,300*Math.random()-150, 200*Math.random());
-
-
-//     scene.add(sprite);
-//    }
-
-    let texts = [],text;
-    for(let i=0;i<4;i++){
-        text="";
-        for(let j=0;j<3+Math.round(Math.random()*10);j++){
-            text +=String.fromCodePoint(Math.round(Math.random() * 20901) + 19968)
-        }
-        texts.push(text);
-    }
-
-    let sprite = new mmGL.TextSprite({
-        fontSize: 16,
-        texture: {  //纹理中需要的文字大小不需要指定,TextSprite会自动计算
-            padding: 0,
-            textLineHeight:1,
-            text: texts.join('\n'),
-            fontFamily: 'SimHei, Arial, Helvetica, sans-serif',
-            wrapS:mmGL.RepeatWrapping,
-            wrapT:mmGL.RepeatWrapping
-        },
-        material: {
-            color: 0x000000,
-            transparent:true
-        }
+    scene.background = new mmGL.Color('#ffffff');
+   // for (i = 0; i < 2; i++) {
+        let sprite = new mmGL.TextSprite({
+            fontSize: 32,
+            texture: {  //纹理中需要的文字大小不需要指定,TextSprite会自动计算
+                padding: 0,
+                text: '测试相机更改',
+                fontFamily: 'SimHei, Arial, Helvetica, sans-serif',
+            },
+            material: {
+                color: 0x000000,
+                transparent: true
+            }
         });
 
-updateTexture(0,1,4);
+        sprite.position.set(0, 0, -200);
 
-   function updateTexture(i, numW, numH) {
+        scene.add(sprite);
+   // }
 
-let a = i == numW * numH ? 0 : i,
-    r = a % numW,
-    c = Math.floor(a / numH);
+    // let texts = [], text;
+    // for (let i = 0; i < 4; i++) {
+    //     text = "";
+    //     for (let j = 0; j < 3 + Math.round(Math.random() * 10); j++) {
+    //         text += String.fromCodePoint(Math.round(Math.random() * 20901) + 19968)
+    //     }
+    //     texts.push(text);
+    // }
 
-sprite.material.map.repeat.set(1 / numW, 1 / numH);
-texturePosW = r / numW;
-texturePosH = c / numH;
+    // let sprite = new mmGL.TextSprite({
+    //     fontSize: 16,
+    //     texture: {  //纹理中需要的文字大小不需要指定,TextSprite会自动计算
+    //         padding: 0,
+    //         textLineHeight: 1,
+    //         text: texts.join('\n'),
+    //         fontFamily: 'SimHei, Arial, Helvetica, sans-serif',
+    //         wrapS: mmGL.RepeatWrapping,
+    //         wrapT: mmGL.RepeatWrapping
+    //     },
+    //     material: {
+    //         color: 0x000000,
+    //         transparent: true
+    //     }
+    // });
 
-console.log(a, texturePosW, texturePosH);
-sprite.material.map.offset.x = texturePosW;
-sprite.material.map.offset.y = texturePosH;
+    // updateTexture(0, 1, 4);
 
-}
+    // function updateTexture(i, numW, numH) {
+
+    //     let a = i == numW * numH ? 0 : i,
+    //         r = a % numW,
+    //         c = Math.floor(a / numH);
+
+    //     sprite.material.map.repeat.set(1 / numW, 1 / numH);
+    //     texturePosW = r / numW;
+    //     texturePosH = c / numH;
+
+    //     console.log(a, texturePosW, texturePosH);
+    //     sprite.material.map.offset.x = texturePosW;
+    //     sprite.material.map.offset.y = texturePosH;
+
+    // }
 
 
-    sprite.position.set(10,10, 10);
+    // sprite.position.set(10, 10, 10);
 
 
-    scene.add(sprite);
-    
+    // scene.add(sprite);
+
 
     let lastTime = (new Date()).getTime();
     (function tick() {
@@ -128,7 +127,7 @@ sprite.material.map.offset.y = texturePosH;
         renderer.render(scene, camera);
         //sprite.material.rotation += 0.1;
         //  scene.rotation.y += 0.01;
-         //scene.rotation.x += 0.01;
+        //scene.scale.z -= 0.001;
 
         window.requestAnimationFrame(tick)
     })()

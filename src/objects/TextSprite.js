@@ -34,11 +34,20 @@ class TextSprite extends Sprite {
         if (camera.isOrthographicCamera) {
             height = camera.top - camera.bottom;
         } else {
-            let dist = camera.position.distanceTo(this.position);
+            let cameraWorldPos = new Vector3();
+            camera.updateMatrixWorld(true);
+            cameraWorldPos.applyMatrix4(camera.matrixWorld);
+
+            let pos = new Vector3();
+            this.updateMatrixWorld(true);
+            pos.applyMatrix4(this.matrixWorld);
+
+            let dist = cameraWorldPos.distanceTo(pos);
             var vFOV = _Math.degToRad(camera.fov); // convert vertical fov to radians
-            height = 2 * Math.tan(vFOV / 2) * dist; // visible height
+             height = 2 * Math.tan(vFOV / 2) * dist; // visible height
             //投影位置全屏的Height 与 屏幕的高度比乘以字体的高度  
         }
+
         actualFontSize = height / screenHeight * fontsize;
 
         this.scale.set(this.material.map.imageAspect, 1, 1).multiplyScalar(Math.round(actualFontSize));

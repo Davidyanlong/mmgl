@@ -205,7 +205,7 @@
 	    return Events;
 	}();
 
-	var REVISION = '0.0.10';
+	var REVISION = '0.0.12';
 
 	//draw Point
 	var pointsMode = 0;
@@ -13888,11 +13888,20 @@
 	            if (camera.isOrthographicCamera) {
 	                height = camera.top - camera.bottom;
 	            } else {
-	                var dist = camera.position.distanceTo(this.position);
+	                var cameraWorldPos = new Vector3$1();
+	                camera.updateMatrixWorld(true);
+	                cameraWorldPos.applyMatrix4(camera.matrixWorld);
+
+	                var pos = new Vector3$1();
+	                this.updateMatrixWorld(true);
+	                pos.applyMatrix4(this.matrixWorld);
+
+	                var dist = cameraWorldPos.distanceTo(pos);
 	                var vFOV = _Math.degToRad(camera.fov); // convert vertical fov to radians
 	                height = 2 * Math.tan(vFOV / 2) * dist; // visible height
 	                //投影位置全屏的Height 与 屏幕的高度比乘以字体的高度  
 	            }
+
 	            actualFontSize = height / screenHeight * fontsize;
 
 	            this.scale.set(this.material.map.imageAspect, 1, 1).multiplyScalar(Math.round(actualFontSize));
