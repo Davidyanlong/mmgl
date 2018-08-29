@@ -4,7 +4,7 @@
 import { Box3 } from './Box3';
 import { Vector3 } from './Vector3';
 
-var box = new Box3();
+
 class Sphere {
     constructor(center, radius) {
         this.center = (center !== undefined) ? center : new Vector3();
@@ -23,7 +23,8 @@ class Sphere {
     setFromPoints(points, optionalCenter) {
 
         var center = this.center;
-
+        var box = new Box3();
+        
         if (optionalCenter !== undefined) {
 
             center.copy(optionalCenter);
