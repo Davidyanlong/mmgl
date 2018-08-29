@@ -202,7 +202,9 @@
 	    return Events;
 	}();
 
-	var REVISION = '0.0.12';
+	var version = "0.0.13";
+
+	var REVISION = version;
 
 	//draw Point
 	var pointsMode = 0;
@@ -2876,8 +2878,6 @@
 	    };
 	}();
 
-	var box = new Box3();
-
 	var Sphere = function () {
 	    function Sphere(center, radius) {
 	        classCallCheck(this, Sphere);
@@ -2900,6 +2900,7 @@
 	        value: function setFromPoints(points, optionalCenter) {
 
 	            var center = this.center;
+	            var box = new Box3();
 
 	            if (optionalCenter !== undefined) {
 

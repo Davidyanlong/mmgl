@@ -1,5 +1,7 @@
 import resolve from 'rollup-plugin-node-resolve';
 import babel from 'rollup-plugin-babel';
+import json from 'rollup-plugin-json';
+
 function glsl() {
 
     return {
@@ -29,7 +31,12 @@ export default {
     entry: './src/index.js',
     indent: '\t',
     plugins: [
-        glsl(),
+        glsl({
+            // for tree-shaking, properties will be declared as
+            // variables, using either `var` or `const`
+            preferConst: true, 
+        }),
+        json(),
         resolve({ jsnext: true, main: true, browser: true }),
         babel({
             exclude: 'node_modules/**' // 只编译我们的源代码

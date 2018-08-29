@@ -1,5 +1,7 @@
 
-export const REVISION = '0.0.12';
+import { version } from '../package.json';
+
+export const REVISION = version;
 
 //draw Point
 export const pointsMode = 0;
