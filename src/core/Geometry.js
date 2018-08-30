@@ -27,6 +27,7 @@ class Geometry extends Events {
 
         this.isGeometry = true;
 
+        this.lineDistances = [];     //计算虚线需要
         this.boundingSphere = null;
         this.boundingBox = null;
 
