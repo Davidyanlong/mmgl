@@ -1,6 +1,3 @@
-euclideanModulo
-
-clamp
 
 const _Math = {
     DEG2RAD: Math.PI / 180,

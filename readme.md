@@ -60,3 +60,6 @@ mmGL是在THREEJS代码的基础上进行基础功能的抽取,满足三维图�
     *   通过fontSize在三维空间中控制文字的大小
     *   绘制清晰的文字
     *   [demo:https://codepen.io/davidyanlong/pen/YjJdgB](https://codepen.io/davidyanlong/pen/YjJdgB)
+
+*   2018.8.31
+    * 增加计算类 Spherical     

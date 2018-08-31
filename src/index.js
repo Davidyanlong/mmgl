@@ -7,7 +7,7 @@ export { Line } from './objects/Line';
 export { Line2 } from './objects/Line2';
 export { Points } from './objects/Points';
 export { Sprite } from './objects/Sprite';
-export { TextSprite }from './objects/TextSprite';
+export { TextSprite } from './objects/TextSprite';
 
 export { Texture } from './textures/Texture.js';
 export { TextTexture } from './textures/TextTexture.js';
@@ -39,6 +39,7 @@ export { _Math as Math } from './maths/Math.js';
 export { Plane } from './maths/Plane.js';
 export { Frustum } from './maths/Frustum.js';
 export { Sphere } from './maths/Sphere.js';
+export { Spherical } from './maths/Spherical';
 export { Ray } from './maths/Ray.js';
 export { Matrix4 } from './maths/Matrix4.js';
 export { Matrix3 } from './maths/Matrix3.js';
@@ -50,5 +51,6 @@ export { Vector3 } from './maths/Vector3.js';
 export { Vector2 } from './maths/Vector2.js';
 export { Quaternion } from './maths/Quaternion.js';
 export { Color } from './maths/Color.js';
+
 export * from './constants.js';
 
