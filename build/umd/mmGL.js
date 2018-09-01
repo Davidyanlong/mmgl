@@ -205,7 +205,7 @@
 	    return Events;
 	}();
 
-	var version = "0.0.16";
+	var version = "0.0.18";
 
 	var REVISION = version;
 
@@ -8211,7 +8211,7 @@
 	}
 
 	function deallocateTexture(texture) {
-
+	    var _gl = this.gl;
 	    var textureProperties = this._properties.get(texture);
 
 	    if (texture.image && textureProperties.__image__webglTextureCube) {

@@ -269,8 +269,8 @@ function filterFallback(f) {
 }
 
 function deallocateTexture(texture) {
-
-    var textureProperties = this._properties.get(texture);
+    let _gl = this.gl;
+    let textureProperties = this._properties.get(texture);
 
     if (texture.image && textureProperties.__image__webglTextureCube) {
 
