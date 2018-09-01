@@ -58,7 +58,7 @@ class WebGLTextures {
 
             textureProperties.__webglInit = true;
 
-            texture.on('dispose', onTextureDispose);
+            texture.on('dispose', onTextureDispose.bind(this));
 
             textureProperties.__webglTexture = _gl.createTexture();
 
@@ -237,8 +237,8 @@ function setTextureParameters(textureType, texture, isPowerOfTwoImage) {
 
         }
 
-        _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER, filterFallback.call(this,texture.magFilter));
-        _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER, filterFallback.call(this,texture.minFilter));
+        _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER, filterFallback.call(this, texture.magFilter));
+        _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER, filterFallback.call(this, texture.minFilter));
 
         if (texture.minFilter !== NearestFilter && texture.minFilter !== LinearFilter) {
 
@@ -303,7 +303,7 @@ function textureNeedsGenerateMipmaps(texture, isPowerOfTwo) {
 function generateMipmap(target, texture, width, height) {
 
     //生成多级纹理图
-   this.gl.generateMipmap(target);
+    this.gl.generateMipmap(target);
 
     var textureProperties = this._properties.get(texture);
 

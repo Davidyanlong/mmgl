@@ -199,7 +199,7 @@ var Events = function () {
     return Events;
 }();
 
-var version = "0.0.13";
+var version = "0.0.16";
 
 var REVISION = version;
 
@@ -8018,7 +8018,7 @@ var WebGLTextures = function () {
 
                 textureProperties.__webglInit = true;
 
-                texture.on('dispose', onTextureDispose);
+                texture.on('dispose', onTextureDispose.bind(this));
 
                 textureProperties.__webglTexture = _gl.createTexture();
 
@@ -10672,7 +10672,6 @@ var Object3D = function (_Events) {
 
         _this.parent = null;
         _this.children = [];
-        _this.isObject3D = true;
 
         _this.up = Object3D.DefaultUp.clone();
 
@@ -11081,6 +11080,11 @@ var Object3D = function (_Events) {
     }, {
         key: 'raycast',
         value: function raycast() {}
+    }, {
+        key: 'isObject3D',
+        get: function get$$1() {
+            return true;
+        }
     }]);
     return Object3D;
 }(Events);
@@ -11214,10 +11218,15 @@ var Group = function (_Object3D) {
         var _this = possibleConstructorReturn(this, (Group.__proto__ || Object.getPrototypeOf(Group)).call(this));
 
         _this.type = 'Group';
-        _this.isGroup = true;
         return _this;
     }
 
+    createClass(Group, [{
+        key: "isGroup",
+        get: function get$$1() {
+            return true;
+        }
+    }]);
     return Group;
 }(Object3D);
 
@@ -12376,7 +12385,6 @@ var Mesh = function (_Object3D) {
         _this.material = material;
 
         _this.drawMode = TrianglesDrawMode;
-        _this.isMesh = true;
 
         return _this;
     }
@@ -12391,6 +12399,11 @@ var Mesh = function (_Object3D) {
         key: 'raycast',
         value: function raycast(raycaster, intersects) {
             _raycast.call(this, raycaster, intersects);
+        }
+    }, {
+        key: 'isMesh',
+        get: function get$$1() {
+            return true;
         }
     }]);
     return Mesh;
@@ -12692,7 +12705,6 @@ var Line = function (_Object3D) {
 
         _this.geometry = geometry !== undefined ? geometry : new BufferGeometry();
         _this.material = material !== undefined ? material : new LineBasicMaterial({ color: Math.random() * 0xffffff });
-        _this.isLine = true;
         _this.drawMode = LinesMode;
 
         if (_this.material.isLineDashedMaterial) {
@@ -12716,6 +12728,11 @@ var Line = function (_Object3D) {
         key: 'raycast',
         value: function raycast(raycaster, intersects) {
             _raycast$1.call(this, raycaster, intersects);
+        }
+    }, {
+        key: 'isLine',
+        get: function get$$1() {
+            return true;
         }
     }]);
     return Line;
@@ -13169,6 +13186,11 @@ var Line2 = function (_Mesh) {
         value: function computeLineDistances() {
             _computeLineDistances$1.call(this);
         }
+    }, {
+        key: 'isLine2',
+        get: function get$$1() {
+            return true;
+        }
     }]);
     return Line2;
 }(Mesh);
@@ -13260,7 +13282,6 @@ var Points = function (_Object3D) {
 
         _this.geometry = geometry !== undefined ? geometry : new BufferGeometry();
         _this.material = material !== undefined ? material : new PointsMaterial({ color: Math.random() * 0xffffff });
-        _this.isPoints = true;
         return _this;
     }
 
@@ -13268,6 +13289,11 @@ var Points = function (_Object3D) {
         key: 'raycast',
         value: function raycast(raycaster, intersects) {
             _raycast$2.call(this, raycaster, intersects);
+        }
+    }, {
+        key: 'isPoints',
+        get: function get$$1() {
+            return true;
         }
     }]);
     return Points;
@@ -13424,7 +13450,6 @@ var Sprite = function (_Object3D) {
         _this.material = material !== undefined ? material : new SpriteMaterial$$1();
 
         _this.center = new Vector2(0.5, 0.5);
-        _this.isSprite = true;
         return _this;
     }
 
@@ -13432,6 +13457,11 @@ var Sprite = function (_Object3D) {
         key: 'raycast',
         value: function raycast(raycaster, intersects) {
             _raycast$3.call(this, raycaster, intersects);
+        }
+    }, {
+        key: 'isSprite',
+        get: function get$$1() {
+            return true;
         }
     }]);
     return Sprite;
@@ -13992,6 +14022,7 @@ var Geometry = function (_Events) {
 
         _this.isGeometry = true;
 
+        _this.lineDistances = []; //计算虚线需要
         _this.boundingSphere = null;
         _this.boundingBox = null;
 
@@ -16370,4 +16401,85 @@ function _intersectObject(object, raycaster, intersects, recursive) {
     }
 }
 
-export { Events, WebGLRenderer, Scene, Group, Mesh, Line, Line2, Points, Sprite, TextSprite, Texture, TextTexture, Camera, PerspectiveCamera, OrthographicCamera, BufferGeometry, Geometry, InstancedBufferGeometry, InterleavedBufferAttribute, InstancedInterleavedBuffer, InterleavedBuffer, InstancedBufferAttribute, Face3, Object3D, Raycaster$$1 as Raycaster, Triangle, _Math as Math, Plane, Frustum, Sphere, Ray, Matrix4, Matrix3, Box3, Line3, Euler, Vector4, Vector3$1 as Vector3, Vector2, Quaternion, Color$1 as Color, CircleGeometry, CircleBufferGeometry, PlaneGeometry, PlaneBufferGeometry, BoxGeometry, BoxBufferGeometry, SphereGeometry, SphereBufferGeometry, CylinderGeometry, CylinderBufferGeometry, LineSegmentsGeometry, LineGeometry, MeshBasicMaterial$$1 as MeshBasicMaterial, MeshLambertMaterial, MeshPhongMaterial, LineBasicMaterial, LineDashedMaterial, LineMeshMaterial, PointsMaterial, SpriteMaterial$$1 as SpriteMaterial, ShaderMaterial, RawShaderMaterial, SpotLight, PointLight, DirectionalLight, AmbientLight, Light, Float64BufferAttribute, Float32BufferAttribute, Uint32BufferAttribute, Int32BufferAttribute, Uint16BufferAttribute, Int16BufferAttribute, Uint8ClampedBufferAttribute, Uint8BufferAttribute, Int8BufferAttribute, BufferAttribute, REVISION, pointsMode, LinesMode, LineLoopMode, LineStripMode, TrianglesDrawMode, TriangleStripDrawMode, TriangleFanDrawMode, NeverDepth, AlwaysDepth, LessDepth, LessEqualDepth, EqualDepth, GreaterEqualDepth, GreaterDepth, NotEqualDepth, CullFaceNone, CullFaceBack, CullFaceFront, CullFaceFrontBack, FrontFaceDirectionCW, FrontFaceDirectionCCW, FrontSide, BackSide, DoubleSide, NoBlending, NormalBlending, AdditiveBlending, SubtractiveBlending, MultiplyBlending, CustomBlending, AddEquation, SubtractEquation, ReverseSubtractEquation, MinEquation, MaxEquation, ZeroFactor, OneFactor, SrcColorFactor, OneMinusSrcColorFactor, SrcAlphaFactor, OneMinusSrcAlphaFactor, DstAlphaFactor, OneMinusDstAlphaFactor, DstColorFactor, OneMinusDstColorFactor, SrcAlphaSaturateFactor, RepeatWrapping, ClampToEdgeWrapping, MirroredRepeatWrapping, NearestFilter, NearestMipMapNearestFilter, NearestMipMapLinearFilter, LinearFilter, LinearMipMapNearestFilter, LinearMipMapLinearFilter, UnsignedByteType, ByteType, ShortType, UnsignedShortType, IntType, UnsignedIntType, FloatType, HalfFloatType, UnsignedShort4444Type, UnsignedShort5551Type, UnsignedShort565Type, UnsignedInt248Type, AlphaFormat, RGBFormat, RGBAFormat, LuminanceFormat, LuminanceAlphaFormat, RGBEFormat, DepthFormat, DepthStencilFormat, UVMapping, NoColors, FaceColors, VertexColors };
+/**
+ * @author bhouston / http://clara.io
+ * @author WestLangley / http://github.com/WestLangley
+ *
+ * Ref: https://en.wikipedia.org/wiki/Spherical_coordinate_system
+ *
+ * The poles (phi) are at the positive and negative y axis.
+ * The equator starts at positive z.
+ */
+
+var Spherical = function () {
+    function Spherical(radius, phi, theta) {
+        classCallCheck(this, Spherical);
+
+
+        this.radius = radius !== undefined ? radius : 1.0;
+        this.phi = phi !== undefined ? phi : 0; // up / down towards top and bottom pole
+        this.theta = theta !== undefined ? theta : 0; // around the equator of the sphere
+
+        return this;
+    }
+
+    createClass(Spherical, [{
+        key: 'set',
+        value: function set$$1(radius, phi, theta) {
+
+            this.radius = radius;
+            this.phi = phi;
+            this.theta = theta;
+
+            return this;
+        }
+    }, {
+        key: 'clone',
+        value: function clone() {
+
+            return new this.constructor().copy(this);
+        }
+    }, {
+        key: 'copy',
+        value: function copy(other) {
+
+            this.radius = other.radius;
+            this.phi = other.phi;
+            this.theta = other.theta;
+
+            return this;
+        }
+        // restrict phi to be betwee EPS and PI-EPS
+
+    }, {
+        key: 'makeSafe',
+        value: function makeSafe() {
+
+            var EPS = 0.000001;
+            this.phi = Math.max(EPS, Math.min(Math.PI - EPS, this.phi));
+
+            return this;
+        }
+    }, {
+        key: 'setFromVector3',
+        value: function setFromVector3(vec3) {
+
+            this.radius = vec3.length();
+
+            if (this.radius === 0) {
+
+                this.theta = 0;
+                this.phi = 0;
+            } else {
+
+                this.theta = Math.atan2(vec3.x, vec3.z); // equator angle around y-up axis
+                this.phi = Math.acos(_Math.clamp(vec3.y / this.radius, -1, 1)); // polar angle
+            }
+
+            return this;
+        }
+    }]);
+    return Spherical;
+}();
+
+export { Events, WebGLRenderer, Scene, Group, Mesh, Line, Line2, Points, Sprite, TextSprite, Texture, TextTexture, Camera, PerspectiveCamera, OrthographicCamera, BufferGeometry, Geometry, InstancedBufferGeometry, InterleavedBufferAttribute, InstancedInterleavedBuffer, InterleavedBuffer, InstancedBufferAttribute, Face3, Object3D, Raycaster$$1 as Raycaster, Triangle, _Math as Math, Plane, Frustum, Sphere, Spherical, Ray, Matrix4, Matrix3, Box3, Line3, Euler, Vector4, Vector3$1 as Vector3, Vector2, Quaternion, Color$1 as Color, CircleGeometry, CircleBufferGeometry, PlaneGeometry, PlaneBufferGeometry, BoxGeometry, BoxBufferGeometry, SphereGeometry, SphereBufferGeometry, CylinderGeometry, CylinderBufferGeometry, LineSegmentsGeometry, LineGeometry, MeshBasicMaterial$$1 as MeshBasicMaterial, MeshLambertMaterial, MeshPhongMaterial, LineBasicMaterial, LineDashedMaterial, LineMeshMaterial, PointsMaterial, SpriteMaterial$$1 as SpriteMaterial, ShaderMaterial, RawShaderMaterial, SpotLight, PointLight, DirectionalLight, AmbientLight, Light, Float64BufferAttribute, Float32BufferAttribute, Uint32BufferAttribute, Int32BufferAttribute, Uint16BufferAttribute, Int16BufferAttribute, Uint8ClampedBufferAttribute, Uint8BufferAttribute, Int8BufferAttribute, BufferAttribute, REVISION, pointsMode, LinesMode, LineLoopMode, LineStripMode, TrianglesDrawMode, TriangleStripDrawMode, TriangleFanDrawMode, NeverDepth, AlwaysDepth, LessDepth, LessEqualDepth, EqualDepth, GreaterEqualDepth, GreaterDepth, NotEqualDepth, CullFaceNone, CullFaceBack, CullFaceFront, CullFaceFrontBack, FrontFaceDirectionCW, FrontFaceDirectionCCW, FrontSide, BackSide, DoubleSide, NoBlending, NormalBlending, AdditiveBlending, SubtractiveBlending, MultiplyBlending, CustomBlending, AddEquation, SubtractEquation, ReverseSubtractEquation, MinEquation, MaxEquation, ZeroFactor, OneFactor, SrcColorFactor, OneMinusSrcColorFactor, SrcAlphaFactor, OneMinusSrcAlphaFactor, DstAlphaFactor, OneMinusDstAlphaFactor, DstColorFactor, OneMinusDstColorFactor, SrcAlphaSaturateFactor, RepeatWrapping, ClampToEdgeWrapping, MirroredRepeatWrapping, NearestFilter, NearestMipMapNearestFilter, NearestMipMapLinearFilter, LinearFilter, LinearMipMapNearestFilter, LinearMipMapLinearFilter, UnsignedByteType, ByteType, ShortType, UnsignedShortType, IntType, UnsignedIntType, FloatType, HalfFloatType, UnsignedShort4444Type, UnsignedShort5551Type, UnsignedShort565Type, UnsignedInt248Type, AlphaFormat, RGBFormat, RGBAFormat, LuminanceFormat, LuminanceAlphaFormat, RGBEFormat, DepthFormat, DepthStencilFormat, UVMapping, NoColors, FaceColors, VertexColors };
