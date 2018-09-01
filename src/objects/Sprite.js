@@ -12,7 +12,10 @@ class Sprite extends Object3D {
         this.material = (material !== undefined) ? material : new SpriteMaterial();
 
         this.center = new Vector2(0.5, 0.5);
-        this.isSprite = true;
+    }
+
+    get isSprite(){
+        return true;
     }
 
     raycast(raycaster, intersects) {

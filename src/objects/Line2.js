@@ -12,6 +12,10 @@ class Line2 extends Mesh {
         this.geometry = geometry !== undefined ? geometry : new THREE.LineGeometry();
         this.material = material !== undefined ? material : new THREE.LineMaterial({ color: Math.random() * 0xffffff });
     }
+    
+    get isLine2() {
+        return true;
+    }
 
     computeLineDistances() {
         computeLineDistances.call(this);

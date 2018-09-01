@@ -24,8 +24,11 @@ class Mesh extends Object3D {
         this.material = material;
 
         this.drawMode = TrianglesDrawMode
-        this.isMesh = true;
 
+    }
+
+    get isMesh(){
+        return true;
     }
 
     setDrawMode(value) {

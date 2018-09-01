@@ -16,7 +16,10 @@ class Points extends Object3D {
 
         this.geometry = geometry !== undefined ? geometry : new BufferGeometry();
         this.material = material !== undefined ? material : new PointsMaterial({ color: Math.random() * 0xffffff });
-        this.isPoints = true;
+    }
+
+    get isPoints(){
+        return true;
     }
 
     raycast(raycaster, intersects) {

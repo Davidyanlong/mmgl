@@ -22,7 +22,7 @@ class Object3D extends Events {
 
         this.parent = null;
         this.children = [];
-        this.isObject3D = true;
+
 
         this.up = Object3D.DefaultUp.clone();
 
@@ -87,6 +87,11 @@ class Object3D extends Events {
         this.renderOrder = 0;
 
     }
+
+    get isObject3D() {
+        return true;
+    }
+
     onBeforeRender(renderer, scene, camera, geometry, material, group) {
         //继承实现 渲染前调用
     }

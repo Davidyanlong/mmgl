@@ -22,13 +22,16 @@ class Line extends Object3D {
 
         this.geometry = geometry !== undefined ? geometry : new BufferGeometry();
         this.material = material !== undefined ? material : new LineBasicMaterial({ color: Math.random() * 0xffffff });
-        this.isLine = true;
         this.drawMode = LinesMode;
 
         if (this.material.isLineDashedMaterial) {
             this.computeLineDistances();
         }
 
+    }
+
+    get isLine(){
+        return true;
     }
 
     setDrawMode(value) {

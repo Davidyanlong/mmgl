@@ -11,7 +11,10 @@ class Group extends Object3D {
     constructor() {
         super();
         this.type = 'Group';
-        this.isGroup = true
+    }
+    
+    get isGroup(){
+        return true;
     }
 }
 
