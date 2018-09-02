@@ -347,7 +347,7 @@ class WebGLRenderer extends Events {
         this._currentMaterialId = - 1;
         this._currentCamera = null;
 
-        if (this._isContextLost) true;
+        if (this._isContextLost) return;
 
         // 更新场景
         if (scene.autoUpdate === true) scene.updateMatrixWorld();

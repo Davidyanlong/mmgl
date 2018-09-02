@@ -199,7 +199,7 @@ var Events = function () {
     return Events;
 }();
 
-var version = "0.0.18";
+var version = "0.0.20";
 
 var REVISION = version;
 
@@ -7616,6 +7616,7 @@ var WebGLPrograms = function () {
                     console.warn('WebGLProgram.getParameters:', material.precision, 'not supported, using', precision, 'instead.');
                 }
             }
+            //shader Define值从这里取
             var parameters = {
                 shaderID: shaderID,
                 precision: precision,
@@ -7625,6 +7626,8 @@ var WebGLPrograms = function () {
                 doubleSided: material.side === DoubleSide,
                 flipSided: material.side === BackSide,
                 dashed: !!material.dashed,
+                sizeAttenuation: !!material.sizeAttenuation,
+                premultipliedAlpha: !!material.premultipliedAlpha,
 
                 numDirLights: lights.directional.length,
                 numPointLights: lights.point.length,
@@ -8885,7 +8888,7 @@ var WebGLRenderer = function (_Events) {
             this._currentMaterialId = -1;
             this._currentCamera = null;
 
-            if (this._isContextLost) true;
+            if (this._isContextLost) return;
 
             // 更新场景
             if (scene.autoUpdate === true) scene.updateMatrixWorld();
@@ -13071,8 +13074,6 @@ var PointsMaterial = function (_Material) {
 
         _this.setValues(parameters);
 
-        _this.isPointsMaterial = true;
-
         return _this;
     }
 
@@ -13864,7 +13865,7 @@ var TextSprite = function (_Sprite) {
 
             actualFontSize = height / screenHeight * fontsize;
 
-            this.scale.set(this.material.map.imageAspect, 1, 1).multiplyScalar(Math.round(actualFontSize));
+            this.scale.set(this.material.map.imageAspect, 1, 1).multiplyScalar(actualFontSize);
         }
 
         // updateMatrix(...args) {

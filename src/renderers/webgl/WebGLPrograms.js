@@ -38,6 +38,7 @@ class WebGLPrograms {
             }
 
         }
+        //shader Define值从这里取
         let parameters = {
             shaderID,
             precision,
@@ -47,6 +48,8 @@ class WebGLPrograms {
             doubleSided: material.side === DoubleSide,
             flipSided: material.side === BackSide,
             dashed: !!material.dashed,
+            sizeAttenuation:!!material.sizeAttenuation,
+            premultipliedAlpha:!!material.premultipliedAlpha,
 
             numDirLights: lights.directional.length,
             numPointLights: lights.point.length,

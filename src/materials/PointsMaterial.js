@@ -19,7 +19,6 @@ class PointsMaterial extends Material {
 
         this.setValues(parameters);
 
-        this.isPointsMaterial = true;
 
     }
 

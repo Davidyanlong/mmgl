@@ -43,7 +43,7 @@
     scene.background = new mmGL.Color('#ffffff');
    for (i = 0; i < 15; i++) {
         let sprite = new mmGL.TextSprite({
-            fontSize: 12,
+            fontSize: 32,
             texture: {  //纹理中需要的文字大小不需要指定,TextSprite会自动计算
                 padding: 0,
                 text: '测试相机更改',
@@ -54,7 +54,7 @@
                 transparent: true
             }
         });
-        sprite.position.set(0, 100*i, -100*i);
+        sprite.position.set(100*Math.random(), 100*Math.random(), -100*Math.random());
 
         scene.add(sprite);
     }

@@ -50,7 +50,7 @@ class TextSprite extends Sprite {
 
         actualFontSize = height / screenHeight * fontsize;
 
-        this.scale.set(this.material.map.imageAspect, 1, 1).multiplyScalar(Math.round(actualFontSize));
+        this.scale.set(this.material.map.imageAspect, 1, 1).multiplyScalar(actualFontSize);
 
     }
 

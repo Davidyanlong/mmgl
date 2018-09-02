@@ -3,7 +3,7 @@ import { Vector3 } from "../../maths/Vector3";
 import { Quaternion } from "../../maths/Quaternion";
 
 
-class WebGLSpriteRenderer {
+class WebGLSpriteRenderer1 {
     constructor(renderer, gl, state, textures, capabilities) {
         this._gl = gl;
         this._state = state;

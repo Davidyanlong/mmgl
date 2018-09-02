@@ -62,4 +62,7 @@ mmGL是在THREEJS代码的基础上进行基础功能的抽取,满足三维图�
     *   [demo:https://codepen.io/davidyanlong/pen/YjJdgB](https://codepen.io/davidyanlong/pen/YjJdgB)
 
 *   2018.8.31
-    * 增加计算类 Spherical     
+    * 增加计算类 Spherical 
+
+*  2018.9.2
+    * 重构Sprite,不单独渲染        
