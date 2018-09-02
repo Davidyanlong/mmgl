@@ -9,14 +9,19 @@ class SpriteMaterial extends Material {
         this.color = new Color(0xffffff);
         this.map = null;
 
-        //纹理旋转角度
         this.rotation = 0;
-        //不接受灯光
+
+        this.sizeAttenuation = true;
+
         this.lights = false;
+        this.transparent = true;
 
         this.setValues(parameters);
-        this.isSpriteMaterial = true;
 
+    }
+
+    get isSpriteMaterial() {
+        return true
     }
 
     copy(source) {
@@ -26,6 +31,8 @@ class SpriteMaterial extends Material {
         this.map = source.map;
 
         this.rotation = source.rotation;
+
+        this.sizeAttenuation = source.sizeAttenuation;
 
         return this;
     }

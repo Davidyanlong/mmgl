@@ -43,8 +43,10 @@ class ShaderMaterial extends Material {
 
         }
 
-        this.isShaderMaterial = true;
+    }
 
+    get isShaderMaterial(){
+        return true;
     }
 
     copy(source) {

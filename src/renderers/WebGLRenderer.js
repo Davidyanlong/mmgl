@@ -32,7 +32,6 @@ import { WebGLObjects } from './webgl/WebGLObjects';
 import { WebGLIndexedBufferRenderer } from './webgl/WebGLIndexedBufferRenderer';
 import { WebGLTextures } from './webgl/WebGLTextures';
 import { WebGLUtils } from './webgl/WebGLUtils';
-import { WebGLSpriteRenderer } from './webgl/WebGLSpriteRenderer';
 import { WebGLRenderStates } from './webgl/WebGLRenderStates';
 
 
@@ -199,7 +198,6 @@ class WebGLRenderer extends Events {
         *  WebGLBackground         背景的绘制与更新, scene.background 可以是颜色 纹理 cube纹理
         *  WebGLBufferRenderer     drawArrays的提取及利用扩展 同一几何体多次绘制的实现
         *  WebGLIndexedBufferRenderer  drawElements 的提取,同上
-        *  WebGLSpriteRenderer       sprite 绘制 走单独的绘制流程  
         */
 
         this._extensions = new WebGLExtensions(_gl);
@@ -219,7 +217,6 @@ class WebGLRenderer extends Events {
         this._renderLists = new WebGLRenderLists();
         this._bufferRenderer = new WebGLBufferRenderer(_gl, this._extensions, this._info);
         this._indexedBufferRenderer = new WebGLIndexedBufferRenderer(_gl, this._extensions, this._info);
-        this._spriteRenderer = new WebGLSpriteRenderer(this, _gl, this._state, this._textures, this._capabilities);
         this._state.viewport(this._currentViewport.copy(_viewport).multiplyScalar(this._pixelRatio));
 
 
@@ -396,11 +393,8 @@ class WebGLRenderer extends Events {
         if (transparentObjects.length) renderObjects.call(this, transparentObjects, scene, camera);
 
 
-        // custom renderers
 
-        let spritesArray = this._currentRenderState.state.spritesArray;
 
-        this._spriteRenderer.render(spritesArray, scene, camera);
 
         this._state.buffers.depth.setTest(true);
         this._state.buffers.depth.setMask(true);
@@ -542,7 +536,13 @@ class WebGLRenderer extends Events {
             }
 
         } else if (object.isPoints) {
+
             renderer.setMode(_gl.POINTS);
+
+        } else if (object.isSprite) {
+
+            renderer.setMode(_gl.TRIANGLES);
+
         }
 
         if (geometry && geometry.isInstancedBufferGeometry) {
@@ -635,7 +635,17 @@ function projectObject(object, camera, sortObjects) {
 
         if (!object.frustumCulled || this._frustum.intersectsSprite(object)) {
 
-            this._currentRenderState.pushSprite(object);
+            if (sortObjects) {
+
+                this._vector3.setFromMatrixPosition(object.matrixWorld)
+                    .applyMatrix4(this._projScreenMatrix);
+
+            }
+
+            var geometry = this._objects.update(object);
+            var material = object.material;
+
+            this._currentRenderList.push(object, geometry, material, this._vector3.z, null);
 
         }
 
@@ -814,7 +824,8 @@ function setProgram(camera, fog, material, object) {
             || material.isMeshLambertMaterial
             || material.isMeshPhongMaterial
             || material.isPointsMaterial
-            || material.isLineMeshMaterial) {
+            || material.isLineMeshMaterial
+            || material.isSpriteMaterial) {
             if (material.color) {
                 m_uniforms.diffuse.value = material.color;
             }
@@ -824,6 +835,7 @@ function setProgram(camera, fog, material, object) {
             }
 
             m_uniforms.opacity.value = material.opacity;
+
             if (material.emissive) {
 
                 m_uniforms.emissive.value.copy(material.emissive).multiplyScalar(material.emissiveIntensity);
@@ -866,6 +878,12 @@ function setProgram(camera, fog, material, object) {
 
             m_uniforms.size.value = material.size * this._pixelRatio;
             m_uniforms.scale.value = this._height * 0.5;
+
+        } else if (material.isSpriteMaterial) {
+
+            m_uniforms.rotation.value = material.rotation;
+
+
         } else if (material.isLineMeshMaterial) {
 
             updateLineMaterial();
@@ -883,6 +901,12 @@ function setProgram(camera, fog, material, object) {
 
         WebGLUniforms.upload(this.gl, materialProperties.uniformsList, m_uniforms, this);
         material.uniformsNeedUpdate = false;
+
+    }
+
+    if (material.isSpriteMaterial) {
+
+        p_uniforms.setValue('center', object.center);
 
     }
 

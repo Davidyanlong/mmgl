@@ -8,8 +8,10 @@ class RawShaderMaterial extends ShaderMaterial {
         super(parameters);
 
         this.type = 'RawShaderMaterial';
-        this.isRawShaderMaterial = true;
 
+    }
+    get isRawShaderMaterial(){
+        return true;
     }
 }
 

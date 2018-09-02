@@ -16,7 +16,8 @@ class WebGLPrograms {
             PointsMaterial: 'points',
             MeshLambertMaterial: 'lambert',
             MeshPhongMaterial: 'phong',
-            LineMeshMaterial: 'linemesh'
+            LineMeshMaterial: 'linemesh',
+            SpriteMaterial: 'sprite'
         };
 
     }

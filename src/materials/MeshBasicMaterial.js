@@ -10,12 +10,15 @@ class MeshBasicMaterial extends Material {
         this.type = 'MeshBasicMaterial';
         this.wireframe = false;
         this.wireframeLinewidth = 1;
-        this.isMeshBasicMaterial = true;
 
         //不接受灯光
         this.lights = false;
 
         this.setValues(parameters);
+    }
+
+    get isMeshBasicMaterial() {
+        return true;
     }
 
     copy(source) {

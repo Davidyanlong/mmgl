@@ -14,8 +14,12 @@ class LineBasicMaterial extends Material {
 
 
         this.setValues(parameters);
-        this.isLineBasicMaterial = true;
     }
+    
+    get isLineBasicMaterial() {
+        return true;
+    }
+
     copy(source) {
         super.copy(source);
         this.color.copy(source.color);

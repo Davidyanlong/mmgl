@@ -44,6 +44,8 @@ class Material extends Events {
 
         this.premultipliedAlpha = false;
 
+        this.userData = {};
+
         this.onBeforeCompile = function () { };
     }
 
@@ -152,6 +154,9 @@ class Material extends Events {
 
         return this;
 
+    }
+    get isMaterial() {
+        return true;
     }
 
     dispose() {

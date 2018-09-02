@@ -18,6 +18,9 @@ import meshphong_vert from './ShaderLib/meshphong_vert.glsl';
 import linemesh_frag from './ShaderLib/linemesh_frag.glsl';
 import linemesh_vert from './ShaderLib/linemesh_vert.glsl';
 
+import sprite_frag from './ShaderLib/sprite_frag.glsl';
+import sprite_vert from './ShaderLib/sprite_vert.glsl';
+
 export const ShaderChunk = {
 
 	meshbasic_frag,
@@ -36,6 +39,9 @@ export const ShaderChunk = {
 	meshphong_frag,
 
 	linemesh_vert,
-	linemesh_frag
+	linemesh_frag,
+
+	sprite_vert,
+	sprite_frag
 
 };

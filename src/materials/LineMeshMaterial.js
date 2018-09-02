@@ -22,8 +22,12 @@ class LineMeshMaterial extends Material {
 
 
         this.setValues(parameters);
-        this.isLineMeshMaterial = true;
     }
+
+    get isLineMeshMaterial() {
+        return true;
+    }
+
     copy(source) {
         super.copy(source);
         this.color.copy(source.color);

@@ -86,6 +86,8 @@ class Object3D extends Events {
         this.frustumCulled = true;
         this.renderOrder = 0;
 
+        this.userData = {};
+
     }
 
     get isObject3D() {

@@ -15,8 +15,10 @@ class LineDashedMaterial extends LineBasicMaterial {
 
         this.setValues(parameters);
 
-        this.isLineDashedMaterial = true;
+    }
 
+    get isLineDashedMaterial() {
+        return true;
     }
 
     copy(source) {

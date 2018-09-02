@@ -22,8 +22,11 @@ class MeshLambertMaterial extends Material {
 
         this.setValues(parameters);
 
-        this.isMeshLambertMaterial = true;
 
+    }
+
+    get isMeshLambertMaterial() {
+        return true;
     }
 
     copy(source) {

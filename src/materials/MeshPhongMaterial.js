@@ -27,9 +27,10 @@ class MeshPhongMaterial extends Material {
         this.wireframeLinewidth = 1;
         this.setValues(parameters);
 
-        this.isMeshPhongMaterial = true;
+    }
 
-
+    get isMeshPhongMaterial() {
+        return true;
     }
 
     copy(source) {

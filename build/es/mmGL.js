@@ -6284,6 +6284,16 @@ var UniformsLib = {
 		scale: { value: 1 },
 		dashSize: { value: 1 },
 		totalSize: { value: 2 }
+	},
+	sprite: {
+
+		diffuse: { value: new Color$1(0xeeeeee) },
+		opacity: { value: 1.0 },
+		center: { value: new Vector2(0.5, 0.5) },
+		rotation: { value: 0.0 },
+		map: { value: null },
+		uvTransform: { value: new Matrix3() }
+
 	}
 };
 
@@ -6360,6 +6370,10 @@ var linemesh_frag = "uniform vec3 diffuse;\nuniform float opacity;\n#ifdef USE_D
 
 var linemesh_vert = "uniform float linewidth;\nuniform vec2 resolution;\nattribute vec3 instanceStart;\nattribute vec3 instanceEnd;\nattribute vec3 instanceColorStart;\nattribute vec3 instanceColorEnd;\nvarying vec2 vUv;\n#ifdef USE_COLOR\n\tvarying vec3 vColor;\n#endif\n#ifdef USE_DASH\n    uniform float scale;\n    attribute float instanceDistanceStart;\n    attribute float instanceDistanceEnd;\n    varying float vLineDistance;\n    \n#endif\nvoid trimSegment( const in vec4 start, inout vec4 end ) {\n    float a = projectionMatrix[ 2 ][ 2 ];    float b = projectionMatrix[ 3 ][ 2 ];    float nearEstimate = - 0.5 * b / a;\n    float alpha = ( nearEstimate - start.z ) / ( end.z - start.z );\n    end.xyz = mix( start.xyz, end.xyz, alpha );\n}\nvoid main() {\n#ifdef USE_COLOR\n        vColor.xyz = ( position.y < 0.5 ) ? instanceColorStart : instanceColorEnd;\n#endif\n#ifdef USE_DASH\n    vLineDistance = ( position.y < 0.5 ) ? scale * instanceDistanceStart : scale * instanceDistanceEnd;\n#endif\n    float aspect = resolution.x / resolution.y;\n    vUv = uv;\n    vec4 start = modelViewMatrix * vec4( instanceStart, 1.0 );\n    vec4 end = modelViewMatrix * vec4( instanceEnd, 1.0 );\n    bool perspective = ( projectionMatrix[ 2 ][ 3 ] == - 1.0 );    if ( perspective ) {\n        if ( start.z < 0.0 && end.z >= 0.0 ) {\n            trimSegment( start, end );\n        } else if ( end.z < 0.0 && start.z >= 0.0 ) {\n            trimSegment( end, start );\n        }\n    }\n    vec4 clipStart = projectionMatrix * start;\n    vec4 clipEnd = projectionMatrix * end;\n    vec2 ndcStart = clipStart.xy / clipStart.w;\n    vec2 ndcEnd = clipEnd.xy / clipEnd.w;\n    vec2 dir = ndcEnd - ndcStart;\n    dir.x *= aspect;\n    dir = normalize( dir );\n    vec2 offset = vec2( dir.y, - dir.x );\n    dir.x /= aspect;\n    offset.x /= aspect;\n    if ( position.x < 0.0 ) offset *= - 1.0;\n    if ( position.y < 0.0 ) {\n        offset += - dir;\n    } else if ( position.y > 1.0 ) {\n        offset += dir;\n    }\n    offset *= linewidth;\n    offset /= resolution.y;\n    vec4 clip = ( position.y < 0.5 ) ? clipStart : clipEnd;\n    offset *= clip.w;\n    clip.xy += offset;\n    gl_Position =clip;\n    vec4 mvPosition = ( position.y < 0.5 ) ? start : end;}";
 
+var sprite_frag = "uniform vec3 diffuse;\nuniform float opacity;\n#ifdef USE_MAP\n\tvarying vec2 vUv;\n#endif\n#ifdef USE_MAP\n\tuniform sampler2D map;\n#endif\nvoid main() {\n\tvec3 outgoingLight = vec3( 0.0 );\n\tvec4 diffuseColor = vec4( diffuse, opacity );\n#ifdef USE_MAP\n\tvec4 texelColor = texture2D( map, vUv );\n\tdiffuseColor *= texelColor;\n#endif\n#ifdef ALPHATEST\n\tif ( diffuseColor.a < ALPHATEST ) discard;\n#endif\n\toutgoingLight = diffuseColor.rgb;\n\tgl_FragColor = vec4( outgoingLight, diffuseColor.a );\n}";
+
+var sprite_vert = "uniform float rotation;\nuniform vec2 center;\n#ifdef USE_MAP\n\tvarying vec2 vUv;\n\tuniform mat3 uvTransform;\n#endif\nvoid main() {\n#ifdef USE_MAP\n\tvUv = ( uvTransform * vec3( uv, 1 ) ).xy;\n#endif\n\tvec4 mvPosition = modelViewMatrix * vec4( 0.0, 0.0, 0.0, 1.0 );\n\tvec2 scale;\n\tscale.x = length( vec3( modelMatrix[ 0 ].x, modelMatrix[ 0 ].y, modelMatrix[ 0 ].z ) );\n\tscale.y = length( vec3( modelMatrix[ 1 ].x, modelMatrix[ 1 ].y, modelMatrix[ 1 ].z ) );\n\t#ifndef USE_SIZEATTENUATION\n\t\tbool isPerspective = ( projectionMatrix[ 2 ][ 3 ] == - 1.0 );\n\t\tif ( isPerspective ) scale *= - mvPosition.z;\n\t#endif\n\tvec2 alignedPosition = ( position.xy - ( center - vec2( 0.5 ) ) ) * scale;\n\tvec2 rotatedPosition;\n\trotatedPosition.x = cos( rotation ) * alignedPosition.x - sin( rotation ) * alignedPosition.y;\n\trotatedPosition.y = sin( rotation ) * alignedPosition.x + cos( rotation ) * alignedPosition.y;\n\tmvPosition.xy += rotatedPosition;\n\tgl_Position = projectionMatrix * mvPosition;\n}";
+
 var ShaderChunk = {
 
 	meshbasic_frag: meshbasic_frag,
@@ -6378,7 +6392,10 @@ var ShaderChunk = {
 	meshphong_frag: meshphong_frag,
 
 	linemesh_vert: linemesh_vert,
-	linemesh_frag: linemesh_frag
+	linemesh_frag: linemesh_frag,
+
+	sprite_vert: sprite_vert,
+	sprite_frag: sprite_frag
 
 };
 
@@ -6436,6 +6453,16 @@ var ShaderLib = {
 
 		vertexShader: ShaderChunk.points_vert,
 		fragmentShader: ShaderChunk.points_frag
+
+	},
+	sprite: {
+
+		uniforms: UniformsUtils$1.merge([UniformsLib.sprite]
+		//UniformsLib.fog
+		),
+
+		vertexShader: ShaderChunk.sprite_vert,
+		fragmentShader: ShaderChunk.sprite_frag
 
 	}
 
@@ -7568,7 +7595,8 @@ var WebGLPrograms = function () {
             PointsMaterial: 'points',
             MeshLambertMaterial: 'lambert',
             MeshPhongMaterial: 'phong',
-            LineMeshMaterial: 'linemesh'
+            LineMeshMaterial: 'linemesh',
+            SpriteMaterial: 'sprite'
         };
     }
 
@@ -8242,6 +8270,1356 @@ function generateMipmap(target, texture, width, height) {
     textureProperties.__maxMipLevel = Math.log(Math.max(width, height)) * Math.LOG2E;
 }
 
+var webglLightsCount = 0;
+var _webGLLightsVector3 = new Vector3$1();
+
+var WebGLLights = function () {
+    function WebGLLights() {
+        classCallCheck(this, WebGLLights);
+
+        this.cache = new UniformsCache();
+        this.state = {
+            id: webglLightsCount++,
+            hash: '',
+            ambient: [0, 0, 0],
+            directional: [],
+            spot: [],
+            point: []
+        };
+    }
+
+    createClass(WebGLLights, [{
+        key: 'setup',
+        value: function setup(lights, shadows, camera) {
+            var r = 0,
+                g = 0,
+                b = 0;
+
+            var directionalLength = 0;
+            var pointLength = 0;
+            var spotLength = 0;
+
+            var state = this.state;
+            var cache = this.cache;
+
+            var viewMatrix = camera.matrixWorldInverse;
+
+            for (var i = 0, l = lights.length; i < l; i++) {
+
+                var light = lights[i];
+
+                var color = light.color;
+                var intensity = light.intensity;
+                var distance = light.distance;
+
+                if (light.isAmbientLight) {
+
+                    r += color.r * intensity;
+                    g += color.g * intensity;
+                    b += color.b * intensity;
+                } else if (light.isDirectionalLight) {
+
+                    var _uniforms = cache.get(light);
+
+                    _uniforms.color.copy(light.color).multiplyScalar(light.intensity);
+                    _uniforms.direction.setFromMatrixPosition(light.matrixWorld);
+                    _webGLLightsVector3.setFromMatrixPosition(light.target.matrixWorld);
+                    _uniforms.direction.sub(_webGLLightsVector3);
+                    _uniforms.direction.transformDirection(viewMatrix);
+
+                    state.directional[directionalLength] = _uniforms;
+
+                    directionalLength++;
+                } else if (light.isSpotLight) {
+
+                    var uniforms = cache.get(light);
+
+                    uniforms.position.setFromMatrixPosition(light.matrixWorld);
+                    uniforms.position.applyMatrix4(viewMatrix);
+
+                    uniforms.color.copy(color).multiplyScalar(intensity);
+                    uniforms.distance = distance;
+
+                    uniforms.direction.setFromMatrixPosition(light.matrixWorld);
+                    _webGLLightsVector3.setFromMatrixPosition(light.target.matrixWorld);
+                    uniforms.direction.sub(_webGLLightsVector3);
+                    uniforms.direction.transformDirection(viewMatrix);
+
+                    uniforms.coneCos = Math.cos(light.angle);
+                    uniforms.penumbraCos = Math.cos(light.angle * (1 - light.penumbra));
+                    uniforms.decay = light.distance === 0 ? 0.0 : light.decay;
+
+                    state.spot[spotLength] = uniforms;
+
+                    spotLength++;
+                } else if (light.isPointLight) {
+
+                    var uniforms = cache.get(light);
+
+                    uniforms.position.setFromMatrixPosition(light.matrixWorld);
+                    uniforms.position.applyMatrix4(viewMatrix);
+
+                    uniforms.color.copy(light.color).multiplyScalar(light.intensity);
+                    uniforms.distance = light.distance;
+                    uniforms.decay = light.distance === 0 ? 0.0 : light.decay;
+
+                    state.point[pointLength] = uniforms;
+
+                    pointLength++;
+                }
+            }
+
+            state.ambient[0] = r;
+            state.ambient[1] = g;
+            state.ambient[2] = b;
+
+            state.directional.length = directionalLength;
+            state.spot.length = spotLength;
+            state.point.length = pointLength;
+
+            state.hash = state.id + ',' + directionalLength + ',' + pointLength + ',' + spotLength;
+        }
+    }, {
+        key: 'dispose',
+        value: function dispose() {
+            this.cache.dispose();
+            this.cache = null;
+            this.state = null;
+        }
+    }]);
+    return WebGLLights;
+}();
+
+var UniformsCache = function () {
+    function UniformsCache() {
+        classCallCheck(this, UniformsCache);
+
+        this._lights = {};
+    }
+
+    createClass(UniformsCache, [{
+        key: 'get',
+        value: function get$$1(light) {
+
+            var lights = this._lights;
+
+            if (lights[light.id] !== undefined) {
+
+                return lights[light.id];
+            }
+
+            var uniforms = void 0;
+
+            switch (light.type) {
+
+                case 'DirectionalLight':
+                    uniforms = {
+                        direction: new Vector3$1(),
+                        color: new Color$1()
+                    };
+                    break;
+
+                case 'SpotLight':
+                    uniforms = {
+                        position: new Vector3$1(),
+                        direction: new Vector3$1(),
+                        color: new Color$1(),
+                        distance: 0,
+                        coneCos: 0,
+                        penumbraCos: 0,
+                        decay: 0
+                    };
+                    break;
+
+                case 'PointLight':
+                    uniforms = {
+                        position: new Vector3$1(),
+                        color: new Color$1(),
+                        distance: 0,
+                        decay: 0
+                    };
+                    break;
+
+                case 'HemisphereLight':
+                case 'RectAreaLight':
+                    console.error('没有实现 HemisphereLight 和 RectAreaLight 灯光');
+            }
+
+            lights[light.id] = uniforms;
+
+            return uniforms;
+        }
+    }, {
+        key: 'dispose',
+        value: function dispose() {
+            this._lights = null;
+        }
+    }]);
+    return UniformsCache;
+}();
+
+var WebGLRenderState = function () {
+    function WebGLRenderState() {
+        classCallCheck(this, WebGLRenderState);
+
+
+        this.state = {
+            lights: new WebGLLights(),
+            lightsArray: [],
+            spritesArray: []
+        };
+    }
+
+    createClass(WebGLRenderState, [{
+        key: "init",
+        value: function init() {
+            this.state.spritesArray.length = 0;
+            this.state.lightsArray.length = 0;
+        }
+    }, {
+        key: "pushLight",
+        value: function pushLight(light) {
+
+            this.state.lightsArray.push(light);
+        }
+    }, {
+        key: "pushSprite",
+        value: function pushSprite(sprite) {
+
+            this.state.spritesArray.push(sprite);
+        }
+    }, {
+        key: "setupLights",
+        value: function setupLights(camera) {
+
+            //todo 阴影为空
+            var shadowsArray = [];
+
+            this.state.lights.setup(this.state.lightsArray, shadowsArray, camera);
+        }
+    }, {
+        key: "dispose",
+        value: function dispose() {
+            this.state.lights.dispose();
+            this.state = null;
+        }
+    }]);
+    return WebGLRenderState;
+}();
+
+var WebGLRenderStates = function () {
+    function WebGLRenderStates() {
+        classCallCheck(this, WebGLRenderStates);
+
+        this._renderStates = {};
+    }
+
+    createClass(WebGLRenderStates, [{
+        key: "get",
+        value: function get$$1(scene, camera) {
+
+            var hash = scene.id + ',' + camera.id;
+
+            var renderState = this._renderStates[hash];
+
+            if (renderState === undefined) {
+
+                renderState = new WebGLRenderState();
+                this._renderStates[hash] = renderState;
+            }
+
+            return renderState;
+        }
+    }, {
+        key: "dispose",
+        value: function dispose() {
+
+            for (var key in this._renderStates) {
+                this._renderStates[key] && this._renderStates[key].dispose();
+            }
+
+            this._renderStates = {};
+        }
+    }]);
+    return WebGLRenderStates;
+}();
+
+/**
+ * @class WebGL渲染对象
+ * @author bujue
+ */
+
+var WebGLRenderer = function (_Events) {
+    inherits(WebGLRenderer, _Events);
+
+    function WebGLRenderer(params) {
+        classCallCheck(this, WebGLRenderer);
+
+        var _this = possibleConstructorReturn(this, (WebGLRenderer.__proto__ || Object.getPrototypeOf(WebGLRenderer)).call(this));
+
+        params = params || {};
+        //canvas context 渲染对象的上下文
+        _this.gl = null;
+
+        //canvasDOM 对象
+        _this.domElement = null;
+
+        //私有变量
+        _this._width = 0;
+        _this._height = 0;
+        _this._isContextLost = false; //是否丢失上下文
+
+        _this._pixelRatio = 1; //屏幕的pixelRatio,
+        _this._currentViewport = new Vector4(); //当前的渲染视口大小
+        _this._currentRenderList = null;
+        _this._currentRenderState = null;
+
+        _this._currentMaterialId = -1; //初始化materialId
+        _this._currentCamera = null; //当前的相机
+        _this._currClearColor = new Color$1(0x000000);
+
+        _this._capabilities = null; //GPU渲染能力 
+        _this._state = null; //GPU的状态管理 
+
+
+        _this._sortObjects = true; // scene graph
+
+        _this._projScreenMatrix = new Matrix4();
+        _this._vector3 = new Vector3$1();
+        _this._frustum = new Frustum();
+
+        _this._init(params);
+        _this._initGLContext(params);
+        return _this;
+    }
+
+    createClass(WebGLRenderer, [{
+        key: '_init',
+        value: function _init(parameters) {
+            //创建webGL对象上下文
+            var me = this;
+            parameters = parameters || {};
+
+            console.log('WebGLRenderer', REVISION);
+
+            /*
+            * `alpha`：值为true，表示为上下文创建一个Alpha通道缓冲区；默认值为true；
+            * `depth`：值为true，表示可以使用16位深缓冲区；默认值为true；
+            * `stencil`：值为true，表示可以使用8位模板缓冲区；默认值为false；
+            * `antialias`：值为true，表示将使用默认机制执行抗锯齿操作；默认值为true。
+            * `premultipliedAlpha`：值为true，表示绘图缓冲区有预乘Alpha值；默认为true;
+            * `preserveDrawingBuffer`：值为true；表示在绘图完成后保留绘图缓冲区；默认值为false。
+            */
+            var _canvas = parameters.canvas !== undefined ? parameters.canvas : document.createElementNS('http://www.w3.org/1999/xhtml', 'canvas'),
+                _context = parameters.context !== undefined ? parameters.context : null,
+                _alpha = parameters.alpha !== undefined ? parameters.alpha : false,
+                _depth = parameters.depth !== undefined ? parameters.depth : true,
+                _stencil = parameters.stencil !== undefined ? parameters.stencil : true,
+                _antialias = parameters.antialias !== undefined ? parameters.antialias : false,
+                _premultipliedAlpha = parameters.premultipliedAlpha !== undefined ? parameters.premultipliedAlpha : true,
+                _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer : false;
+
+            me.domElement = _canvas;
+            me.gl = _context;
+            me._width = _canvas.width;
+            me._height = _canvas.height;
+            me._premultipliedAlpha = _premultipliedAlpha;
+
+            try {
+
+                var contextAttributes = {
+                    alpha: _alpha,
+                    depth: _depth,
+                    stencil: _stencil,
+                    antialias: _antialias,
+                    premultipliedAlpha: _premultipliedAlpha,
+                    preserveDrawingBuffer: _preserveDrawingBuffer
+                };
+
+                var _gl = _context || _canvas.getContext('webgl', contextAttributes) || _canvas.getContext('experimental-webgl', contextAttributes);
+
+                if (_gl === null) {
+
+                    if (_canvas.getContext('webgl') !== null) {
+
+                        throw 'Error creating WebGL context with your selected attributes.';
+                    } else {
+
+                        throw 'Error creating WebGL context.';
+                    }
+                }
+
+                me.gl = _gl;
+
+                _canvas.addEventListener('webglcontextlost', onContextLost.bind(me), false);
+                _canvas.addEventListener('webglcontextrestored', onContextRestore.bind(me), false);
+            } catch (error) {
+
+                console.error('WebGLRenderer: ' + error);
+            }
+
+            /**
+                * @private
+                * @description 上下文丢失
+                * @param {*} event 
+                */
+            function onContextLost(event) {
+
+                event.preventDefault();
+                console.log('WebGLRenderer: Context Lost.');
+                this._isContextLost = true;
+                this.fire({ type: 'contextlost' });
+            }
+            /**
+            * @private
+            * @description 上下文恢复
+            */
+            function onContextRestore() {
+
+                console.log('WebGLRenderer: Context Restored.');
+                this._isContextLost = true;
+                this._initGLContext(parametersÎ);
+                this.fire({ type: 'contextrestore' });
+            }
+        }
+    }, {
+        key: '_initGLContext',
+        value: function _initGLContext(parameters) {
+            var me = this;
+            var _gl = this.gl;
+            var _width = this._width;
+            var _height = this._height;
+            var _viewport = new Vector4(0, 0, _width, _height);
+
+            /**  
+            *  
+            *  WebGLUtils              gl常量管理
+            *  WebGLCapabilities       gl能力数据
+            *  WebGLState              gl状态管理
+            *  WebGLInfo               保存渲染的基本数据
+            *  WebGLProperties         可以有效的将上层Material传过来的对象与底层渲染的对象做关联但有不改变原对象,利用WeapMap实现
+            *  WebGLAttributes         根据上层的顶点属性Geometry数据,利用WeapMap绑定buffer相关数据,提供get update remove 方法
+            *  WebGLGeometries         将上层的顶点属性分解后保存到WebGLAttribute对象中 update更新 WebGLAttribute的update 
+            *  WebGLObjects            通过更新帧来控制更新WebGLGemetries update
+            *  WebGLMorphtargets       顶点动画,图表动画可以参考使用
+            *  WebGLPrograms           programs的管理 
+            *  WebGLTextures           纹理的预处理与参数设置与上传
+            *  WebGLRenderLists        通过hash 构建一个Map WebGLRenderList 是真正的渲染列表 opaque transparent 
+            *  WebGLRenderStates       灯光阴影的管理   WebGLLights.setup 将上次的灯光参数转换为shader格式的参数
+            *  WebGLBackground         背景的绘制与更新, scene.background 可以是颜色 纹理 cube纹理
+            *  WebGLBufferRenderer     drawArrays的提取及利用扩展 同一几何体多次绘制的实现
+            *  WebGLIndexedBufferRenderer  drawElements 的提取,同上
+            */
+
+            this._extensions = new WebGLExtensions(_gl);
+            this._extensions.get('ANGLE_instanced_arrays');
+
+            this._utils = new WebGLUtils(_gl);
+            this._info = new WebGLInfo(_gl);
+            this._properties = new WebGLProperties();
+            this._state = new WebGLState(_gl, this._extensions);
+            this._renderStates = new WebGLRenderStates();
+            this._capabilities = new WebGLCapabilities(_gl, parameters);
+            this._textures = new WebGLTextures(_gl, null, this._state, this._properties, this._capabilities, this._utils, this._info);
+            this._attributes = new WebGLAttributes(_gl);
+            this._geometries = new WebGLGeometries(_gl, this._attributes, this._info);
+            this._objects = new WebGLObjects(this._geometries, this._info);
+            this._programCache = new WebGLPrograms(_gl, this._extensions, this._capabilities);
+            this._renderLists = new WebGLRenderLists();
+            this._bufferRenderer = new WebGLBufferRenderer(_gl, this._extensions, this._info);
+            this._indexedBufferRenderer = new WebGLIndexedBufferRenderer(_gl, this._extensions, this._info);
+            this._state.viewport(this._currentViewport.copy(_viewport).multiplyScalar(this._pixelRatio));
+
+            //console.dir(this._capabilities);
+            this._info.programs = this._programCache.programs;
+
+            me.setSize(_width, _height, true);
+        }
+    }, {
+        key: 'getContext',
+        value: function getContext() {
+            return this.gl;
+        }
+    }, {
+        key: 'getPixelRatio',
+        value: function getPixelRatio() {
+            return this._pixelRatio;
+        }
+    }, {
+        key: 'getCurrentViewport',
+        value: function getCurrentViewport() {
+            return this._currentViewport;
+        }
+    }, {
+        key: 'getClearColor',
+        value: function getClearColor() {
+            return this._currClearColor;
+        }
+
+        //设置设备像素比,默认是 1    
+
+    }, {
+        key: 'setPixelRatio',
+        value: function setPixelRatio(value) {
+            var _width = this._width;
+            var _height = this._height;
+
+            this._pixelRatio = value;
+            this.setSize(_width, _height, false);
+        }
+
+        //设置可视区域大小
+
+    }, {
+        key: 'setSize',
+        value: function setSize(width, height, updateStyle) {
+            var me = this;
+            var _pixelRatio = this._pixelRatio;
+            var _canvas = me.domElement;
+            var _width = width;
+            var _height = height;
+
+            _canvas.width = width * _pixelRatio;
+            _canvas.height = height * _pixelRatio;
+
+            //注意:updateStyle 只有完全等于false才不更新style
+            if (updateStyle !== false) {
+
+                _canvas.style.width = width + 'px';
+                _canvas.style.height = height + 'px';
+            }
+
+            me.setViewport(0, 0, width, height);
+        }
+
+        //设置视口大小
+
+    }, {
+        key: 'setViewport',
+        value: function setViewport(x, y, width, height) {
+            var gl = this.gl;
+            var viewport = new Vector4(x, y, width, height);
+
+            if (this._currentViewport.equals(viewport) === false) {
+
+                this._currentViewport.copy(viewport).multiplyScalar(this._pixelRatio);
+
+                this._state.viewport(this._currentViewport);
+            }
+        }
+        //设置清除色
+
+    }, {
+        key: 'setClearColor',
+        value: function setClearColor() {
+            var _gl = this.gl;
+
+            var _arguments = Array.prototype.slice.call(arguments),
+                r = _arguments[0],
+                g = _arguments[1],
+                b = _arguments[2],
+                a = _arguments[3];
+
+            var _color = this._currClearColor.set(r, g, b, a);
+            this._state.buffers.color.setClear(_color.r, _color.g, _color.b, _color.a, this._premultipliedAlpha);
+        }
+    }, {
+        key: 'getClearAlpha',
+        value: function getClearAlpha() {
+            return this._currClearColor.a;
+        }
+    }, {
+        key: 'setClearAlpha',
+        value: function setClearAlpha(alpha) {
+            var _gl = this.gl;
+            this._currClearColor.a = alpha;
+            var _color = this._currClearColor;
+            this._state.buffers.color.setClear(_color.r, _color.g, _color.b, _color.a, this._premultipliedAlpha);
+        }
+    }, {
+        key: 'clear',
+
+
+        //清除缓冲
+        value: function clear(color, depth, stencil) {
+            var _gl = this.gl;
+            var bits = 0;
+
+            if (color === undefined || color) bits |= _gl.COLOR_BUFFER_BIT;
+            if (depth === undefined || depth) bits |= _gl.DEPTH_BUFFER_BIT;
+            if (stencil === undefined || stencil) bits |= _gl.STENCIL_BUFFER_BIT;
+
+            _gl.clear(bits);
+        }
+        //清除颜色缓冲
+
+    }, {
+        key: 'clearColor',
+        value: function clearColor() {
+            this.clear(true, false, false);
+        }
+        //清除深度缓冲
+
+    }, {
+        key: 'clearDepth',
+        value: function clearDepth() {
+            this.clear(false, true, false);
+        }
+        //清除模版缓冲
+
+    }, {
+        key: 'clearStencil',
+        value: function clearStencil() {
+            this.clear(false, false, true);
+        }
+    }, {
+        key: 'render',
+        value: function render(scene, camera) {
+
+            if (!(camera && camera.isCamera)) {
+
+                console.error('WebGLRenderer.render: camera is not an instance of Camera.');
+                return;
+            }
+            _currentGeometryProgram = '';
+            this._currentMaterialId = -1;
+            this._currentCamera = null;
+
+            if (this._isContextLost) true;
+
+            // 更新场景
+            if (scene.autoUpdate === true) scene.updateMatrixWorld();
+
+            //更新相机矩阵
+            if (camera.parent === null) camera.updateMatrixWorld();
+
+            this._projScreenMatrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+            this._frustum.setFromMatrix(this._projScreenMatrix);
+
+            //初始化渲染队列
+
+            this._currentRenderState = this._renderStates.get(scene, camera);
+            this._currentRenderState.init();
+
+            this._currentRenderList = this._renderLists.get(scene, camera);
+
+            this._currentRenderList.init();
+
+            //将渲染的几何对象和材质存放到渲染队列中
+            projectObject.call(this, scene, camera, this._sortObjects);
+
+            if (this._sortObjects === true) {
+                this._currentRenderList.sort();
+            }
+
+            this._currentRenderState.setupLights(camera);
+
+            if (this._info.autoReset) this._info.reset();
+
+            scene.background === null ? this.setClearColor(this._currClearColor) : this.setClearColor(scene.background);
+            this.clearColor(true);
+
+            var opaqueObjects = this._currentRenderList.opaque;
+            var transparentObjects = this._currentRenderList.transparent;
+
+            // opaque pass (front-to-back order)
+
+            if (opaqueObjects.length) renderObjects.call(this, opaqueObjects, scene, camera);
+
+            // transparent pass (back-to-front order)
+
+            if (transparentObjects.length) renderObjects.call(this, transparentObjects, scene, camera);
+
+            this._state.buffers.depth.setTest(true);
+            this._state.buffers.depth.setMask(true);
+            this._state.buffers.color.setMask(true);
+
+            this._state.setPolygonOffset(false);
+
+            this._currentRenderList = null;
+            this._currentRenderState = null;
+        }
+    }, {
+        key: 'renderBufferDirect',
+        value: function renderBufferDirect(camera, fog, geometry, material, object, group) {
+
+            var me = this;
+            var _gl = this.gl;
+
+            var frontFaceCW = object.isMesh && object.matrixWorld.determinant() < 0;
+
+            //通过Materail设置 CULL_FACE  Blend clearColor ClearDepth
+            this._state.setMaterial(material, frontFaceCW);
+
+            var program = setProgram.call(me, camera, fog, material, object);
+
+            var updateBuffers = isUpdateBuffers(geometry, program, material);
+
+            var index = geometry.index;
+            var position = geometry.attributes.position;
+            var rangeFactor = 1;
+
+            if (material.wireframe === true) {
+
+                index = this._geometries.getWireframeAttribute(geometry);
+                rangeFactor = 2;
+            }
+
+            var attribute = void 0;
+            var renderer = this._bufferRenderer;
+
+            if (index !== null) {
+
+                attribute = this._attributes.get(index);
+
+                renderer = this._indexedBufferRenderer;
+                renderer.setIndex(attribute);
+            }
+
+            if (updateBuffers) {
+
+                setupVertexAttributes.call(this, material, program, geometry);
+
+                if (index !== null) {
+
+                    _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER, attribute.buffer);
+                }
+            }
+
+            var dataCount = Infinity;
+
+            if (index !== null) {
+
+                dataCount = index.count;
+            } else if (position !== undefined) {
+
+                dataCount = position.count;
+            }
+
+            var rangeStart = geometry.drawRange.start * rangeFactor;
+            var rangeCount = geometry.drawRange.count * rangeFactor;
+
+            var groupStart = group !== null ? group.start * rangeFactor : 0;
+            var groupCount = group !== null ? group.count * rangeFactor : Infinity;
+
+            var drawStart = Math.max(rangeStart, groupStart);
+            var drawEnd = Math.min(dataCount, rangeStart + rangeCount, groupStart + groupCount) - 1;
+
+            var drawCount = Math.max(0, drawEnd - drawStart + 1);
+
+            if (drawCount === 0) return;
+
+            if (object.isMesh) {
+
+                if (material.wireframe === true) {
+
+                    this._state.setLineWidth(material.wireframeLinewidth * this._pixelRatio);
+                    renderer.setMode(_gl.LINES);
+                } else {
+
+                    switch (object.drawMode) {
+
+                        case TrianglesDrawMode:
+                            renderer.setMode(_gl.TRIANGLES);
+                            break;
+
+                        case TriangleStripDrawMode:
+                            renderer.setMode(_gl.TRIANGLE_STRIP);
+                            break;
+
+                        case TriangleFanDrawMode:
+                            renderer.setMode(_gl.TRIANGLE_FAN);
+                            break;
+
+                    }
+                }
+            } else if (object.isLine) {
+                var lineWidth = material.linewidth;
+
+                if (lineWidth === undefined) lineWidth = 1; // Not using Line*Material
+
+                this._state.setLineWidth(lineWidth * this._pixelRatio);
+
+                switch (object.drawMode) {
+
+                    case LinesMode:
+                        renderer.setMode(_gl.LINES);
+                        break;
+
+                    case LineLoopMode:
+                        renderer.setMode(_gl.LINE_LOOP);
+                        break;
+
+                    case LineStripMode:
+                        renderer.setMode(_gl.LINE_STRIP);
+                        break;
+
+                }
+            } else if (object.isPoints) {
+
+                renderer.setMode(_gl.POINTS);
+            } else if (object.isSprite) {
+
+                renderer.setMode(_gl.TRIANGLES);
+            }
+
+            if (geometry && geometry.isInstancedBufferGeometry) {
+
+                if (geometry.maxInstancedCount > 0) {
+
+                    renderer.renderInstances(geometry, drawStart, drawCount);
+                }
+            } else {
+
+                renderer.render(drawStart, drawCount);
+            }
+        }
+    }, {
+        key: 'allocTextureUnit',
+        value: function allocTextureUnit() {
+            var textureUnit = _usedTextureUnits;
+
+            if (textureUnit >= this._capabilities.maxTextures) {
+
+                console.warn('WebGLRenderer: Trying to use ' + textureUnit + ' texture units while this GPU supports only ' + capabilities.maxTextures);
+            }
+
+            _usedTextureUnits += 1;
+
+            return textureUnit;
+        }
+    }, {
+        key: 'setTexture2D',
+        value: function setTexture2D(texture, slot) {
+            //todo Use in WebGLUniforms
+            this._textures.setTexture2D(texture, slot);
+        }
+    }, {
+        key: 'setTextureCube',
+        value: function setTextureCube() {
+            //todo Use in WebGLUniforms
+        }
+    }, {
+        key: 'dispose',
+        value: function dispose() {
+
+            this._canvas.removeEventListener('webglcontextlost', onContextLost, false);
+            this._canvas.removeEventListener('webglcontextrestored', onContextRestore, false);
+
+            this._renderLists.dispose();
+            this._renderStates.dispose();
+            this._properties.dispose();
+            this._objects.dispose();
+
+            //vr.dispose();
+
+            //stopAnimation();
+        }
+    }]);
+    return WebGLRenderer;
+}(Events);
+
+//判断是否更新了Buffer
+
+
+var _currentGeometryProgram = '';
+function isUpdateBuffers(geometry, program, material) {
+
+    var geometryProgram = geometry.id + '_' + program.id + '_' + (material.wireframe === true);
+
+    var updateBuffers = false;
+
+    if (geometryProgram !== _currentGeometryProgram) {
+
+        updateBuffers = true;
+        _currentGeometryProgram = geometryProgram;
+    }
+
+    return updateBuffers;
+}
+
+//将渲染的几何对象和材质存放到渲染队列中
+function projectObject(object, camera, sortObjects) {
+
+    if (object.visible === false) return;
+
+    if (object.isLight) {
+
+        this._currentRenderState.pushLight(object);
+    } else if (object.isSprite) {
+
+        if (!object.frustumCulled || this._frustum.intersectsSprite(object)) {
+
+            if (sortObjects) {
+
+                this._vector3.setFromMatrixPosition(object.matrixWorld).applyMatrix4(this._projScreenMatrix);
+            }
+
+            var geometry = this._objects.update(object);
+            var material = object.material;
+
+            this._currentRenderList.push(object, geometry, material, this._vector3.z, null);
+        }
+    } else if (object.isMesh || object.isLine || object.isPoints) {
+
+        if (!object.frustumCulled || this._frustum.intersectsObject(object)) {
+
+            if (sortObjects) {
+
+                this._vector3.setFromMatrixPosition(object.matrixWorld).applyMatrix4(this._projScreenMatrix);
+            }
+            //创建好了attribute buffer
+            var _geometry = this._objects.update(object);
+            var _material = object.material;
+
+            //如果是数组,表示geometry根据groups的分组进行分别绘制
+            if (Array.isArray(_material)) {
+
+                var groups = _geometry.groups;
+
+                for (var i = 0, l = groups.length; i < l; i++) {
+
+                    var group = groups[i];
+                    var groupMaterial = _material[group.materialIndex];
+
+                    if (groupMaterial && groupMaterial.visible) {
+
+                        this._currentRenderList.push(object, _geometry, groupMaterial, this._vector3.z, group);
+                    }
+                }
+            } else if (_material.visible) {
+
+                this._currentRenderList.push(object, _geometry, _material, this._vector3.z, null);
+            }
+        }
+    }
+
+    var children = object.children;
+
+    for (var _i = 0, _l = children.length; _i < _l; _i++) {
+
+        projectObject.call(this, children[_i], camera, sortObjects);
+    }
+}
+
+function renderObjects(renderList, scene, camera) {
+    for (var i = 0, l = renderList.length; i < l; i++) {
+
+        var renderItem = renderList[i];
+
+        var object = renderItem.object;
+        var geometry = renderItem.geometry;
+        var material = renderItem.material;
+        var group = renderItem.group;
+
+        renderObject.call(this, object, scene, camera, geometry, material, group);
+    }
+}
+
+function renderObject(object, scene, camera, geometry, material, group) {
+
+    object.onBeforeRender(this, scene, camera, geometry, material, group);
+    this._currentRenderState = this._renderStates.get(scene, camera);
+
+    object.modelViewMatrix.multiplyMatrices(camera.matrixWorldInverse, object.matrixWorld);
+    object.normalMatrix.getNormalMatrix(object.modelViewMatrix);
+
+    this.renderBufferDirect(camera, scene.fog, geometry, material, object, group);
+
+    object.onAfterRender(this, scene, camera, geometry, material, group);
+    // this._currentRenderState = renderStates.get( scene,  camera );
+}
+
+var _usedTextureUnits = 0; //当前纹理单元
+function setProgram(camera, fog, material, object) {
+    _usedTextureUnits = 0;
+
+    var materialProperties = this._properties.get(material);
+    var lights = this._currentRenderState.state.lights;
+
+    if (material.needsUpdate === false) {
+
+        if (materialProperties.program === undefined) {
+
+            material.needsUpdate = true;
+        } else if (material.lights && materialProperties.lightsHash !== lights.state.hash) {
+
+            material.needsUpdate = true;
+        }
+    }
+
+    if (material.needsUpdate) {
+
+        initMaterial.call(this, material, fog, object);
+        material.needsUpdate = false;
+    }
+
+    var refreshProgram = false;
+    var refreshMaterial = false;
+    var refreshLights = false;
+
+    var program = materialProperties.program,
+        p_uniforms = program.getUniforms(),
+        m_uniforms = materialProperties.shader.uniforms;
+
+    if (this._state.useProgram(program.program)) {
+
+        refreshProgram = true;
+        refreshMaterial = true;
+        refreshLights = true;
+    }
+
+    if (material.id !== this._currentMaterialId) {
+
+        this._currentMaterialId = material.id;
+
+        refreshMaterial = true;
+    }
+
+    if (refreshProgram || camera !== this._currentCamera) {
+
+        p_uniforms.setValue('projectionMatrix', camera.projectionMatrix);
+
+        if (camera !== this._currentCamera) {
+
+            this._currentCamera = camera;
+            refreshMaterial = true;
+            refreshLights = true;
+        }
+    }
+
+    if (refreshMaterial) {
+        var updateLineMaterial = function updateLineMaterial() {
+            m_uniforms.dashSize.value = material.dashSize;
+            m_uniforms.totalSize.value = material.dashSize + material.gapSize;
+            m_uniforms.scale.value = material.scale;
+        };
+
+        if (material.lights) {
+
+            // the current material requires lighting info
+
+            // note: all lighting uniforms are always set correctly
+            // they simply reference the renderer's state for their
+            // values
+            //
+            // use the current material's .needsUpdate flags to set
+            // the GL state when required
+
+            markUniformsLightsNeedsUpdate(m_uniforms, refreshLights);
+        }
+
+        if (material.isMeshBasicMaterial || material.isLineBasicMaterial || material.isMeshLambertMaterial || material.isMeshPhongMaterial || material.isPointsMaterial || material.isLineMeshMaterial || material.isSpriteMaterial) {
+            if (material.color) {
+                m_uniforms.diffuse.value = material.color;
+            }
+
+            if (material.map) {
+                m_uniforms.map.value = material.map;
+            }
+
+            m_uniforms.opacity.value = material.opacity;
+
+            if (material.emissive) {
+
+                m_uniforms.emissive.value.copy(material.emissive).multiplyScalar(material.emissiveIntensity);
+            }
+
+            if (material.map) {
+
+                if (material.map.matrixAutoUpdate === true) {
+                    //更新纹理映射矩阵
+                    material.map.updateMatrix();
+                }
+
+                m_uniforms.uvTransform.value.copy(material.map.matrix);
+            }
+        }
+
+        if (material.isLineBasicMaterial) {
+
+            if (material.isLineDashedMaterial) {
+                updateLineMaterial();
+            }
+        } else if (material.isMeshPhongMaterial) {
+
+            m_uniforms.specular.value = material.specular;
+            m_uniforms.shininess.value = Math.max(material.shininess, 1e-4); // to prevent pow( 0.0, 0.0 )
+        } else if (material.isPointsMaterial) {
+
+            m_uniforms.size.value = material.size * this._pixelRatio;
+            m_uniforms.scale.value = this._height * 0.5;
+        } else if (material.isSpriteMaterial) {
+
+            m_uniforms.rotation.value = material.rotation;
+        } else if (material.isLineMeshMaterial) {
+
+            updateLineMaterial();
+            m_uniforms.linewidth.value = material.linewidth;
+            m_uniforms.resolution.value.copy(material.resolution);
+        }
+
+        WebGLUniforms.upload(this.gl, materialProperties.uniformsList, m_uniforms, this);
+    }
+    if (material.isShaderMaterial && material.uniformsNeedUpdate === true) {
+
+        WebGLUniforms.upload(this.gl, materialProperties.uniformsList, m_uniforms, this);
+        material.uniformsNeedUpdate = false;
+    }
+
+    if (material.isSpriteMaterial) {
+
+        p_uniforms.setValue('center', object.center);
+    }
+
+    // common matrices
+
+    p_uniforms.setValue('modelViewMatrix', object.modelViewMatrix);
+    p_uniforms.setValue('normalMatrix', object.normalMatrix);
+    p_uniforms.setValue('modelMatrix', object.matrixWorld);
+
+    return program;
+}
+
+function initMaterial(material, fog, object) {
+
+    var materialProperties = this._properties.get(material);
+    var lights = this._currentRenderState.state.lights;
+    var parameters = this._programCache.getParameters(material, lights.state);
+
+    var code = this._programCache.getProgramCode(material, parameters);
+
+    var program = materialProperties.program;
+    var programChange = true;
+
+    if (program === undefined) {
+
+        // new material
+        material.on('dispose', onMaterialDispose.bind(this));
+    } else if (program.code !== code) {
+
+        // changed glsl or parameters
+        releaseMaterialProgramReference.call(this, material);
+    } else if (materialProperties.lightsHash !== lights.state.hash) {
+
+        properties.update(material, 'lightsHash', lights.state.hash);
+        programChange = false;
+    } else if (parameters.shaderID !== undefined) {
+
+        // same glsl and uniform list
+        return;
+    } else {
+
+        // only rebuild uniform list
+        programChange = false;
+    }
+
+    if (programChange) {
+
+        if (parameters.shaderID) {
+
+            var shader = ShaderLib[parameters.shaderID];
+
+            materialProperties.shader = {
+                name: material.type,
+                uniforms: UniformsUtils$1.clone(shader.uniforms),
+                vertexShader: shader.vertexShader,
+                fragmentShader: shader.fragmentShader
+            };
+        } else {
+            //自定义shader
+            materialProperties.shader = {
+                name: material.type,
+                uniforms: material.uniforms,
+                vertexShader: material.vertexShader,
+                fragmentShader: material.fragmentShader
+            };
+        }
+
+        material.onBeforeCompile(materialProperties.shader, this);
+
+        //WebGLProgram 对象
+        program = this._programCache.acquireProgram(material, materialProperties.shader, parameters, code);
+
+        materialProperties.program = program;
+        material.program = program;
+    }
+
+    var programAttributes = program.getAttributes();
+
+    var uniforms = materialProperties.shader.uniforms;
+
+    // store the light setup it was created for
+
+    materialProperties.lightsHash = lights.state.hash;
+
+    if (material.lights) {
+
+        // wire up the material to this renderer's lighting state
+
+        uniforms.ambientLightColor.value = lights.state.ambient;
+        uniforms.directionalLights.value = lights.state.directional;
+        uniforms.spotLights.value = lights.state.spot;
+        uniforms.pointLights.value = lights.state.point;
+    }
+
+    var progUniforms = materialProperties.program.getUniforms();
+    var uniformsList = WebGLUniforms.seqWithValue(progUniforms.seq, uniforms);
+
+    materialProperties.uniformsList = uniformsList;
+}
+
+function onMaterialDispose(event) {
+    var me = this;
+    var material = event.target;
+
+    material.off('dispose', onMaterialDispose.bind(me));
+
+    deallocateMaterial.call(this, material);
+}
+
+// Buffer deallocation
+
+function deallocateMaterial(material) {
+
+    releaseMaterialProgramReference.call(this, material);
+
+    this._properties.remove(material);
+}
+
+function releaseMaterialProgramReference(material) {
+    var programInfo = this._properties.get(material).program;
+
+    material.program = undefined;
+
+    if (programInfo !== undefined) {
+
+        this._programCache.releaseProgram(programInfo);
+    }
+}
+
+function setupVertexAttributes(material, program, geometry) {
+
+    if (geometry && geometry.isInstancedBufferGeometry) {
+
+        if (this._extensions.get('ANGLE_instanced_arrays') === null) {
+
+            console.error('WebGLRenderer.setupVertexAttributes: using InstancedBufferGeometry but hardware does not support extension ANGLE_instanced_arrays.');
+            return;
+        }
+    }
+
+    this._state.initAttributes();
+    var _gl = this.gl;
+    var geometryAttributes = geometry.attributes;
+
+    var programAttributes = program.getAttributes();
+    var materialDefaultAttributeValues = material.defaultAttributeValues;
+
+    for (var name in programAttributes) {
+
+        var programAttribute = programAttributes[name];
+
+        if (programAttribute >= 0) {
+
+            var geometryAttribute = geometryAttributes[name];
+
+            if (geometryAttribute !== undefined) {
+
+                var normalized = geometryAttribute.normalized;
+                var size = geometryAttribute.itemSize;
+
+                var attribute = this._attributes.get(geometryAttribute);
+
+                // TODO Attribute may not be available on context restore
+
+                if (attribute === undefined) continue;
+
+                var buffer = attribute.buffer;
+                var type = attribute.type;
+                var bytesPerElement = attribute.bytesPerElement;
+
+                if (geometryAttribute.isInterleavedBufferAttribute) {
+
+                    var data = geometryAttribute.data;
+                    var stride = data.stride;
+                    var offset = geometryAttribute.offset;
+
+                    if (data && data.isInstancedInterleavedBuffer) {
+
+                        this._state.enableAttributeAndDivisor(programAttribute, data.meshPerAttribute);
+
+                        if (geometry.maxInstancedCount === undefined) {
+
+                            geometry.maxInstancedCount = data.meshPerAttribute * data.count;
+                        }
+                    } else {
+
+                        this._state.enableAttribute(programAttribute);
+                    }
+
+                    _gl.bindBuffer(_gl.ARRAY_BUFFER, buffer);
+                    _gl.vertexAttribPointer(programAttribute, size, type, normalized, stride * bytesPerElement, offset * bytesPerElement);
+                } else {
+
+                    if (geometryAttribute.isInstancedBufferAttribute) {
+
+                        this._state.enableAttributeAndDivisor(programAttribute, geometryAttribute.meshPerAttribute);
+
+                        if (geometry.maxInstancedCount === undefined) {
+
+                            geometry.maxInstancedCount = geometryAttribute.meshPerAttribute * geometryAttribute.count;
+                        }
+                    } else {
+
+                        this._state.enableAttribute(programAttribute);
+                    }
+
+                    _gl.bindBuffer(_gl.ARRAY_BUFFER, buffer);
+                    _gl.vertexAttribPointer(programAttribute, size, type, normalized, 0, 0);
+                }
+            } else if (materialDefaultAttributeValues !== undefined) {
+                var value = materialDefaultAttributeValues[name];
+
+                if (value !== undefined) {
+
+                    switch (value.length) {
+
+                        case 2:
+                            _gl.vertexAttrib2fv(programAttribute, value);
+                            break;
+
+                        case 3:
+                            _gl.vertexAttrib3fv(programAttribute, value);
+                            break;
+
+                        case 4:
+                            _gl.vertexAttrib4fv(programAttribute, value);
+                            break;
+
+                        default:
+                            _gl.vertexAttrib1fv(programAttribute, value);
+
+                    }
+                }
+            }
+        }
+    }
+
+    this._state.disableUnusedAttributes();
+}
+
+// If uniforms are marked as clean, they don't need to be loaded to the GPU.
+
+function markUniformsLightsNeedsUpdate(uniforms, value) {
+
+    uniforms.ambientLightColor.needsUpdate = value;
+
+    uniforms.directionalLights.needsUpdate = value;
+    uniforms.pointLights.needsUpdate = value;
+    uniforms.spotLights.needsUpdate = value;
+}
+
 var v1$3 = new Vector3$1();
 var r;
 
@@ -8790,1578 +10168,6 @@ var Quaternion = function () {
     return Quaternion;
 }();
 
-var WebGLSpriteRenderer = function () {
-    function WebGLSpriteRenderer(renderer, gl, state, textures, capabilities) {
-        classCallCheck(this, WebGLSpriteRenderer);
-
-        this._gl = gl;
-        this._state = state;
-        this._textures = textures;
-        this._renderer = renderer;
-        this._capabilities = capabilities;
-
-        this._vertexBuffer = null;
-        this._elementBuffer = null;
-        this._program = null;
-        this._attributes = null;
-
-        this.spritePosition = new Vector3$1();
-        this.spriteRotation = new Quaternion();
-        this.spriteScale = new Vector3$1();
-    }
-
-    createClass(WebGLSpriteRenderer, [{
-        key: "_init",
-        value: function _init() {
-
-            var gl = this._gl;
-
-            var vertices = new Float32Array([
-            //  x     y     u  v 
-            -0.5, -0.5, 0, 0, 0.5, -0.5, 1, 0, 0.5, 0.5, 1, 1, -0.5, 0.5, 0, 1]);
-
-            var faces = new Uint16Array([0, 1, 2, 0, 2, 3]);
-
-            this._vertexBuffer = gl.createBuffer();
-            this._elementBuffer = gl.createBuffer();
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._elementBuffer);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, faces, gl.STATIC_DRAW);
-
-            var program = this._program = createProgram.call(this);
-
-            this._attributes = {
-                position: gl.getAttribLocation(program, 'position'),
-                uv: gl.getAttribLocation(program, 'uv')
-            };
-
-            this._uniforms = {
-                uvOffset: gl.getUniformLocation(program, 'uvOffset'),
-                uvScale: gl.getUniformLocation(program, 'uvScale'),
-
-                rotation: gl.getUniformLocation(program, 'rotation'),
-                center: gl.getUniformLocation(program, 'center'),
-                scale: gl.getUniformLocation(program, 'scale'),
-
-                color: gl.getUniformLocation(program, 'color'),
-                map: gl.getUniformLocation(program, 'map'),
-                opacity: gl.getUniformLocation(program, 'opacity'),
-
-                modelViewMatrix: gl.getUniformLocation(program, 'modelViewMatrix'),
-                projectionMatrix: gl.getUniformLocation(program, 'projectionMatrix')
-            };
-
-            var canvas = document.createElementNS('http://www.w3.org/1999/xhtml', 'canvas');
-            canvas.width = 8;
-            canvas.height = 8;
-
-            var context = canvas.getContext('2d');
-            context.fillStyle = 'white';
-            context.fillRect(0, 0, 8, 8);
-
-            this._emptyTexture = new Texture(canvas);
-            this._emptyTexture.needsUpdate = true;
-        }
-    }, {
-        key: "render",
-        value: function render(sprites, scene, camera) {
-
-            var state = this._state;
-            var gl = this._gl;
-            var uniforms = void 0;
-
-            if (sprites.length === 0) return;
-
-            // setup gl
-
-            if (this._program === null) {
-
-                this._init();
-            }
-
-            uniforms = this._uniforms;
-
-            state.useProgram(this._program);
-
-            state.initAttributes();
-            state.enableAttribute(this._attributes.position);
-            state.enableAttribute(this._attributes.uv);
-            state.disableUnusedAttributes();
-            //关闭背面裁截
-            state.disable(gl.CULL_FACE);
-            state.enable(gl.BLEND);
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
-            gl.vertexAttribPointer(this._attributes.position, 2, gl.FLOAT, false, 2 * 8, 0);
-            gl.vertexAttribPointer(this._attributes.uv, 2, gl.FLOAT, false, 2 * 8, 8);
-
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._elementBuffer);
-
-            gl.uniformMatrix4fv(uniforms.projectionMatrix, false, camera.projectionMatrix.elements);
-
-            state.activeTexture(gl.TEXTURE0);
-            gl.uniform1i(uniforms.map, 0);
-
-            // update positions and sort
-
-            for (var i = 0, l = sprites.length; i < l; i++) {
-
-                var sprite = sprites[i];
-
-                sprite.modelViewMatrix.multiplyMatrices(camera.matrixWorldInverse, sprite.matrixWorld);
-                //12:x  13:y  14:z
-                sprite.z = -sprite.modelViewMatrix.elements[14];
-            }
-
-            sprites.sort(painterSortStable$1);
-
-            // render all sprites
-
-            var scale = [];
-            var center = [];
-
-            for (var _i = 0, _l = sprites.length; _i < _l; _i++) {
-
-                var _sprite = sprites[_i];
-                var material = _sprite.material;
-
-                if (material.visible === false) continue;
-
-                _sprite.onBeforeRender(this._renderer, scene, camera, undefined, material, undefined);
-
-                //gl.uniform1f(uniforms.alphaTest, material.alphaTest);
-                gl.uniformMatrix4fv(uniforms.modelViewMatrix, false, _sprite.modelViewMatrix.elements);
-
-                _sprite.matrixWorld.decompose(this.spritePosition, this.spriteRotation, this.spriteScale);
-
-                scale[0] = this.spriteScale.x;
-                scale[1] = this.spriteScale.y;
-
-                center[0] = _sprite.center.x - 0.5;
-                center[1] = _sprite.center.y - 0.5;
-
-                if (material.map !== null) {
-
-                    gl.uniform2f(uniforms.uvOffset, material.map.offset.x, material.map.offset.y);
-                    gl.uniform2f(uniforms.uvScale, material.map.repeat.x, material.map.repeat.y);
-                } else {
-
-                    gl.uniform2f(uniforms.uvOffset, 0, 0);
-                    gl.uniform2f(uniforms.uvScale, 1, 1);
-                }
-
-                gl.uniform1f(uniforms.opacity, material.opacity);
-                gl.uniform3f(uniforms.color, material.color.r, material.color.g, material.color.b);
-
-                gl.uniform1f(uniforms.rotation, material.rotation);
-                gl.uniform2fv(uniforms.center, center);
-                gl.uniform2fv(uniforms.scale, scale);
-
-                state.setBlending(material.blending, material.blendEquation, material.blendSrc, material.blendDst, material.blendEquationAlpha, material.blendSrcAlpha, material.blendDstAlpha, material.premultipliedAlpha);
-
-                state.buffers.depth.setTest(material.depthTest);
-                state.buffers.depth.setMask(material.depthWrite);
-                state.buffers.color.setMask(material.colorWrite);
-
-                this._textures.setTexture2D(material.map || this._emptyTexture, 0);
-
-                gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-
-                _sprite.onAfterRender(this._renderer, scene, camera, undefined, material, undefined);
-            }
-
-            // restore gl
-
-            state.enable(gl.CULL_FACE);
-
-            state.reset();
-        }
-    }]);
-    return WebGLSpriteRenderer;
-}();
-
-function createProgram() {
-
-    var gl = this._gl;
-    var program = gl.createProgram();
-
-    var vertexShader = gl.createShader(gl.VERTEX_SHADER);
-    var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-
-    //todo 考虑雾,删除相关代码
-    gl.shaderSource(vertexShader, ['precision ' + this._capabilities.precision + ' float;', '#define SHADER_NAME ' + 'SpriteMaterial', 'uniform mat4 modelViewMatrix;', 'uniform mat4 projectionMatrix;', 'uniform float rotation;', 'uniform vec2 center;', 'uniform vec2 scale;', 'uniform vec2 uvOffset;', 'uniform vec2 uvScale;', 'attribute vec2 position;', 'attribute vec2 uv;', 'varying vec2 vUV;', 'void main() {', '	vUV = uvOffset + uv * uvScale;', '	vec2 alignedPosition = ( position - center ) * scale;',
-    //绕精灵的中心旋转,精灵的中心默认(0,0) 
-    '	vec2 rotatedPosition;', '	rotatedPosition.x = cos( rotation ) * alignedPosition.x - sin( rotation ) * alignedPosition.y;', '	rotatedPosition.y = sin( rotation ) * alignedPosition.x + cos( rotation ) * alignedPosition.y;', '	vec4 mvPosition;',
-    //物体的模型矩阵和视图矩阵都不改变顶点的x,y坐标,顶点是vec4(0.0, 0.0, 0.0 ,1.0) 
-    '	mvPosition = modelViewMatrix * vec4( 0.0, 0.0, 0.0, 1.0 );', '	mvPosition.xy += rotatedPosition;', '	gl_Position = projectionMatrix * mvPosition;', '}'].join('\n'));
-
-    gl.shaderSource(fragmentShader, ['precision ' + this._capabilities.precision + ' float;', '#define SHADER_NAME ' + 'SpriteMaterial', 'uniform vec3 color;', 'uniform sampler2D map;', 'uniform float opacity;', 'varying vec2 vUV;', 'void main() {', '	vec4 texture = texture2D( map, vUV );', '	gl_FragColor = vec4( color * texture.rgb, texture.a * opacity );', '}'].join('\n'));
-
-    gl.compileShader(vertexShader);
-    gl.compileShader(fragmentShader);
-
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-
-    gl.linkProgram(program);
-
-    return program;
-}
-
-function painterSortStable$1(a, b) {
-
-    if (a.renderOrder !== b.renderOrder) {
-
-        return a.renderOrder - b.renderOrder;
-    } else if (a.z !== b.z) {
-
-        return b.z - a.z;
-    } else {
-
-        return b.id - a.id;
-    }
-}
-
-var webglLightsCount = 0;
-var _webGLLightsVector3 = new Vector3$1();
-
-var WebGLLights = function () {
-    function WebGLLights() {
-        classCallCheck(this, WebGLLights);
-
-        this.cache = new UniformsCache();
-        this.state = {
-            id: webglLightsCount++,
-            hash: '',
-            ambient: [0, 0, 0],
-            directional: [],
-            spot: [],
-            point: []
-        };
-    }
-
-    createClass(WebGLLights, [{
-        key: 'setup',
-        value: function setup(lights, shadows, camera) {
-            var r = 0,
-                g = 0,
-                b = 0;
-
-            var directionalLength = 0;
-            var pointLength = 0;
-            var spotLength = 0;
-
-            var state = this.state;
-            var cache = this.cache;
-
-            var viewMatrix = camera.matrixWorldInverse;
-
-            for (var i = 0, l = lights.length; i < l; i++) {
-
-                var light = lights[i];
-
-                var color = light.color;
-                var intensity = light.intensity;
-                var distance = light.distance;
-
-                if (light.isAmbientLight) {
-
-                    r += color.r * intensity;
-                    g += color.g * intensity;
-                    b += color.b * intensity;
-                } else if (light.isDirectionalLight) {
-
-                    var _uniforms = cache.get(light);
-
-                    _uniforms.color.copy(light.color).multiplyScalar(light.intensity);
-                    _uniforms.direction.setFromMatrixPosition(light.matrixWorld);
-                    _webGLLightsVector3.setFromMatrixPosition(light.target.matrixWorld);
-                    _uniforms.direction.sub(_webGLLightsVector3);
-                    _uniforms.direction.transformDirection(viewMatrix);
-
-                    state.directional[directionalLength] = _uniforms;
-
-                    directionalLength++;
-                } else if (light.isSpotLight) {
-
-                    var uniforms = cache.get(light);
-
-                    uniforms.position.setFromMatrixPosition(light.matrixWorld);
-                    uniforms.position.applyMatrix4(viewMatrix);
-
-                    uniforms.color.copy(color).multiplyScalar(intensity);
-                    uniforms.distance = distance;
-
-                    uniforms.direction.setFromMatrixPosition(light.matrixWorld);
-                    _webGLLightsVector3.setFromMatrixPosition(light.target.matrixWorld);
-                    uniforms.direction.sub(_webGLLightsVector3);
-                    uniforms.direction.transformDirection(viewMatrix);
-
-                    uniforms.coneCos = Math.cos(light.angle);
-                    uniforms.penumbraCos = Math.cos(light.angle * (1 - light.penumbra));
-                    uniforms.decay = light.distance === 0 ? 0.0 : light.decay;
-
-                    state.spot[spotLength] = uniforms;
-
-                    spotLength++;
-                } else if (light.isPointLight) {
-
-                    var uniforms = cache.get(light);
-
-                    uniforms.position.setFromMatrixPosition(light.matrixWorld);
-                    uniforms.position.applyMatrix4(viewMatrix);
-
-                    uniforms.color.copy(light.color).multiplyScalar(light.intensity);
-                    uniforms.distance = light.distance;
-                    uniforms.decay = light.distance === 0 ? 0.0 : light.decay;
-
-                    state.point[pointLength] = uniforms;
-
-                    pointLength++;
-                }
-            }
-
-            state.ambient[0] = r;
-            state.ambient[1] = g;
-            state.ambient[2] = b;
-
-            state.directional.length = directionalLength;
-            state.spot.length = spotLength;
-            state.point.length = pointLength;
-
-            state.hash = state.id + ',' + directionalLength + ',' + pointLength + ',' + spotLength;
-        }
-    }, {
-        key: 'dispose',
-        value: function dispose() {
-            this.cache.dispose();
-            this.cache = null;
-            this.state = null;
-        }
-    }]);
-    return WebGLLights;
-}();
-
-var UniformsCache = function () {
-    function UniformsCache() {
-        classCallCheck(this, UniformsCache);
-
-        this._lights = {};
-    }
-
-    createClass(UniformsCache, [{
-        key: 'get',
-        value: function get$$1(light) {
-
-            var lights = this._lights;
-
-            if (lights[light.id] !== undefined) {
-
-                return lights[light.id];
-            }
-
-            var uniforms = void 0;
-
-            switch (light.type) {
-
-                case 'DirectionalLight':
-                    uniforms = {
-                        direction: new Vector3$1(),
-                        color: new Color$1()
-                    };
-                    break;
-
-                case 'SpotLight':
-                    uniforms = {
-                        position: new Vector3$1(),
-                        direction: new Vector3$1(),
-                        color: new Color$1(),
-                        distance: 0,
-                        coneCos: 0,
-                        penumbraCos: 0,
-                        decay: 0
-                    };
-                    break;
-
-                case 'PointLight':
-                    uniforms = {
-                        position: new Vector3$1(),
-                        color: new Color$1(),
-                        distance: 0,
-                        decay: 0
-                    };
-                    break;
-
-                case 'HemisphereLight':
-                case 'RectAreaLight':
-                    console.error('没有实现 HemisphereLight 和 RectAreaLight 灯光');
-            }
-
-            lights[light.id] = uniforms;
-
-            return uniforms;
-        }
-    }, {
-        key: 'dispose',
-        value: function dispose() {
-            this._lights = null;
-        }
-    }]);
-    return UniformsCache;
-}();
-
-var WebGLRenderState = function () {
-    function WebGLRenderState() {
-        classCallCheck(this, WebGLRenderState);
-
-
-        this.state = {
-            lights: new WebGLLights(),
-            lightsArray: [],
-            spritesArray: []
-        };
-    }
-
-    createClass(WebGLRenderState, [{
-        key: "init",
-        value: function init() {
-            this.state.spritesArray.length = 0;
-            this.state.lightsArray.length = 0;
-        }
-    }, {
-        key: "pushLight",
-        value: function pushLight(light) {
-
-            this.state.lightsArray.push(light);
-        }
-    }, {
-        key: "pushSprite",
-        value: function pushSprite(sprite) {
-
-            this.state.spritesArray.push(sprite);
-        }
-    }, {
-        key: "setupLights",
-        value: function setupLights(camera) {
-
-            //todo 阴影为空
-            var shadowsArray = [];
-
-            this.state.lights.setup(this.state.lightsArray, shadowsArray, camera);
-        }
-    }, {
-        key: "dispose",
-        value: function dispose() {
-            this.state.lights.dispose();
-            this.state = null;
-        }
-    }]);
-    return WebGLRenderState;
-}();
-
-var WebGLRenderStates = function () {
-    function WebGLRenderStates() {
-        classCallCheck(this, WebGLRenderStates);
-
-        this._renderStates = {};
-    }
-
-    createClass(WebGLRenderStates, [{
-        key: "get",
-        value: function get$$1(scene, camera) {
-
-            var hash = scene.id + ',' + camera.id;
-
-            var renderState = this._renderStates[hash];
-
-            if (renderState === undefined) {
-
-                renderState = new WebGLRenderState();
-                this._renderStates[hash] = renderState;
-            }
-
-            return renderState;
-        }
-    }, {
-        key: "dispose",
-        value: function dispose() {
-
-            for (var key in this._renderStates) {
-                this._renderStates[key] && this._renderStates[key].dispose();
-            }
-
-            this._renderStates = {};
-        }
-    }]);
-    return WebGLRenderStates;
-}();
-
-/**
- * @class WebGL渲染对象
- * @author bujue
- */
-
-var WebGLRenderer = function (_Events) {
-    inherits(WebGLRenderer, _Events);
-
-    function WebGLRenderer(params) {
-        classCallCheck(this, WebGLRenderer);
-
-        var _this = possibleConstructorReturn(this, (WebGLRenderer.__proto__ || Object.getPrototypeOf(WebGLRenderer)).call(this));
-
-        params = params || {};
-        //canvas context 渲染对象的上下文
-        _this.gl = null;
-
-        //canvasDOM 对象
-        _this.domElement = null;
-
-        //私有变量
-        _this._width = 0;
-        _this._height = 0;
-        _this._isContextLost = false; //是否丢失上下文
-
-        _this._pixelRatio = 1; //屏幕的pixelRatio,
-        _this._currentViewport = new Vector4(); //当前的渲染视口大小
-        _this._currentRenderList = null;
-        _this._currentRenderState = null;
-
-        _this._currentMaterialId = -1; //初始化materialId
-        _this._currentCamera = null; //当前的相机
-        _this._currClearColor = new Color$1(0x000000);
-
-        _this._capabilities = null; //GPU渲染能力 
-        _this._state = null; //GPU的状态管理 
-
-
-        _this._sortObjects = true; // scene graph
-
-        _this._projScreenMatrix = new Matrix4();
-        _this._vector3 = new Vector3$1();
-        _this._frustum = new Frustum();
-
-        _this._init(params);
-        _this._initGLContext(params);
-        return _this;
-    }
-
-    createClass(WebGLRenderer, [{
-        key: '_init',
-        value: function _init(parameters) {
-            //创建webGL对象上下文
-            var me = this;
-            parameters = parameters || {};
-
-            console.log('WebGLRenderer', REVISION);
-
-            /*
-            * `alpha`：值为true，表示为上下文创建一个Alpha通道缓冲区；默认值为true；
-            * `depth`：值为true，表示可以使用16位深缓冲区；默认值为true；
-            * `stencil`：值为true，表示可以使用8位模板缓冲区；默认值为false；
-            * `antialias`：值为true，表示将使用默认机制执行抗锯齿操作；默认值为true。
-            * `premultipliedAlpha`：值为true，表示绘图缓冲区有预乘Alpha值；默认为true;
-            * `preserveDrawingBuffer`：值为true；表示在绘图完成后保留绘图缓冲区；默认值为false。
-            */
-            var _canvas = parameters.canvas !== undefined ? parameters.canvas : document.createElementNS('http://www.w3.org/1999/xhtml', 'canvas'),
-                _context = parameters.context !== undefined ? parameters.context : null,
-                _alpha = parameters.alpha !== undefined ? parameters.alpha : false,
-                _depth = parameters.depth !== undefined ? parameters.depth : true,
-                _stencil = parameters.stencil !== undefined ? parameters.stencil : true,
-                _antialias = parameters.antialias !== undefined ? parameters.antialias : false,
-                _premultipliedAlpha = parameters.premultipliedAlpha !== undefined ? parameters.premultipliedAlpha : true,
-                _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer : false;
-
-            me.domElement = _canvas;
-            me.gl = _context;
-            me._width = _canvas.width;
-            me._height = _canvas.height;
-            me._premultipliedAlpha = _premultipliedAlpha;
-
-            try {
-
-                var contextAttributes = {
-                    alpha: _alpha,
-                    depth: _depth,
-                    stencil: _stencil,
-                    antialias: _antialias,
-                    premultipliedAlpha: _premultipliedAlpha,
-                    preserveDrawingBuffer: _preserveDrawingBuffer
-                };
-
-                var _gl = _context || _canvas.getContext('webgl', contextAttributes) || _canvas.getContext('experimental-webgl', contextAttributes);
-
-                if (_gl === null) {
-
-                    if (_canvas.getContext('webgl') !== null) {
-
-                        throw 'Error creating WebGL context with your selected attributes.';
-                    } else {
-
-                        throw 'Error creating WebGL context.';
-                    }
-                }
-
-                me.gl = _gl;
-
-                _canvas.addEventListener('webglcontextlost', onContextLost.bind(me), false);
-                _canvas.addEventListener('webglcontextrestored', onContextRestore.bind(me), false);
-            } catch (error) {
-
-                console.error('WebGLRenderer: ' + error);
-            }
-
-            /**
-                * @private
-                * @description 上下文丢失
-                * @param {*} event 
-                */
-            function onContextLost(event) {
-
-                event.preventDefault();
-                console.log('WebGLRenderer: Context Lost.');
-                this._isContextLost = true;
-                this.fire({ type: 'contextlost' });
-            }
-            /**
-            * @private
-            * @description 上下文恢复
-            */
-            function onContextRestore() {
-
-                console.log('WebGLRenderer: Context Restored.');
-                this._isContextLost = true;
-                this._initGLContext(parametersÎ);
-                this.fire({ type: 'contextrestore' });
-            }
-        }
-    }, {
-        key: '_initGLContext',
-        value: function _initGLContext(parameters) {
-            var me = this;
-            var _gl = this.gl;
-            var _width = this._width;
-            var _height = this._height;
-            var _viewport = new Vector4(0, 0, _width, _height);
-
-            /**  
-            *  
-            *  WebGLUtils              gl常量管理
-            *  WebGLCapabilities       gl能力数据
-            *  WebGLState              gl状态管理
-            *  WebGLInfo               保存渲染的基本数据
-            *  WebGLProperties         可以有效的将上层Material传过来的对象与底层渲染的对象做关联但有不改变原对象,利用WeapMap实现
-            *  WebGLAttributes         根据上层的顶点属性Geometry数据,利用WeapMap绑定buffer相关数据,提供get update remove 方法
-            *  WebGLGeometries         将上层的顶点属性分解后保存到WebGLAttribute对象中 update更新 WebGLAttribute的update 
-            *  WebGLObjects            通过更新帧来控制更新WebGLGemetries update
-            *  WebGLMorphtargets       顶点动画,图表动画可以参考使用
-            *  WebGLPrograms           programs的管理 
-            *  WebGLTextures           纹理的预处理与参数设置与上传
-            *  WebGLRenderLists        通过hash 构建一个Map WebGLRenderList 是真正的渲染列表 opaque transparent 
-            *  WebGLRenderStates       灯光阴影的管理   WebGLLights.setup 将上次的灯光参数转换为shader格式的参数
-            *  WebGLBackground         背景的绘制与更新, scene.background 可以是颜色 纹理 cube纹理
-            *  WebGLBufferRenderer     drawArrays的提取及利用扩展 同一几何体多次绘制的实现
-            *  WebGLIndexedBufferRenderer  drawElements 的提取,同上
-            *  WebGLSpriteRenderer       sprite 绘制 走单独的绘制流程  
-            */
-
-            this._extensions = new WebGLExtensions(_gl);
-            this._extensions.get('ANGLE_instanced_arrays');
-
-            this._utils = new WebGLUtils(_gl);
-            this._info = new WebGLInfo(_gl);
-            this._properties = new WebGLProperties();
-            this._state = new WebGLState(_gl, this._extensions);
-            this._renderStates = new WebGLRenderStates();
-            this._capabilities = new WebGLCapabilities(_gl, parameters);
-            this._textures = new WebGLTextures(_gl, null, this._state, this._properties, this._capabilities, this._utils, this._info);
-            this._attributes = new WebGLAttributes(_gl);
-            this._geometries = new WebGLGeometries(_gl, this._attributes, this._info);
-            this._objects = new WebGLObjects(this._geometries, this._info);
-            this._programCache = new WebGLPrograms(_gl, this._extensions, this._capabilities);
-            this._renderLists = new WebGLRenderLists();
-            this._bufferRenderer = new WebGLBufferRenderer(_gl, this._extensions, this._info);
-            this._indexedBufferRenderer = new WebGLIndexedBufferRenderer(_gl, this._extensions, this._info);
-            this._spriteRenderer = new WebGLSpriteRenderer(this, _gl, this._state, this._textures, this._capabilities);
-            this._state.viewport(this._currentViewport.copy(_viewport).multiplyScalar(this._pixelRatio));
-
-            //console.dir(this._capabilities);
-            this._info.programs = this._programCache.programs;
-
-            me.setSize(_width, _height, true);
-        }
-    }, {
-        key: 'getContext',
-        value: function getContext() {
-            return this.gl;
-        }
-    }, {
-        key: 'getPixelRatio',
-        value: function getPixelRatio() {
-            return this._pixelRatio;
-        }
-    }, {
-        key: 'getCurrentViewport',
-        value: function getCurrentViewport() {
-            return this._currentViewport;
-        }
-    }, {
-        key: 'getClearColor',
-        value: function getClearColor() {
-            return this._currClearColor;
-        }
-
-        //设置设备像素比,默认是 1    
-
-    }, {
-        key: 'setPixelRatio',
-        value: function setPixelRatio(value) {
-            var _width = this._width;
-            var _height = this._height;
-
-            this._pixelRatio = value;
-            this.setSize(_width, _height, false);
-        }
-
-        //设置可视区域大小
-
-    }, {
-        key: 'setSize',
-        value: function setSize(width, height, updateStyle) {
-            var me = this;
-            var _pixelRatio = this._pixelRatio;
-            var _canvas = me.domElement;
-            var _width = width;
-            var _height = height;
-
-            _canvas.width = width * _pixelRatio;
-            _canvas.height = height * _pixelRatio;
-
-            //注意:updateStyle 只有完全等于false才不更新style
-            if (updateStyle !== false) {
-
-                _canvas.style.width = width + 'px';
-                _canvas.style.height = height + 'px';
-            }
-
-            me.setViewport(0, 0, width, height);
-        }
-
-        //设置视口大小
-
-    }, {
-        key: 'setViewport',
-        value: function setViewport(x, y, width, height) {
-            var gl = this.gl;
-            var viewport = new Vector4(x, y, width, height);
-
-            if (this._currentViewport.equals(viewport) === false) {
-
-                this._currentViewport.copy(viewport).multiplyScalar(this._pixelRatio);
-
-                this._state.viewport(this._currentViewport);
-            }
-        }
-        //设置清除色
-
-    }, {
-        key: 'setClearColor',
-        value: function setClearColor() {
-            var _gl = this.gl;
-
-            var _arguments = Array.prototype.slice.call(arguments),
-                r = _arguments[0],
-                g = _arguments[1],
-                b = _arguments[2],
-                a = _arguments[3];
-
-            var _color = this._currClearColor.set(r, g, b, a);
-            this._state.buffers.color.setClear(_color.r, _color.g, _color.b, _color.a, this._premultipliedAlpha);
-        }
-    }, {
-        key: 'getClearAlpha',
-        value: function getClearAlpha() {
-            return this._currClearColor.a;
-        }
-    }, {
-        key: 'setClearAlpha',
-        value: function setClearAlpha(alpha) {
-            var _gl = this.gl;
-            this._currClearColor.a = alpha;
-            var _color = this._currClearColor;
-            this._state.buffers.color.setClear(_color.r, _color.g, _color.b, _color.a, this._premultipliedAlpha);
-        }
-    }, {
-        key: 'clear',
-
-
-        //清除缓冲
-        value: function clear(color, depth, stencil) {
-            var _gl = this.gl;
-            var bits = 0;
-
-            if (color === undefined || color) bits |= _gl.COLOR_BUFFER_BIT;
-            if (depth === undefined || depth) bits |= _gl.DEPTH_BUFFER_BIT;
-            if (stencil === undefined || stencil) bits |= _gl.STENCIL_BUFFER_BIT;
-
-            _gl.clear(bits);
-        }
-        //清除颜色缓冲
-
-    }, {
-        key: 'clearColor',
-        value: function clearColor() {
-            this.clear(true, false, false);
-        }
-        //清除深度缓冲
-
-    }, {
-        key: 'clearDepth',
-        value: function clearDepth() {
-            this.clear(false, true, false);
-        }
-        //清除模版缓冲
-
-    }, {
-        key: 'clearStencil',
-        value: function clearStencil() {
-            this.clear(false, false, true);
-        }
-    }, {
-        key: 'render',
-        value: function render(scene, camera) {
-
-            if (!(camera && camera.isCamera)) {
-
-                console.error('WebGLRenderer.render: camera is not an instance of Camera.');
-                return;
-            }
-            _currentGeometryProgram = '';
-            this._currentMaterialId = -1;
-            this._currentCamera = null;
-
-            if (this._isContextLost) true;
-
-            // 更新场景
-            if (scene.autoUpdate === true) scene.updateMatrixWorld();
-
-            //更新相机矩阵
-            if (camera.parent === null) camera.updateMatrixWorld();
-
-            this._projScreenMatrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
-            this._frustum.setFromMatrix(this._projScreenMatrix);
-
-            //初始化渲染队列
-
-            this._currentRenderState = this._renderStates.get(scene, camera);
-            this._currentRenderState.init();
-
-            this._currentRenderList = this._renderLists.get(scene, camera);
-
-            this._currentRenderList.init();
-
-            //将渲染的几何对象和材质存放到渲染队列中
-            projectObject.call(this, scene, camera, this._sortObjects);
-
-            if (this._sortObjects === true) {
-                this._currentRenderList.sort();
-            }
-
-            this._currentRenderState.setupLights(camera);
-
-            if (this._info.autoReset) this._info.reset();
-
-            scene.background === null ? this.setClearColor(this._currClearColor) : this.setClearColor(scene.background);
-            this.clearColor(true);
-
-            var opaqueObjects = this._currentRenderList.opaque;
-            var transparentObjects = this._currentRenderList.transparent;
-
-            // opaque pass (front-to-back order)
-
-            if (opaqueObjects.length) renderObjects.call(this, opaqueObjects, scene, camera);
-
-            // transparent pass (back-to-front order)
-
-            if (transparentObjects.length) renderObjects.call(this, transparentObjects, scene, camera);
-
-            // custom renderers
-
-            var spritesArray = this._currentRenderState.state.spritesArray;
-
-            this._spriteRenderer.render(spritesArray, scene, camera);
-
-            this._state.buffers.depth.setTest(true);
-            this._state.buffers.depth.setMask(true);
-            this._state.buffers.color.setMask(true);
-
-            this._state.setPolygonOffset(false);
-
-            this._currentRenderList = null;
-            this._currentRenderState = null;
-        }
-    }, {
-        key: 'renderBufferDirect',
-        value: function renderBufferDirect(camera, fog, geometry, material, object, group) {
-
-            var me = this;
-            var _gl = this.gl;
-
-            var frontFaceCW = object.isMesh && object.matrixWorld.determinant() < 0;
-
-            //通过Materail设置 CULL_FACE  Blend clearColor ClearDepth
-            this._state.setMaterial(material, frontFaceCW);
-
-            var program = setProgram.call(me, camera, fog, material, object);
-
-            var updateBuffers = isUpdateBuffers(geometry, program, material);
-
-            var index = geometry.index;
-            var position = geometry.attributes.position;
-            var rangeFactor = 1;
-
-            if (material.wireframe === true) {
-
-                index = this._geometries.getWireframeAttribute(geometry);
-                rangeFactor = 2;
-            }
-
-            var attribute = void 0;
-            var renderer = this._bufferRenderer;
-
-            if (index !== null) {
-
-                attribute = this._attributes.get(index);
-
-                renderer = this._indexedBufferRenderer;
-                renderer.setIndex(attribute);
-            }
-
-            if (updateBuffers) {
-
-                setupVertexAttributes.call(this, material, program, geometry);
-
-                if (index !== null) {
-
-                    _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER, attribute.buffer);
-                }
-            }
-
-            var dataCount = Infinity;
-
-            if (index !== null) {
-
-                dataCount = index.count;
-            } else if (position !== undefined) {
-
-                dataCount = position.count;
-            }
-
-            var rangeStart = geometry.drawRange.start * rangeFactor;
-            var rangeCount = geometry.drawRange.count * rangeFactor;
-
-            var groupStart = group !== null ? group.start * rangeFactor : 0;
-            var groupCount = group !== null ? group.count * rangeFactor : Infinity;
-
-            var drawStart = Math.max(rangeStart, groupStart);
-            var drawEnd = Math.min(dataCount, rangeStart + rangeCount, groupStart + groupCount) - 1;
-
-            var drawCount = Math.max(0, drawEnd - drawStart + 1);
-
-            if (drawCount === 0) return;
-
-            if (object.isMesh) {
-
-                if (material.wireframe === true) {
-
-                    this._state.setLineWidth(material.wireframeLinewidth * this._pixelRatio);
-                    renderer.setMode(_gl.LINES);
-                } else {
-
-                    switch (object.drawMode) {
-
-                        case TrianglesDrawMode:
-                            renderer.setMode(_gl.TRIANGLES);
-                            break;
-
-                        case TriangleStripDrawMode:
-                            renderer.setMode(_gl.TRIANGLE_STRIP);
-                            break;
-
-                        case TriangleFanDrawMode:
-                            renderer.setMode(_gl.TRIANGLE_FAN);
-                            break;
-
-                    }
-                }
-            } else if (object.isLine) {
-                var lineWidth = material.linewidth;
-
-                if (lineWidth === undefined) lineWidth = 1; // Not using Line*Material
-
-                this._state.setLineWidth(lineWidth * this._pixelRatio);
-
-                switch (object.drawMode) {
-
-                    case LinesMode:
-                        renderer.setMode(_gl.LINES);
-                        break;
-
-                    case LineLoopMode:
-                        renderer.setMode(_gl.LINE_LOOP);
-                        break;
-
-                    case LineStripMode:
-                        renderer.setMode(_gl.LINE_STRIP);
-                        break;
-
-                }
-            } else if (object.isPoints) {
-                renderer.setMode(_gl.POINTS);
-            }
-
-            if (geometry && geometry.isInstancedBufferGeometry) {
-
-                if (geometry.maxInstancedCount > 0) {
-
-                    renderer.renderInstances(geometry, drawStart, drawCount);
-                }
-            } else {
-
-                renderer.render(drawStart, drawCount);
-            }
-        }
-    }, {
-        key: 'allocTextureUnit',
-        value: function allocTextureUnit() {
-            var textureUnit = _usedTextureUnits;
-
-            if (textureUnit >= this._capabilities.maxTextures) {
-
-                console.warn('WebGLRenderer: Trying to use ' + textureUnit + ' texture units while this GPU supports only ' + capabilities.maxTextures);
-            }
-
-            _usedTextureUnits += 1;
-
-            return textureUnit;
-        }
-    }, {
-        key: 'setTexture2D',
-        value: function setTexture2D(texture, slot) {
-            //todo Use in WebGLUniforms
-            this._textures.setTexture2D(texture, slot);
-        }
-    }, {
-        key: 'setTextureCube',
-        value: function setTextureCube() {
-            //todo Use in WebGLUniforms
-        }
-    }, {
-        key: 'dispose',
-        value: function dispose() {
-
-            this._canvas.removeEventListener('webglcontextlost', onContextLost, false);
-            this._canvas.removeEventListener('webglcontextrestored', onContextRestore, false);
-
-            this._renderLists.dispose();
-            this._renderStates.dispose();
-            this._properties.dispose();
-            this._objects.dispose();
-
-            //vr.dispose();
-
-            //stopAnimation();
-        }
-    }]);
-    return WebGLRenderer;
-}(Events);
-
-//判断是否更新了Buffer
-
-
-var _currentGeometryProgram = '';
-function isUpdateBuffers(geometry, program, material) {
-
-    var geometryProgram = geometry.id + '_' + program.id + '_' + (material.wireframe === true);
-
-    var updateBuffers = false;
-
-    if (geometryProgram !== _currentGeometryProgram) {
-
-        updateBuffers = true;
-        _currentGeometryProgram = geometryProgram;
-    }
-
-    return updateBuffers;
-}
-
-//将渲染的几何对象和材质存放到渲染队列中
-function projectObject(object, camera, sortObjects) {
-
-    if (object.visible === false) return;
-
-    if (object.isLight) {
-
-        this._currentRenderState.pushLight(object);
-    } else if (object.isSprite) {
-
-        if (!object.frustumCulled || this._frustum.intersectsSprite(object)) {
-
-            this._currentRenderState.pushSprite(object);
-        }
-    } else if (object.isMesh || object.isLine || object.isPoints) {
-
-        if (!object.frustumCulled || this._frustum.intersectsObject(object)) {
-
-            if (sortObjects) {
-
-                this._vector3.setFromMatrixPosition(object.matrixWorld).applyMatrix4(this._projScreenMatrix);
-            }
-            //创建好了attribute buffer
-            var geometry = this._objects.update(object);
-            var material = object.material;
-
-            //如果是数组,表示geometry根据groups的分组进行分别绘制
-            if (Array.isArray(material)) {
-
-                var groups = geometry.groups;
-
-                for (var i = 0, l = groups.length; i < l; i++) {
-
-                    var group = groups[i];
-                    var groupMaterial = material[group.materialIndex];
-
-                    if (groupMaterial && groupMaterial.visible) {
-
-                        this._currentRenderList.push(object, geometry, groupMaterial, this._vector3.z, group);
-                    }
-                }
-            } else if (material.visible) {
-
-                this._currentRenderList.push(object, geometry, material, this._vector3.z, null);
-            }
-        }
-    }
-
-    var children = object.children;
-
-    for (var _i = 0, _l = children.length; _i < _l; _i++) {
-
-        projectObject.call(this, children[_i], camera, sortObjects);
-    }
-}
-
-function renderObjects(renderList, scene, camera) {
-    for (var i = 0, l = renderList.length; i < l; i++) {
-
-        var renderItem = renderList[i];
-
-        var object = renderItem.object;
-        var geometry = renderItem.geometry;
-        var material = renderItem.material;
-        var group = renderItem.group;
-
-        renderObject.call(this, object, scene, camera, geometry, material, group);
-    }
-}
-
-function renderObject(object, scene, camera, geometry, material, group) {
-
-    object.onBeforeRender(this, scene, camera, geometry, material, group);
-    this._currentRenderState = this._renderStates.get(scene, camera);
-
-    object.modelViewMatrix.multiplyMatrices(camera.matrixWorldInverse, object.matrixWorld);
-    object.normalMatrix.getNormalMatrix(object.modelViewMatrix);
-
-    this.renderBufferDirect(camera, scene.fog, geometry, material, object, group);
-
-    object.onAfterRender(this, scene, camera, geometry, material, group);
-    // this._currentRenderState = renderStates.get( scene,  camera );
-}
-
-var _usedTextureUnits = 0; //当前纹理单元
-function setProgram(camera, fog, material, object) {
-    _usedTextureUnits = 0;
-
-    var materialProperties = this._properties.get(material);
-    var lights = this._currentRenderState.state.lights;
-
-    if (material.needsUpdate === false) {
-
-        if (materialProperties.program === undefined) {
-
-            material.needsUpdate = true;
-        } else if (material.lights && materialProperties.lightsHash !== lights.state.hash) {
-
-            material.needsUpdate = true;
-        }
-    }
-
-    if (material.needsUpdate) {
-
-        initMaterial.call(this, material, fog, object);
-        material.needsUpdate = false;
-    }
-
-    var refreshProgram = false;
-    var refreshMaterial = false;
-    var refreshLights = false;
-
-    var program = materialProperties.program,
-        p_uniforms = program.getUniforms(),
-        m_uniforms = materialProperties.shader.uniforms;
-
-    if (this._state.useProgram(program.program)) {
-
-        refreshProgram = true;
-        refreshMaterial = true;
-        refreshLights = true;
-    }
-
-    if (material.id !== this._currentMaterialId) {
-
-        this._currentMaterialId = material.id;
-
-        refreshMaterial = true;
-    }
-
-    if (refreshProgram || camera !== this._currentCamera) {
-
-        p_uniforms.setValue('projectionMatrix', camera.projectionMatrix);
-
-        if (camera !== this._currentCamera) {
-
-            this._currentCamera = camera;
-            refreshMaterial = true;
-            refreshLights = true;
-        }
-    }
-
-    if (refreshMaterial) {
-        var updateLineMaterial = function updateLineMaterial() {
-            m_uniforms.dashSize.value = material.dashSize;
-            m_uniforms.totalSize.value = material.dashSize + material.gapSize;
-            m_uniforms.scale.value = material.scale;
-        };
-
-        if (material.lights) {
-
-            // the current material requires lighting info
-
-            // note: all lighting uniforms are always set correctly
-            // they simply reference the renderer's state for their
-            // values
-            //
-            // use the current material's .needsUpdate flags to set
-            // the GL state when required
-
-            markUniformsLightsNeedsUpdate(m_uniforms, refreshLights);
-        }
-
-        if (material.isMeshBasicMaterial || material.isLineBasicMaterial || material.isMeshLambertMaterial || material.isMeshPhongMaterial || material.isPointsMaterial || material.isLineMeshMaterial) {
-            if (material.color) {
-                m_uniforms.diffuse.value = material.color;
-            }
-
-            if (material.map) {
-                m_uniforms.map.value = material.map;
-            }
-
-            m_uniforms.opacity.value = material.opacity;
-            if (material.emissive) {
-
-                m_uniforms.emissive.value.copy(material.emissive).multiplyScalar(material.emissiveIntensity);
-            }
-
-            if (material.map) {
-
-                if (material.map.matrixAutoUpdate === true) {
-                    //更新纹理映射矩阵
-                    material.map.updateMatrix();
-                }
-
-                m_uniforms.uvTransform.value.copy(material.map.matrix);
-            }
-        }
-
-        if (material.isLineBasicMaterial) {
-
-            if (material.isLineDashedMaterial) {
-                updateLineMaterial();
-            }
-        } else if (material.isMeshPhongMaterial) {
-
-            m_uniforms.specular.value = material.specular;
-            m_uniforms.shininess.value = Math.max(material.shininess, 1e-4); // to prevent pow( 0.0, 0.0 )
-        } else if (material.isPointsMaterial) {
-
-            m_uniforms.size.value = material.size * this._pixelRatio;
-            m_uniforms.scale.value = this._height * 0.5;
-        } else if (material.isLineMeshMaterial) {
-
-            updateLineMaterial();
-            m_uniforms.linewidth.value = material.linewidth;
-            m_uniforms.resolution.value.copy(material.resolution);
-        }
-
-        WebGLUniforms.upload(this.gl, materialProperties.uniformsList, m_uniforms, this);
-    }
-    if (material.isShaderMaterial && material.uniformsNeedUpdate === true) {
-
-        WebGLUniforms.upload(this.gl, materialProperties.uniformsList, m_uniforms, this);
-        material.uniformsNeedUpdate = false;
-    }
-
-    // common matrices
-
-    p_uniforms.setValue('modelViewMatrix', object.modelViewMatrix);
-    p_uniforms.setValue('normalMatrix', object.normalMatrix);
-    p_uniforms.setValue('modelMatrix', object.matrixWorld);
-
-    return program;
-}
-
-function initMaterial(material, fog, object) {
-
-    var materialProperties = this._properties.get(material);
-    var lights = this._currentRenderState.state.lights;
-    var parameters = this._programCache.getParameters(material, lights.state);
-
-    var code = this._programCache.getProgramCode(material, parameters);
-
-    var program = materialProperties.program;
-    var programChange = true;
-
-    if (program === undefined) {
-
-        // new material
-        material.on('dispose', onMaterialDispose.bind(this));
-    } else if (program.code !== code) {
-
-        // changed glsl or parameters
-        releaseMaterialProgramReference.call(this, material);
-    } else if (materialProperties.lightsHash !== lights.state.hash) {
-
-        properties.update(material, 'lightsHash', lights.state.hash);
-        programChange = false;
-    } else if (parameters.shaderID !== undefined) {
-
-        // same glsl and uniform list
-        return;
-    } else {
-
-        // only rebuild uniform list
-        programChange = false;
-    }
-
-    if (programChange) {
-
-        if (parameters.shaderID) {
-
-            var shader = ShaderLib[parameters.shaderID];
-
-            materialProperties.shader = {
-                name: material.type,
-                uniforms: UniformsUtils$1.clone(shader.uniforms),
-                vertexShader: shader.vertexShader,
-                fragmentShader: shader.fragmentShader
-            };
-        } else {
-            //自定义shader
-            materialProperties.shader = {
-                name: material.type,
-                uniforms: material.uniforms,
-                vertexShader: material.vertexShader,
-                fragmentShader: material.fragmentShader
-            };
-        }
-
-        material.onBeforeCompile(materialProperties.shader, this);
-
-        //WebGLProgram 对象
-        program = this._programCache.acquireProgram(material, materialProperties.shader, parameters, code);
-
-        materialProperties.program = program;
-        material.program = program;
-    }
-
-    var programAttributes = program.getAttributes();
-
-    var uniforms = materialProperties.shader.uniforms;
-
-    // store the light setup it was created for
-
-    materialProperties.lightsHash = lights.state.hash;
-
-    if (material.lights) {
-
-        // wire up the material to this renderer's lighting state
-
-        uniforms.ambientLightColor.value = lights.state.ambient;
-        uniforms.directionalLights.value = lights.state.directional;
-        uniforms.spotLights.value = lights.state.spot;
-        uniforms.pointLights.value = lights.state.point;
-    }
-
-    var progUniforms = materialProperties.program.getUniforms();
-    var uniformsList = WebGLUniforms.seqWithValue(progUniforms.seq, uniforms);
-
-    materialProperties.uniformsList = uniformsList;
-}
-
-function onMaterialDispose(event) {
-    var me = this;
-    var material = event.target;
-
-    material.off('dispose', onMaterialDispose.bind(me));
-
-    deallocateMaterial.call(this, material);
-}
-
-// Buffer deallocation
-
-function deallocateMaterial(material) {
-
-    releaseMaterialProgramReference.call(this, material);
-
-    this._properties.remove(material);
-}
-
-function releaseMaterialProgramReference(material) {
-    var programInfo = this._properties.get(material).program;
-
-    material.program = undefined;
-
-    if (programInfo !== undefined) {
-
-        this._programCache.releaseProgram(programInfo);
-    }
-}
-
-function setupVertexAttributes(material, program, geometry) {
-
-    if (geometry && geometry.isInstancedBufferGeometry) {
-
-        if (this._extensions.get('ANGLE_instanced_arrays') === null) {
-
-            console.error('WebGLRenderer.setupVertexAttributes: using InstancedBufferGeometry but hardware does not support extension ANGLE_instanced_arrays.');
-            return;
-        }
-    }
-
-    this._state.initAttributes();
-    var _gl = this.gl;
-    var geometryAttributes = geometry.attributes;
-
-    var programAttributes = program.getAttributes();
-    var materialDefaultAttributeValues = material.defaultAttributeValues;
-
-    for (var name in programAttributes) {
-
-        var programAttribute = programAttributes[name];
-
-        if (programAttribute >= 0) {
-
-            var geometryAttribute = geometryAttributes[name];
-
-            if (geometryAttribute !== undefined) {
-
-                var normalized = geometryAttribute.normalized;
-                var size = geometryAttribute.itemSize;
-
-                var attribute = this._attributes.get(geometryAttribute);
-
-                // TODO Attribute may not be available on context restore
-
-                if (attribute === undefined) continue;
-
-                var buffer = attribute.buffer;
-                var type = attribute.type;
-                var bytesPerElement = attribute.bytesPerElement;
-
-                if (geometryAttribute.isInterleavedBufferAttribute) {
-
-                    var data = geometryAttribute.data;
-                    var stride = data.stride;
-                    var offset = geometryAttribute.offset;
-
-                    if (data && data.isInstancedInterleavedBuffer) {
-
-                        this._state.enableAttributeAndDivisor(programAttribute, data.meshPerAttribute);
-
-                        if (geometry.maxInstancedCount === undefined) {
-
-                            geometry.maxInstancedCount = data.meshPerAttribute * data.count;
-                        }
-                    } else {
-
-                        this._state.enableAttribute(programAttribute);
-                    }
-
-                    _gl.bindBuffer(_gl.ARRAY_BUFFER, buffer);
-                    _gl.vertexAttribPointer(programAttribute, size, type, normalized, stride * bytesPerElement, offset * bytesPerElement);
-                } else {
-
-                    if (geometryAttribute.isInstancedBufferAttribute) {
-
-                        this._state.enableAttributeAndDivisor(programAttribute, geometryAttribute.meshPerAttribute);
-
-                        if (geometry.maxInstancedCount === undefined) {
-
-                            geometry.maxInstancedCount = geometryAttribute.meshPerAttribute * geometryAttribute.count;
-                        }
-                    } else {
-
-                        this._state.enableAttribute(programAttribute);
-                    }
-
-                    _gl.bindBuffer(_gl.ARRAY_BUFFER, buffer);
-                    _gl.vertexAttribPointer(programAttribute, size, type, normalized, 0, 0);
-                }
-            } else if (materialDefaultAttributeValues !== undefined) {
-                var value = materialDefaultAttributeValues[name];
-
-                if (value !== undefined) {
-
-                    switch (value.length) {
-
-                        case 2:
-                            _gl.vertexAttrib2fv(programAttribute, value);
-                            break;
-
-                        case 3:
-                            _gl.vertexAttrib3fv(programAttribute, value);
-                            break;
-
-                        case 4:
-                            _gl.vertexAttrib4fv(programAttribute, value);
-                            break;
-
-                        default:
-                            _gl.vertexAttrib1fv(programAttribute, value);
-
-                    }
-                }
-            }
-        }
-    }
-
-    this._state.disableUnusedAttributes();
-}
-
-// If uniforms are marked as clean, they don't need to be loaded to the GPU.
-
-function markUniformsLightsNeedsUpdate(uniforms, value) {
-
-    uniforms.ambientLightColor.needsUpdate = value;
-
-    uniforms.directionalLights.needsUpdate = value;
-    uniforms.pointLights.needsUpdate = value;
-    uniforms.spotLights.needsUpdate = value;
-}
-
 var matrix = new Matrix4();
 var q = new Quaternion();
 
@@ -10731,6 +10537,8 @@ var Object3D = function (_Events) {
 
         _this.frustumCulled = true;
         _this.renderOrder = 0;
+
+        _this.userData = {};
 
         return _this;
     }
@@ -12219,6 +12027,8 @@ var Material = function (_Events) {
 
         _this.premultipliedAlpha = false;
 
+        _this.userData = {};
+
         _this.onBeforeCompile = function () {};
         return _this;
     }
@@ -12325,6 +12135,11 @@ var Material = function (_Events) {
 
             this.fire({ type: 'dispose' });
         }
+    }, {
+        key: 'isMaterial',
+        get: function get$$1() {
+            return true;
+        }
     }]);
     return Material;
 }(Events);
@@ -12343,7 +12158,6 @@ var MeshBasicMaterial$$1 = function (_Material) {
         _this.type = 'MeshBasicMaterial';
         _this.wireframe = false;
         _this.wireframeLinewidth = 1;
-        _this.isMeshBasicMaterial = true;
 
         //不接受灯光
         _this.lights = false;
@@ -12362,6 +12176,11 @@ var MeshBasicMaterial$$1 = function (_Material) {
             this.wireframe = source.wireframe;
 
             return this;
+        }
+    }, {
+        key: "isMeshBasicMaterial",
+        get: function get$$1() {
+            return true;
         }
     }]);
     return MeshBasicMaterial$$1;
@@ -12670,7 +12489,6 @@ var LineBasicMaterial = function (_Material) {
         _this.lights = false;
 
         _this.setValues(parameters);
-        _this.isLineBasicMaterial = true;
         return _this;
     }
 
@@ -12682,6 +12500,11 @@ var LineBasicMaterial = function (_Material) {
             this.linewidth = source.linewidth;
 
             return this;
+        }
+    }, {
+        key: "isLineBasicMaterial",
+        get: function get$$1() {
+            return true;
         }
     }]);
     return LineBasicMaterial;
@@ -13266,6 +13089,11 @@ var PointsMaterial = function (_Material) {
 
             return this;
         }
+    }, {
+        key: "isPointsMaterial",
+        get: function get$$1() {
+            return true;
+        }
     }]);
     return PointsMaterial;
 }(Material);
@@ -13410,13 +13238,14 @@ var SpriteMaterial$$1 = function (_Material) {
         _this.color = new Color$1(0xffffff);
         _this.map = null;
 
-        //纹理旋转角度
         _this.rotation = 0;
-        //不接受灯光
+
+        _this.sizeAttenuation = true;
+
         _this.lights = false;
+        _this.transparent = true;
 
         _this.setValues(parameters);
-        _this.isSpriteMaterial = true;
 
         return _this;
     }
@@ -13431,11 +13260,20 @@ var SpriteMaterial$$1 = function (_Material) {
 
             this.rotation = source.rotation;
 
+            this.sizeAttenuation = source.sizeAttenuation;
+
             return this;
+        }
+    }, {
+        key: "isSpriteMaterial",
+        get: function get$$1() {
+            return true;
         }
     }]);
     return SpriteMaterial$$1;
 }(Material);
+
+var geometry;
 
 var Sprite = function (_Object3D) {
     inherits(Sprite, _Object3D);
@@ -13446,6 +13284,21 @@ var Sprite = function (_Object3D) {
         var _this = possibleConstructorReturn(this, (Sprite.__proto__ || Object.getPrototypeOf(Sprite)).call(this));
 
         _this.type = 'Sprite';
+
+        if (geometry === undefined) {
+
+            geometry = new BufferGeometry();
+
+            var float32Array = new Float32Array([-0.5, -0.5, 0, 0, 0, 0.5, -0.5, 0, 1, 0, 0.5, 0.5, 0, 1, 1, -0.5, 0.5, 0, 0, 1]);
+
+            var interleavedBuffer = new InterleavedBuffer(float32Array, 5);
+
+            geometry.setIndex([0, 1, 2, 0, 2, 3]);
+            geometry.addAttribute('position', new InterleavedBufferAttribute(interleavedBuffer, 3, 0, false));
+            geometry.addAttribute('uv', new InterleavedBufferAttribute(interleavedBuffer, 2, 3, false));
+        }
+
+        _this.geometry = geometry;
 
         _this.material = material !== undefined ? material : new SpriteMaterial$$1();
 
@@ -13459,6 +13312,22 @@ var Sprite = function (_Object3D) {
             _raycast$3.call(this, raycaster, intersects);
         }
     }, {
+        key: 'clone',
+        value: function clone() {
+
+            return new this.constructor(this.material).copy(this);
+        }
+    }, {
+        key: 'copy',
+        value: function copy(source) {
+
+            Object3D.prototype.copy.call(this, source);
+
+            if (source.center !== undefined) this.center.copy(source.center);
+
+            return this;
+        }
+    }, {
         key: 'isSprite',
         get: function get$$1() {
             return true;
@@ -13467,21 +13336,86 @@ var Sprite = function (_Object3D) {
     return Sprite;
 }(Object3D);
 
-var _raycast$3 = function () {
+var _raycast$3 = function _raycast() {
 
     var intersectPoint = new Vector3$1();
-    var worldPosition = new Vector3$1();
     var worldScale = new Vector3$1();
+    var mvPosition = new Vector3$1();
+
+    var alignedPosition = new Vector2();
+    var rotatedPosition = new Vector2();
+    var viewWorldMatrix = new Matrix4();
+
+    var vA = new Vector3$1();
+    var vB = new Vector3$1();
+    var vC = new Vector3$1();
+
+    var uvA = new Vector2();
+    var uvB = new Vector2();
+    var uvC = new Vector2();
+
+    function transformVertex(vertexPosition, mvPosition, center, scale, sin, cos) {
+
+        // compute position in camera space
+        alignedPosition.subVectors(vertexPosition, center).addScalar(0.5).multiply(scale);
+
+        // to check if rotation is not zero
+        if (sin !== undefined) {
+
+            rotatedPosition.x = cos * alignedPosition.x - sin * alignedPosition.y;
+            rotatedPosition.y = sin * alignedPosition.x + cos * alignedPosition.y;
+        } else {
+
+            rotatedPosition.copy(alignedPosition);
+        }
+
+        vertexPosition.copy(mvPosition);
+        vertexPosition.x += rotatedPosition.x;
+        vertexPosition.y += rotatedPosition.y;
+
+        // transform to world space
+        vertexPosition.applyMatrix4(viewWorldMatrix);
+    }
 
     return function raycast(raycaster, intersects) {
 
-        worldPosition.setFromMatrixPosition(this.matrixWorld);
-        raycaster.ray.closestPointToPoint(worldPosition, intersectPoint);
-
         worldScale.setFromMatrixScale(this.matrixWorld);
-        var guessSizeSq = worldScale.x * worldScale.y / 4;
+        viewWorldMatrix.getInverse(this.modelViewMatrix).premultiply(this.matrixWorld);
+        mvPosition.setFromMatrixPosition(this.modelViewMatrix);
 
-        if (worldPosition.distanceToSquared(intersectPoint) > guessSizeSq) return;
+        var rotation = this.material.rotation;
+        var sin, cos;
+        if (rotation !== 0) {
+
+            cos = Math.cos(rotation);
+            sin = Math.sin(rotation);
+        }
+
+        var center = this.center;
+
+        transformVertex(vA.set(-0.5, -0.5, 0), mvPosition, center, worldScale, sin, cos);
+        transformVertex(vB.set(0.5, -0.5, 0), mvPosition, center, worldScale, sin, cos);
+        transformVertex(vC.set(0.5, 0.5, 0), mvPosition, center, worldScale, sin, cos);
+
+        uvA.set(0, 0);
+        uvB.set(1, 0);
+        uvC.set(1, 1);
+
+        // check first triangle
+        var intersect = raycaster.ray.intersectTriangle(vA, vB, vC, false, intersectPoint);
+
+        if (intersect === null) {
+
+            // check second triangle
+            transformVertex(vB.set(-0.5, 0.5, 0), mvPosition, center, worldScale, sin, cos);
+            uvB.set(0, 1);
+
+            intersect = raycaster.ray.intersectTriangle(vA, vC, vB, false, intersectPoint);
+            if (intersect === null) {
+
+                return;
+            }
+        }
 
         var distance = raycaster.ray.origin.distanceTo(intersectPoint);
 
@@ -13491,12 +13425,13 @@ var _raycast$3 = function () {
 
             distance: distance,
             point: intersectPoint.clone(),
+            uv: Triangle.getUV(intersectPoint, vA, vB, vC, uvA, uvB, uvC, new Vector2()),
             face: null,
             object: this
 
         });
     };
-}();
+};
 
 var TextTexture = function (_Texture) {
     inherits(TextTexture, _Texture);
@@ -15713,8 +15648,6 @@ var MeshLambertMaterial = function (_Material) {
 
         _this.setValues(parameters);
 
-        _this.isMeshLambertMaterial = true;
-
         return _this;
     }
 
@@ -15734,6 +15667,11 @@ var MeshLambertMaterial = function (_Material) {
             this.wireframeLinewidth = source.wireframeLinewidth;
 
             return this;
+        }
+    }, {
+        key: 'isMeshLambertMaterial',
+        get: function get$$1() {
+            return true;
         }
     }]);
     return MeshLambertMaterial;
@@ -15767,8 +15705,6 @@ var MeshPhongMaterial = function (_Material) {
         _this.wireframeLinewidth = 1;
         _this.setValues(parameters);
 
-        _this.isMeshPhongMaterial = true;
-
         return _this;
     }
 
@@ -15790,6 +15726,11 @@ var MeshPhongMaterial = function (_Material) {
             this.wireframeLinewidth = source.wireframeLinewidth;
 
             return this;
+        }
+    }, {
+        key: 'isMeshPhongMaterial',
+        get: function get$$1() {
+            return true;
         }
     }]);
     return MeshPhongMaterial;
@@ -15813,8 +15754,6 @@ var LineDashedMaterial = function (_LineBasicMaterial) {
 
         _this.setValues(parameters);
 
-        _this.isLineDashedMaterial = true;
-
         return _this;
     }
 
@@ -15828,6 +15767,11 @@ var LineDashedMaterial = function (_LineBasicMaterial) {
             this.gapSize = source.gapSize;
 
             return this;
+        }
+    }, {
+        key: "isLineDashedMaterial",
+        get: function get$$1() {
+            return true;
         }
     }]);
     return LineDashedMaterial;
@@ -15856,7 +15800,6 @@ var LineMeshMaterial = function (_Material) {
         _this.lights = false;
 
         _this.setValues(parameters);
-        _this.isLineMeshMaterial = true;
         return _this;
     }
 
@@ -15874,6 +15817,11 @@ var LineMeshMaterial = function (_Material) {
             this.resolution.copy(source.resolution);
 
             return this;
+        }
+    }, {
+        key: "isLineMeshMaterial",
+        get: function get$$1() {
+            return true;
         }
     }]);
     return LineMeshMaterial;
@@ -15923,8 +15871,6 @@ var ShaderMaterial = function (_Material) {
             _this.setValues(parameters);
         }
 
-        _this.isShaderMaterial = true;
-
         return _this;
     }
 
@@ -15947,6 +15893,11 @@ var ShaderMaterial = function (_Material) {
 
             return this;
         }
+    }, {
+        key: 'isShaderMaterial',
+        get: function get$$1() {
+            return true;
+        }
     }]);
     return ShaderMaterial;
 }(Material);
@@ -15960,11 +15911,16 @@ var RawShaderMaterial = function (_ShaderMaterial) {
         var _this = possibleConstructorReturn(this, (RawShaderMaterial.__proto__ || Object.getPrototypeOf(RawShaderMaterial)).call(this, parameters));
 
         _this.type = 'RawShaderMaterial';
-        _this.isRawShaderMaterial = true;
 
         return _this;
     }
 
+    createClass(RawShaderMaterial, [{
+        key: 'isRawShaderMaterial',
+        get: function get$$1() {
+            return true;
+        }
+    }]);
     return RawShaderMaterial;
 }(ShaderMaterial);
 

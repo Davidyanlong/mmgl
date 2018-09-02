@@ -1,5 +1,6 @@
 import { Color } from '../../maths/Color';
 import { Matrix3 } from '../../maths/Matrix3';
+import {Vector2} from '../../maths/Vector2';
 
 let UniformsLib = {
 	common: {
@@ -59,6 +60,16 @@ let UniformsLib = {
 		scale: { value: 1 },
 		dashSize: { value: 1 },
 		totalSize: { value: 2 }
+	},
+	sprite: {
+
+		diffuse: { value: new Color(0xeeeeee) },
+		opacity: { value: 1.0 },
+		center: { value: new Vector2(0.5, 0.5) },
+		rotation: { value: 0.0 },
+		map: { value: null },
+		uvTransform: { value: new Matrix3() }
+
 	}
 }
 

@@ -81,6 +81,17 @@ let ShaderLib = {
 		fragmentShader: ShaderChunk.points_frag
 
 	},
+	sprite: {
+
+		uniforms: UniformsUtils.merge( [
+			UniformsLib.sprite,
+			//UniformsLib.fog
+		] ),
+
+		vertexShader: ShaderChunk.sprite_vert,
+		fragmentShader: ShaderChunk.sprite_frag
+
+	}
 
 }
 

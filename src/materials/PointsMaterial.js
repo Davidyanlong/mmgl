@@ -23,6 +23,10 @@ class PointsMaterial extends Material {
 
     }
 
+    get isPointsMaterial() {
+        return true;
+    }
+
     copy(source) {
         super.copy(source);
         this.color.copy(source.color);
