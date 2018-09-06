@@ -230,7 +230,7 @@ class Color {
         return _color;
     }
     clone() {
-        return new this.constructor(this.r, this.g, this.b);
+        return new this.constructor(this.r, this.g, this.b,this.a);
     }
     copy(color) {
         this.r = color.r;

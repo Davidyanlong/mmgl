@@ -67,13 +67,13 @@ class Material extends Events {
             }
 
             // for backward compatability if shading is set in the constructor
-            if (key === 'shading') {
+            // if (key === 'shading') {
 
-                console.warn(this.type + ': .shading has been removed. Use the boolean .flatShading instead.');
-                this.flatShading = (newValue === FlatShading) ? true : false;
-                continue;
+            //     console.warn(this.type + ': .shading has been removed. Use the boolean .flatShading instead.');
+            //     this.flatShading = (newValue === FlatShading) ? true : false;
+            //     continue;
 
-            }
+            // }
 
             var currentValue = this[key];
 
