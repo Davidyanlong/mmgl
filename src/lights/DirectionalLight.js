@@ -12,9 +12,10 @@ class DirectionalLight extends Light {
         this.updateMatrix();
 
         this.target = new Object3D();
-        
+
 
     }
+    
     get isDirectionalLight() {
         return true;
     }

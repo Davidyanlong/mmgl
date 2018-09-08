@@ -229,8 +229,58 @@ class Color {
         _color.a = a;
         return _color;
     }
+    getHSL(target) {
+
+        // h,s,l ranges are in 0.0 - 1.0
+
+        if (target === undefined) {
+
+            console.warn('Color: .getHSL() target is now required');
+            target = { h: 0, s: 0, l: 0 };
+
+        }
+
+        var r = this.r, g = this.g, b = this.b;
+
+        var max = Math.max(r, g, b);
+        var min = Math.min(r, g, b);
+
+        var hue, saturation;
+        var lightness = (min + max) / 2.0;
+
+        if (min === max) {
+
+            hue = 0;
+            saturation = 0;
+
+        } else {
+
+            var delta = max - min;
+
+            saturation = lightness <= 0.5 ? delta / (max + min) : delta / (2 - max - min);
+
+            switch (max) {
+
+                case r: hue = (g - b) / delta + (g < b ? 6 : 0); break;
+                case g: hue = (b - r) / delta + 2; break;
+                case b: hue = (r - g) / delta + 4; break;
+
+            }
+
+            hue /= 6;
+
+        }
+
+        target.h = hue;
+        target.s = saturation;
+        target.l = lightness;
+
+        return target;
+
+    }
+
     clone() {
-        return new this.constructor(this.r, this.g, this.b,this.a);
+        return new this.constructor(this.r, this.g, this.b, this.a);
     }
     copy(color) {
         this.r = color.r;
@@ -249,18 +299,18 @@ class Color {
         return this;
 
     }
-    getHex () {
+    getHex() {
 
-		return ( this.r * 255 ) << 16 ^ ( this.g * 255 ) << 8 ^ ( this.b * 255 ) << 0;
+        return (this.r * 255) << 16 ^ (this.g * 255) << 8 ^ (this.b * 255) << 0;
 
     }
 
     getHexString() {
 
-		return ( '000000' + this.getHex().toString( 16 ) ).slice( - 6 );
+        return ('000000' + this.getHex().toString(16)).slice(- 6);
 
-	}
-    
+    }
+
 
 }
 
