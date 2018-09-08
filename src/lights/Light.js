@@ -9,7 +9,9 @@ class Light extends Object3D {
         this.color = new Color(color);
         this.intensity = intensity !== undefined ? intensity : 1;
 
-        this.isLight = Light;
+    }
+    get isLight() {
+        return true;
     }
 
 }

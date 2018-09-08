@@ -205,7 +205,7 @@
 	    return Events;
 	}();
 
-	var version = "0.0.20";
+	var version = "0.0.21";
 
 	var REVISION = version;
 
@@ -1451,7 +1451,7 @@
 	    }, {
 	        key: 'clone',
 	        value: function clone() {
-	            return new this.constructor(this.r, this.g, this.b);
+	            return new this.constructor(this.r, this.g, this.b, this.a);
 	        }
 	    }, {
 	        key: 'copy',
@@ -12059,12 +12059,13 @@
 	                }
 
 	                // for backward compatability if shading is set in the constructor
-	                if (key === 'shading') {
+	                // if (key === 'shading') {
 
-	                    console.warn(this.type + ': .shading has been removed. Use the boolean .flatShading instead.');
-	                    this.flatShading = newValue === FlatShading ? true : false;
-	                    continue;
-	                }
+	                //     console.warn(this.type + ': .shading has been removed. Use the boolean .flatShading instead.');
+	                //     this.flatShading = (newValue === FlatShading) ? true : false;
+	                //     continue;
+
+	                // }
 
 	                var currentValue = this[key];
 
@@ -15947,10 +15948,15 @@
 	        _this.color = new Color$1(color);
 	        _this.intensity = intensity !== undefined ? intensity : 1;
 
-	        _this.isLight = Light;
 	        return _this;
 	    }
 
+	    createClass(Light, [{
+	        key: 'isLight',
+	        get: function get$$1() {
+	            return true;
+	        }
+	    }]);
 	    return Light;
 	}(Object3D);
 
@@ -15974,16 +15980,20 @@
 	        _this.penumbra = penumbra !== undefined ? penumbra : 0;
 	        _this.decay = decay !== undefined ? decay : 1; // for physically correct lights, should be 2.
 
-	        _this.isSpotLight = true;
 
 	        return _this;
 	    }
 
-	    // intensity = power per solid angle.
-	    // ref: equation (17) from https://seblagarde.files.wordpress.com/2015/07/course_notes_moving_frostbite_to_pbr_v32.pdf
-
-
 	    createClass(SpotLight, [{
+	        key: 'isSpotLight',
+	        get: function get$$1() {
+	            return true;
+	        }
+
+	        // intensity = power per solid angle.
+	        // ref: equation (17) from https://seblagarde.files.wordpress.com/2015/07/course_notes_moving_frostbite_to_pbr_v32.pdf
+
+	    }, {
 	        key: 'power',
 	        get: function get$$1() {
 	            return this.intensity * Math.PI;
@@ -16009,14 +16019,18 @@
 	        _this.distance = distance !== undefined ? distance : 0;
 	        _this.decay = decay !== undefined ? decay : 1; // for physically correct lights, should be 2.
 
-	        _this.isPointLight = true;
 	        return _this;
 	    }
-	    // intensity = power per solid angle.
-	    // ref: equation (15) from https://seblagarde.files.wordpress.com/2015/07/course_notes_moving_frostbite_to_pbr_v32.pdf
-
 
 	    createClass(PointLight, [{
+	        key: "isPointLight",
+	        get: function get$$1() {
+	            return true;
+	        }
+	        // intensity = power per solid angle.
+	        // ref: equation (15) from https://seblagarde.files.wordpress.com/2015/07/course_notes_moving_frostbite_to_pbr_v32.pdf
+
+	    }, {
 	        key: "power",
 	        get: function get$$1() {
 	            return this.intensity * 4 * Math.PI;
@@ -16044,11 +16058,15 @@
 
 	        _this.target = new Object3D();
 
-	        _this.isDirectionalLight = true;
-
 	        return _this;
 	    }
 
+	    createClass(DirectionalLight, [{
+	        key: 'isDirectionalLight',
+	        get: function get$$1() {
+	            return true;
+	        }
+	    }]);
 	    return DirectionalLight;
 	}(Light);
 
@@ -16061,10 +16079,15 @@
 	        var _this = possibleConstructorReturn(this, (AmbientLight.__proto__ || Object.getPrototypeOf(AmbientLight)).call(this, color, intensity));
 
 	        _this.type = 'AmbientLight';
-	        _this.isAmbientLight = true;
 	        return _this;
 	    }
 
+	    createClass(AmbientLight, [{
+	        key: "isAmbientLight",
+	        get: function get$$1() {
+	            return true;
+	        }
+	    }]);
 	    return AmbientLight;
 	}(Light);
 

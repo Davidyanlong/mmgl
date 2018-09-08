@@ -16,9 +16,12 @@ class SpotLight extends Light {
         this.angle = (angle !== undefined) ? angle : Math.PI / 3;
         this.penumbra = (penumbra !== undefined) ? penumbra : 0;
         this.decay = (decay !== undefined) ? decay : 1;	// for physically correct lights, should be 2.
+        
 
-        this.isSpotLight = true;
+    }
 
+    get isSpotLight(){
+        return true;
     }
 
     // intensity = power per solid angle.

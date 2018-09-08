@@ -9,7 +9,9 @@ class PointLight extends Light {
         this.distance = (distance !== undefined) ? distance : 0;
         this.decay = (decay !== undefined) ? decay : 1;	// for physically correct lights, should be 2.
 
-        this.isPointLight = true;
+    }
+    get isPointLight(){
+        return true;
     }
     // intensity = power per solid angle.
     // ref: equation (15) from https://seblagarde.files.wordpress.com/2015/07/course_notes_moving_frostbite_to_pbr_v32.pdf

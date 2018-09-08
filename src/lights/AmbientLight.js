@@ -5,7 +5,9 @@ class AmbientLight extends Light {
     constructor(color, intensity) {
         super(color, intensity);
         this.type = 'AmbientLight';
-        this.isAmbientLight = true;
+    }
+    get isAmbientLight() {
+        return true;
     }
 }
 

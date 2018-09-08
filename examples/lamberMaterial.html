@@ -20,7 +20,7 @@
 </p>
 
 </html>
-<script src="../build/mmGL2.js"></script>
+<script src="../build/mmGL.js"></script>
 <script>
     let canvas = document.getElementById('cas');
     let renderer = new mmGL.WebGLRenderer({
@@ -61,7 +61,7 @@
         lamberMaterial.needsUpdate = true;
     }, false);
 
-    image.src = './assets/0005082044980897_b.jpg';
+    //image.src = './assets/0005082044980897_b.jpg';
     //image.src = './assets/heart01.png';
 
     let mesh = new mmGL.Mesh(geometry, lamberMaterial);
@@ -88,11 +88,11 @@
     lights[3].position.set(0, - 1, 0);
     lights[4].position.set(0, 0, 1);
 
-    // scene.add(lights[0]);
-    // scene.add(lights[1]);
-    // scene.add(lights[2]);
-    // scene.add(lights[3]);
-    // scene.add(lights[4]);
+    scene.add(lights[0]);
+    scene.add(lights[1]);
+    scene.add(lights[2]);
+    scene.add(lights[3]);
+    scene.add(lights[4]);
 
 
     //平行光
@@ -109,10 +109,10 @@
 
 
 
-    // scene.add(lights[5]);
-    // scene.add(lights[6]);
-    // scene.add(lights[7]);
-    // scene.add(lights[8]);
+    scene.add(lights[5]);
+    scene.add(lights[6]);
+    scene.add(lights[7]);
+    scene.add(lights[8]);
 
 
     //聚光灯
@@ -124,8 +124,8 @@
 
     lights[9].target.position.set(0, 0, 0);
 
-    scene.add(lights[9]);
-    scene.add(lights[10]);
+    // scene.add(lights[9]);
+    // scene.add(lights[10]);
 
 
     let camera = new mmGL.Camera();
