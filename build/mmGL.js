@@ -202,7 +202,7 @@
 	    return Events;
 	}();
 
-	var version = "0.0.21";
+	var version = "0.0.23";
 
 	var REVISION = version;
 
@@ -1444,6 +1444,58 @@
 	            var _color = _setHSL.call(this, h, s, l);
 	            _color.a = a;
 	            return _color;
+	        }
+	    }, {
+	        key: 'getHSL',
+	        value: function getHSL(target) {
+
+	            // h,s,l ranges are in 0.0 - 1.0
+
+	            if (target === undefined) {
+
+	                console.warn('Color: .getHSL() target is now required');
+	                target = { h: 0, s: 0, l: 0 };
+	            }
+
+	            var r = this.r,
+	                g = this.g,
+	                b = this.b;
+
+	            var max = Math.max(r, g, b);
+	            var min = Math.min(r, g, b);
+
+	            var hue, saturation;
+	            var lightness = (min + max) / 2.0;
+
+	            if (min === max) {
+
+	                hue = 0;
+	                saturation = 0;
+	            } else {
+
+	                var delta = max - min;
+
+	                saturation = lightness <= 0.5 ? delta / (max + min) : delta / (2 - max - min);
+
+	                switch (max) {
+
+	                    case r:
+	                        hue = (g - b) / delta + (g < b ? 6 : 0);break;
+	                    case g:
+	                        hue = (b - r) / delta + 2;break;
+	                    case b:
+	                        hue = (r - g) / delta + 4;break;
+
+	                }
+
+	                hue /= 6;
+	            }
+
+	            target.h = hue;
+	            target.s = saturation;
+	            target.l = lightness;
+
+	            return target;
 	        }
 	    }, {
 	        key: 'clone',
