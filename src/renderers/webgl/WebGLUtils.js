@@ -9,12 +9,15 @@ class WebGLUtils {
     constructor(gl) {
         this.gl = gl;
         this._map = {
+
             [RepeatWrapping]: gl.REPEAT,
-            [ClampToEdgeWrapping]: gl.MIRRORED_REPEAT,
+            [ClampToEdgeWrapping]: gl.CLAMP_TO_EDGE,
             [MirroredRepeatWrapping]: gl.MIRRORED_REPEAT,
+
             [NearestFilter]: gl.NEAREST,
             [NearestMipMapNearestFilter]: gl.NEAREST_MIPMAP_NEAREST,
             [NearestMipMapLinearFilter]: gl.NEAREST_MIPMAP_LINEAR,
+            
             [LinearFilter]: gl.LINEAR,
             [LinearMipMapNearestFilter]: gl.LINEAR_MIPMAP_NEAREST,
             [LinearMipMapLinearFilter]: gl.LINEAR_MIPMAP_LINEAR,

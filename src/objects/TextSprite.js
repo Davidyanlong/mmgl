@@ -11,7 +11,12 @@ class TextSprite extends Sprite {
         material = {},
         texture = {},
     } = {}) {
-        super(new SpriteMaterial({ ...material, map: new TextTexture(texture) }));
+        let params = {};
+        for (let key in material) {
+            params[key] = material[key];
+        }
+        params['map'] = new TextTexture(texture);
+        super(new SpriteMaterial(params));
 
         this.fontSize = fontSize;
         this.redrawInterval = redrawInterval;
@@ -44,7 +49,7 @@ class TextSprite extends Sprite {
 
             let dist = cameraWorldPos.distanceTo(pos);
             var vFOV = _Math.degToRad(camera.fov); // convert vertical fov to radians
-             height = 2 * Math.tan(vFOV / 2) * dist; // visible height
+            height = 2 * Math.tan(vFOV / 2) * dist; // visible height
             //投影位置全屏的Height 与 屏幕的高度比乘以字体的高度  
         }
 

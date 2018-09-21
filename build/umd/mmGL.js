@@ -47,20 +47,6 @@
 	  return obj;
 	};
 
-	var _extends = Object.assign || function (target) {
-	  for (var i = 1; i < arguments.length; i++) {
-	    var source = arguments[i];
-
-	    for (var key in source) {
-	      if (Object.prototype.hasOwnProperty.call(source, key)) {
-	        target[key] = source[key];
-	      }
-	    }
-	  }
-
-	  return target;
-	};
-
 	var get = function get(object, property, receiver) {
 	  if (object === null) object = Function.prototype;
 	  var desc = Object.getOwnPropertyDescriptor(object, property);
@@ -3982,7 +3968,7 @@
 	        classCallCheck(this, WebGLUtils);
 
 	        this.gl = gl;
-	        this._map = (_map = {}, defineProperty(_map, RepeatWrapping, gl.REPEAT), defineProperty(_map, ClampToEdgeWrapping, gl.MIRRORED_REPEAT), defineProperty(_map, MirroredRepeatWrapping, gl.MIRRORED_REPEAT), defineProperty(_map, NearestFilter, gl.NEAREST), defineProperty(_map, NearestMipMapNearestFilter, gl.NEAREST_MIPMAP_NEAREST), defineProperty(_map, NearestMipMapLinearFilter, gl.NEAREST_MIPMAP_LINEAR), defineProperty(_map, LinearFilter, gl.LINEAR), defineProperty(_map, LinearMipMapNearestFilter, gl.LINEAR_MIPMAP_NEAREST), defineProperty(_map, LinearMipMapLinearFilter, gl.LINEAR_MIPMAP_LINEAR), defineProperty(_map, UnsignedByteType, gl.UNSIGNED_BYTE), defineProperty(_map, UnsignedShort4444Type, gl.UNSIGNED_SHORT_4_4_4_4), defineProperty(_map, UnsignedShort5551Type, gl.UNSIGNED_SHORT_5_5_5_1), defineProperty(_map, UnsignedShort565Type, gl.UNSIGNED_SHORT_5_6_5), defineProperty(_map, ByteType, gl.BYTE), defineProperty(_map, ShortType, gl.SHORT), defineProperty(_map, UnsignedShortType, gl.UNSIGNED_SHORT), defineProperty(_map, IntType, gl.INT), defineProperty(_map, UnsignedIntType, gl.UNSIGNED_INT), defineProperty(_map, FloatType, gl.FLOAT), defineProperty(_map, AlphaFormat, gl.ALPHA), defineProperty(_map, RGBFormat, gl.RGB), defineProperty(_map, RGBAFormat, gl.RGBA), defineProperty(_map, LuminanceFormat, gl.LUMINANCE), defineProperty(_map, LuminanceAlphaFormat, gl.LUMINANCE_ALPHA), defineProperty(_map, DepthFormat, gl.DEPTH_COMPONENT), defineProperty(_map, DepthStencilFormat, gl.DEPTH_STENCIL), defineProperty(_map, AddEquation, gl.FUNC_ADD), defineProperty(_map, SubtractEquation, gl.FUNC_SUBTRACT), defineProperty(_map, ReverseSubtractEquation, gl.FUNC_REVERSE_SUBTRACT), defineProperty(_map, ZeroFactor, gl.ZERO), defineProperty(_map, OneFactor, gl.ONE), defineProperty(_map, SrcColorFactor, gl.SRC_COLOR), defineProperty(_map, OneMinusSrcColorFactor, gl.ONE_MINUS_SRC_COLOR), defineProperty(_map, SrcAlphaFactor, gl.SRC_ALPHA), defineProperty(_map, OneMinusSrcAlphaFactor, gl.ONE_MINUS_SRC_ALPHA), defineProperty(_map, DstAlphaFactor, gl.DST_ALPHA), defineProperty(_map, OneMinusDstAlphaFactor, gl.ONE_MINUS_DST_ALPHA), defineProperty(_map, DstColorFactor, gl.DST_COLOR), defineProperty(_map, OneMinusDstColorFactor, gl.ONE_MINUS_DST_COLOR), defineProperty(_map, SrcAlphaSaturateFactor, gl.SRC_ALPHA_SATURATE), _map);
+	        this._map = (_map = {}, defineProperty(_map, RepeatWrapping, gl.REPEAT), defineProperty(_map, ClampToEdgeWrapping, gl.CLAMP_TO_EDGE), defineProperty(_map, MirroredRepeatWrapping, gl.MIRRORED_REPEAT), defineProperty(_map, NearestFilter, gl.NEAREST), defineProperty(_map, NearestMipMapNearestFilter, gl.NEAREST_MIPMAP_NEAREST), defineProperty(_map, NearestMipMapLinearFilter, gl.NEAREST_MIPMAP_LINEAR), defineProperty(_map, LinearFilter, gl.LINEAR), defineProperty(_map, LinearMipMapNearestFilter, gl.LINEAR_MIPMAP_NEAREST), defineProperty(_map, LinearMipMapLinearFilter, gl.LINEAR_MIPMAP_LINEAR), defineProperty(_map, UnsignedByteType, gl.UNSIGNED_BYTE), defineProperty(_map, UnsignedShort4444Type, gl.UNSIGNED_SHORT_4_4_4_4), defineProperty(_map, UnsignedShort5551Type, gl.UNSIGNED_SHORT_5_5_5_1), defineProperty(_map, UnsignedShort565Type, gl.UNSIGNED_SHORT_5_6_5), defineProperty(_map, ByteType, gl.BYTE), defineProperty(_map, ShortType, gl.SHORT), defineProperty(_map, UnsignedShortType, gl.UNSIGNED_SHORT), defineProperty(_map, IntType, gl.INT), defineProperty(_map, UnsignedIntType, gl.UNSIGNED_INT), defineProperty(_map, FloatType, gl.FLOAT), defineProperty(_map, AlphaFormat, gl.ALPHA), defineProperty(_map, RGBFormat, gl.RGB), defineProperty(_map, RGBAFormat, gl.RGBA), defineProperty(_map, LuminanceFormat, gl.LUMINANCE), defineProperty(_map, LuminanceAlphaFormat, gl.LUMINANCE_ALPHA), defineProperty(_map, DepthFormat, gl.DEPTH_COMPONENT), defineProperty(_map, DepthStencilFormat, gl.DEPTH_STENCIL), defineProperty(_map, AddEquation, gl.FUNC_ADD), defineProperty(_map, SubtractEquation, gl.FUNC_SUBTRACT), defineProperty(_map, ReverseSubtractEquation, gl.FUNC_REVERSE_SUBTRACT), defineProperty(_map, ZeroFactor, gl.ZERO), defineProperty(_map, OneFactor, gl.ONE), defineProperty(_map, SrcColorFactor, gl.SRC_COLOR), defineProperty(_map, OneMinusSrcColorFactor, gl.ONE_MINUS_SRC_COLOR), defineProperty(_map, SrcAlphaFactor, gl.SRC_ALPHA), defineProperty(_map, OneMinusSrcAlphaFactor, gl.ONE_MINUS_SRC_ALPHA), defineProperty(_map, DstAlphaFactor, gl.DST_ALPHA), defineProperty(_map, OneMinusDstAlphaFactor, gl.ONE_MINUS_DST_ALPHA), defineProperty(_map, DstColorFactor, gl.DST_COLOR), defineProperty(_map, OneMinusDstColorFactor, gl.ONE_MINUS_DST_COLOR), defineProperty(_map, SrcAlphaSaturateFactor, gl.SRC_ALPHA_SATURATE), _map);
 	    }
 
 	    createClass(WebGLUtils, [{
@@ -6653,7 +6639,7 @@
 	        //
 	        // Also changing the encoding after already used by a Material will not automatically make the Material
 	        // update.  You need to explicitly call Material.needsUpdate to trigger it to recompile.
-	        // this.encoding = encoding !== undefined ? encoding :  LinearEncoding;
+	        //this.encoding = encoding !== undefined ? encoding :  LinearEncoding;
 
 	        _this.version = 0;
 	        _this.onUpdate = null;
@@ -8064,6 +8050,7 @@
 	        this._properties = properties;
 	        this._info = info;
 	        this._state = state;
+	        this.extensions = extensions;
 	        this._capabilities = capabilities;
 	        this._utils = utils;
 	    }
@@ -8250,7 +8237,10 @@
 	function setTextureParameters(textureType, texture, isPowerOfTwoImage) {
 
 	    var _gl = this.gl,
-	        utils = this._utils;
+	        extensions = this.extensions,
+	        utils = this._utils,
+	        properties = this._properties,
+	        extension = void 0;
 
 	    if (isPowerOfTwoImage) {
 
@@ -8275,6 +8265,20 @@
 	        if (texture.minFilter !== NearestFilter && texture.minFilter !== LinearFilter) {
 
 	            console.warn('WebGLRenderer: Texture is not power of two. Texture.minFilter should be set to NearestFilter or LinearFilter.', texture);
+	        }
+	    }
+
+	    extension = extensions.get('EXT_texture_filter_anisotropic');
+
+	    if (extension) {
+
+	        if (texture.type === FloatType && extensions.get('OES_texture_float_linear') === null) return;
+	        if (texture.type === HalfFloatType && extensions.get('OES_texture_half_float_linear') === null) return;
+
+	        if (texture.anisotropy > 1 || properties.get(texture).__currentAnisotropy) {
+
+	            _gl.texParameterf(textureType, extension.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(texture.anisotropy, capabilities.getMaxAnisotropy()));
+	            properties.get(texture).__currentAnisotropy = texture.anisotropy;
 	        }
 	    }
 	}
@@ -8678,7 +8682,8 @@
 	                _stencil = parameters.stencil !== undefined ? parameters.stencil : true,
 	                _antialias = parameters.antialias !== undefined ? parameters.antialias : false,
 	                _premultipliedAlpha = parameters.premultipliedAlpha !== undefined ? parameters.premultipliedAlpha : true,
-	                _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer : false;
+	                _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer : false,
+	                _powerPreference = parameters.powerPreference !== undefined ? parameters.powerPreference : 'default';
 
 	            me.domElement = _canvas;
 	            me.gl = _context;
@@ -8694,7 +8699,8 @@
 	                    stencil: _stencil,
 	                    antialias: _antialias,
 	                    premultipliedAlpha: _premultipliedAlpha,
-	                    preserveDrawingBuffer: _preserveDrawingBuffer
+	                    preserveDrawingBuffer: _preserveDrawingBuffer,
+	                    powerPreference: _powerPreference
 	                };
 
 	                var _gl = _context || _canvas.getContext('webgl', contextAttributes) || _canvas.getContext('experimental-webgl', contextAttributes);
@@ -8714,6 +8720,15 @@
 
 	                _canvas.addEventListener('webglcontextlost', onContextLost.bind(me), false);
 	                _canvas.addEventListener('webglcontextrestored', onContextRestore.bind(me), false);
+
+	                // Some experimental-webgl implementations do not have getShaderPrecisionFormat
+	                if (_gl.getShaderPrecisionFormat === undefined) {
+
+	                    _gl.getShaderPrecisionFormat = function () {
+
+	                        return { 'rangeMin': 1, 'rangeMax': 1, 'precision': 1 };
+	                    };
+	                }
 	            } catch (error) {
 
 	                console.error('WebGLRenderer: ' + error);
@@ -8781,7 +8796,7 @@
 	            this._state = new WebGLState(_gl, this._extensions);
 	            this._renderStates = new WebGLRenderStates();
 	            this._capabilities = new WebGLCapabilities(_gl, parameters);
-	            this._textures = new WebGLTextures(_gl, null, this._state, this._properties, this._capabilities, this._utils, this._info);
+	            this._textures = new WebGLTextures(_gl, this._extensions, this._state, this._properties, this._capabilities, this._utils, this._info);
 	            this._attributes = new WebGLAttributes(_gl);
 	            this._geometries = new WebGLGeometries(_gl, this._attributes, this._info);
 	            this._objects = new WebGLObjects(this._geometries, this._info);
@@ -8794,7 +8809,7 @@
 	            //console.dir(this._capabilities);
 	            this._info.programs = this._programCache.programs;
 
-	            me.setSize(_width, _height, true);
+	            //me.setSize(_width, _height, true);
 	        }
 	    }, {
 	        key: 'getContext',
@@ -8837,8 +8852,8 @@
 	            var me = this;
 	            var _pixelRatio = this._pixelRatio;
 	            var _canvas = me.domElement;
-	            var _width = width;
-	            var _height = height;
+	            this._width = width;
+	            this._height = height;
 
 	            _canvas.width = width * _pixelRatio;
 	            _canvas.height = height * _pixelRatio;
@@ -8861,12 +8876,12 @@
 	            var gl = this.gl;
 	            var viewport = new Vector4(x, y, width, height);
 
-	            if (this._currentViewport.equals(viewport) === false) {
+	            //if (this._currentViewport.equals(viewport) === false) {
 
-	                this._currentViewport.copy(viewport).multiplyScalar(this._pixelRatio);
+	            this._currentViewport.copy(viewport).multiplyScalar(this._pixelRatio);
 
-	                this._state.viewport(this._currentViewport);
-	            }
+	            this._state.viewport(this._currentViewport);
+	            //}
 	        }
 	        //设置清除色
 
@@ -13884,7 +13899,13 @@
 
 	        classCallCheck(this, TextSprite);
 
-	        var _this = possibleConstructorReturn(this, (TextSprite.__proto__ || Object.getPrototypeOf(TextSprite)).call(this, new SpriteMaterial$$1(_extends({}, material, { map: new TextTexture(texture) }))));
+	        var params = {};
+	        for (var key in material) {
+	            params[key] = material[key];
+	        }
+	        params['map'] = new TextTexture(texture);
+
+	        var _this = possibleConstructorReturn(this, (TextSprite.__proto__ || Object.getPrototypeOf(TextSprite)).call(this, new SpriteMaterial$$1(params)));
 
 	        _this.fontSize = fontSize;
 	        _this.redrawInterval = redrawInterval;

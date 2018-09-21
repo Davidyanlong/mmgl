@@ -101,8 +101,8 @@ class WebGLRenderer extends Events {
             _stencil = parameters.stencil !== undefined ? parameters.stencil : true,
             _antialias = parameters.antialias !== undefined ? parameters.antialias : false,
             _premultipliedAlpha = parameters.premultipliedAlpha !== undefined ? parameters.premultipliedAlpha : true,
-            _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer : false;
-
+            _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer : false,
+            _powerPreference = parameters.powerPreference !== undefined ? parameters.powerPreference : 'default';
 
         me.domElement = _canvas;
         me.gl = _context;
@@ -118,7 +118,8 @@ class WebGLRenderer extends Events {
                 stencil: _stencil,
                 antialias: _antialias,
                 premultipliedAlpha: _premultipliedAlpha,
-                preserveDrawingBuffer: _preserveDrawingBuffer
+                preserveDrawingBuffer: _preserveDrawingBuffer,
+                powerPreference: _powerPreference
             };
 
             let _gl = _context || _canvas.getContext('webgl', contextAttributes) || _canvas.getContext('experimental-webgl', contextAttributes);
@@ -141,6 +142,17 @@ class WebGLRenderer extends Events {
 
             _canvas.addEventListener('webglcontextlost', onContextLost.bind(me), false);
             _canvas.addEventListener('webglcontextrestored', onContextRestore.bind(me), false);
+
+            // Some experimental-webgl implementations do not have getShaderPrecisionFormat
+            if ( _gl.getShaderPrecisionFormat === undefined ) {
+
+                _gl.getShaderPrecisionFormat = function () {
+    
+                    return { 'rangeMin': 1, 'rangeMax': 1, 'precision': 1 };
+    
+                };
+    
+            }
 
         } catch (error) {
 
@@ -209,7 +221,7 @@ class WebGLRenderer extends Events {
         this._state = new WebGLState(_gl, this._extensions);
         this._renderStates = new WebGLRenderStates();
         this._capabilities = new WebGLCapabilities(_gl, parameters);
-        this._textures = new WebGLTextures(_gl, null, this._state, this._properties, this._capabilities, this._utils, this._info);
+        this._textures = new WebGLTextures(_gl, this._extensions, this._state, this._properties, this._capabilities, this._utils, this._info);
         this._attributes = new WebGLAttributes(_gl);
         this._geometries = new WebGLGeometries(_gl, this._attributes, this._info);
         this._objects = new WebGLObjects(this._geometries, this._info);
@@ -223,7 +235,7 @@ class WebGLRenderer extends Events {
         //console.dir(this._capabilities);
         this._info.programs = this._programCache.programs;
 
-        me.setSize(_width, _height, true);
+        //me.setSize(_width, _height, true);
 
     }
 
@@ -259,8 +271,8 @@ class WebGLRenderer extends Events {
         let me = this;
         let _pixelRatio = this._pixelRatio;
         let _canvas = me.domElement;
-        let _width = width;
-        let _height = height;
+        this._width = width;
+        this._height = height;
 
 
         _canvas.width = width * _pixelRatio;
@@ -283,12 +295,12 @@ class WebGLRenderer extends Events {
         let gl = this.gl;
         let viewport = new Vector4(x, y, width, height);
 
-        if (this._currentViewport.equals(viewport) === false) {
+        //if (this._currentViewport.equals(viewport) === false) {
 
             this._currentViewport.copy(viewport).multiplyScalar(this._pixelRatio);
 
             this._state.viewport(this._currentViewport);
-        }
+        //}
 
     }
     //设置清除色

@@ -1,11 +1,5 @@
 
-import {
-    ClampToEdgeWrapping,
-    NearestFilter,
-    LinearFilter,
-    NearestMipMapNearestFilter,
-    NearestMipMapLinearFilter
-} from '../../constants';
+import { LinearFilter, NearestFilter, RGBFormat, RGBAFormat, DepthFormat, DepthStencilFormat, UnsignedShortType, UnsignedIntType, UnsignedInt248Type, FloatType, HalfFloatType, ClampToEdgeWrapping, NearestMipMapLinearFilter, NearestMipMapNearestFilter } from '../../constants.js';
 import { _Math } from '../../maths/Math';
 
 class WebGLTextures {
@@ -14,6 +8,7 @@ class WebGLTextures {
         this._properties = properties;
         this._info = info;
         this._state = state;
+        this.extensions = extensions;
         this._capabilities = capabilities;
         this._utils = utils;
     }
@@ -216,7 +211,10 @@ function makePowerOfTwo(image) {
 function setTextureParameters(textureType, texture, isPowerOfTwoImage) {
 
     let _gl = this.gl,
-        utils = this._utils;
+        extensions = this.extensions,
+        utils = this._utils,
+        properties = this._properties,
+        extension;
 
     if (isPowerOfTwoImage) {
 
@@ -243,6 +241,22 @@ function setTextureParameters(textureType, texture, isPowerOfTwoImage) {
         if (texture.minFilter !== NearestFilter && texture.minFilter !== LinearFilter) {
 
             console.warn('WebGLRenderer: Texture is not power of two. Texture.minFilter should be set to NearestFilter or LinearFilter.', texture);
+
+        }
+
+    }
+
+    extension = extensions.get('EXT_texture_filter_anisotropic');
+
+    if (extension) {
+
+        if (texture.type === FloatType && extensions.get('OES_texture_float_linear') === null) return;
+        if (texture.type === HalfFloatType && extensions.get('OES_texture_half_float_linear') === null) return;
+
+        if (texture.anisotropy > 1 || properties.get(texture).__currentAnisotropy) {
+
+            _gl.texParameterf(textureType, extension.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(texture.anisotropy, capabilities.getMaxAnisotropy()));
+            properties.get(texture).__currentAnisotropy = texture.anisotropy;
 
         }
 

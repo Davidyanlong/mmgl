@@ -48,7 +48,7 @@ class Texture extends Events {
         //
         // Also changing the encoding after already used by a Material will not automatically make the Material
         // update.  You need to explicitly call Material.needsUpdate to trigger it to recompile.
-       // this.encoding = encoding !== undefined ? encoding :  LinearEncoding;
+        //this.encoding = encoding !== undefined ? encoding :  LinearEncoding;
 
         this.version = 0;
         this.onUpdate = null;

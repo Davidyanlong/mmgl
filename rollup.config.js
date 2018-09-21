@@ -63,7 +63,7 @@ export default {
         },
         {
             format: 'cjs',
-            moduleName: 'mmGL',
+           // moduleName: 'mmGL',
             dest: 'build/cjs/mmGL.js',
         }
     ]
