@@ -218,9 +218,9 @@ class WebGLRenderer extends Events {
         this._utils = new WebGLUtils(_gl);
         this._info = new WebGLInfo(_gl);
         this._properties = new WebGLProperties();
-        this._state = new WebGLState(_gl, this._extensions);
-        this._renderStates = new WebGLRenderStates();
         this._capabilities = new WebGLCapabilities(_gl, parameters);
+        this._state = new WebGLState(_gl, this._extensions,this._capabilities);
+        this._renderStates = new WebGLRenderStates();  
         this._textures = new WebGLTextures(_gl, this._extensions, this._state, this._properties, this._capabilities, this._utils, this._info);
         this._attributes = new WebGLAttributes(_gl);
         this._geometries = new WebGLGeometries(_gl, this._attributes, this._info);

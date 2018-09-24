@@ -189,7 +189,7 @@ var Events = function () {
     return Events;
 }();
 
-var version = "0.0.23";
+var version = "0.0.24";
 
 var REVISION = version;
 
@@ -4229,15 +4229,12 @@ var Switch = function () {
 }();
 
 var AttributeSwitch = function () {
-    function AttributeSwitch(gl, extensions) {
+    function AttributeSwitch(gl, extensions, capabilities) {
         classCallCheck(this, AttributeSwitch);
 
         this.gl = gl;
         this._extensions = extensions;
-        var capabilities = new WebGLCapabilities(gl);
         var maxVertexAttributes = capabilities.maxAttributes;
-        //回收
-        capabilities = null;
 
         this._newAttributes = new Uint8Array(maxVertexAttributes);
         this._enabledAttributes = new Uint8Array(maxVertexAttributes);
@@ -4443,11 +4440,11 @@ var BlendingState = function () {
 }();
 
 var TextureState = function () {
-    function TextureState(gl) {
+    function TextureState(gl, capabilities) {
         classCallCheck(this, TextureState);
 
         this.gl = gl;
-
+        this._capabilities = capabilities;
         this._currentTextureSlot = null;
         this._currentBoundTextures = {};
         this._currentTextureSlot = null;
@@ -4480,7 +4477,7 @@ var TextureState = function () {
         key: "activeTexture",
         value: function activeTexture(webglSlot) {
             var gl = this.gl;
-            var _capabilities = new WebGLCapabilities(gl);
+            var _capabilities = this._capabilities;
             var _maxTextures = _capabilities.maxCombinedTextures;
 
             if (webglSlot === undefined) webglSlot = gl.TEXTURE0 + _maxTextures - 1;
@@ -4490,7 +4487,6 @@ var TextureState = function () {
                 gl.activeTexture(webglSlot);
                 this._currentTextureSlot = webglSlot;
             }
-            _capabilities = null;
         }
     }, {
         key: "bindTexture",
@@ -4556,7 +4552,7 @@ function getLineWidthAvailable(gl) {
 }
 
 var WebGLState = function () {
-    function WebGLState(gl, extensions) {
+    function WebGLState(gl, extensions, capabilities) {
         classCallCheck(this, WebGLState);
 
         this.gl = gl;
@@ -4567,7 +4563,7 @@ var WebGLState = function () {
             stencil: new StencilBuffer(gl)
         };
 
-        this._attributeSwitch = new AttributeSwitch(gl, extensions);
+        this._attributeSwitch = new AttributeSwitch(gl, extensions, capabilities);
         this._switch = new Switch(gl);
 
         this._currentProgram = null;
@@ -4579,7 +4575,7 @@ var WebGLState = function () {
 
         this._currentLineWidth = null;
 
-        this._textureState = new TextureState(gl);
+        this._textureState = new TextureState(gl, capabilities);
         this._currentViewport = new Vector4();
 
         this._initState(gl);
@@ -8791,9 +8787,9 @@ var WebGLRenderer = function (_Events) {
             this._utils = new WebGLUtils(_gl);
             this._info = new WebGLInfo(_gl);
             this._properties = new WebGLProperties();
-            this._state = new WebGLState(_gl, this._extensions);
-            this._renderStates = new WebGLRenderStates();
             this._capabilities = new WebGLCapabilities(_gl, parameters);
+            this._state = new WebGLState(_gl, this._extensions, this._capabilities);
+            this._renderStates = new WebGLRenderStates();
             this._textures = new WebGLTextures(_gl, this._extensions, this._state, this._properties, this._capabilities, this._utils, this._info);
             this._attributes = new WebGLAttributes(_gl);
             this._geometries = new WebGLGeometries(_gl, this._attributes, this._info);

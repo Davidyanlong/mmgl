@@ -1,5 +1,4 @@
 import { Vector4 } from "../../maths/Vector4";
-import { WebGLCapabilities } from "./WebGLCapabilities";
 import { NotEqualDepth, GreaterDepth, GreaterEqualDepth, EqualDepth, LessEqualDepth, LessDepth, AlwaysDepth, NeverDepth, CullFaceFront, CullFaceBack, CullFaceNone, CustomBlending, MultiplyBlending, SubtractiveBlending, AdditiveBlending, NoBlending, NormalBlending, DoubleSide, BackSide } from '../../constants.js';
 import { WebGLUtils } from "./WebGLUtils";
 
@@ -232,13 +231,10 @@ class Switch {
 }
 
 class AttributeSwitch {
-    constructor(gl, extensions) {
+    constructor(gl, extensions,capabilities) {
         this.gl = gl;
         this._extensions = extensions;
-        let capabilities = new WebGLCapabilities(gl);
         let maxVertexAttributes = capabilities.maxAttributes;
-        //回收
-        capabilities = null;
 
         this._newAttributes = new Uint8Array(maxVertexAttributes);
         this._enabledAttributes = new Uint8Array(maxVertexAttributes);
@@ -459,9 +455,9 @@ class BlendingState {
 }
 
 class TextureState {
-    constructor(gl) {
+    constructor(gl,capabilities) {
         this.gl = gl;
-
+        this._capabilities = capabilities;
         this._currentTextureSlot = null;
         this._currentBoundTextures = {};
         this._currentTextureSlot = null;
@@ -494,7 +490,7 @@ class TextureState {
 
     activeTexture(webglSlot) {
         let gl = this.gl;
-        let _capabilities = new WebGLCapabilities(gl);
+        let _capabilities = this._capabilities;
         let _maxTextures = _capabilities.maxCombinedTextures;
 
         if (webglSlot === undefined) webglSlot = gl.TEXTURE0 + _maxTextures - 1;
@@ -505,7 +501,6 @@ class TextureState {
             this._currentTextureSlot = webglSlot;
 
         }
-        _capabilities = null;
 
     }
 
@@ -577,7 +572,7 @@ function getLineWidthAvailable(gl) {
 
 
 class WebGLState {
-    constructor(gl, extensions) {
+    constructor(gl, extensions,capabilities) {
         this.gl = gl;
 
         this.buffers = {
@@ -586,7 +581,7 @@ class WebGLState {
             stencil: new StencilBuffer(gl)
         }
 
-        this._attributeSwitch = new AttributeSwitch(gl, extensions);
+        this._attributeSwitch = new AttributeSwitch(gl, extensions,capabilities);
         this._switch = new Switch(gl);
 
         this._currentProgram = null;
@@ -598,7 +593,7 @@ class WebGLState {
 
         this._currentLineWidth = null;
 
-        this._textureState = new TextureState(gl)
+        this._textureState = new TextureState(gl,capabilities)
         this._currentViewport = new Vector4();
 
         this._initState(gl)

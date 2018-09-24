@@ -19,7 +19,7 @@
         varying vec2 v_Texcoord;
         void main()
         {
-            vec4 proj = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+            vec4 proj = projectionMatrix *  modelViewMatrix * vec4( position, 1.0 );
             vec2 screen = (proj.xy / abs(proj.w) + 1.0) * 0.5 * viewport.zw;
             screen += offset;
             proj.xy = (screen / viewport.zw - 0.5) * 2.0 * abs(proj.w);
@@ -85,14 +85,17 @@
 
 
     let canvas = document.createElement("canvas");
-    canvas.width = 1024;
-    canvas.height = 256;
+    canvas.width = 1024 * window.devicePixelRatio;
+    canvas.height = 256 * window.devicePixelRatio;
+    canvas.style.width = 1024 + 'px';
+    canvas.style.height = 256 + 'px';
 
     var ctx = canvas.getContext("2d");
     //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.font = "100px Arial";
+    ctx.font = "120px Arial";
     ctx.fillStyle="#ff0000";
     ctx.fillText("Hello World", 10,100);
+    document.body.appendChild(canvas);
 
     let texture = new mmGL.Texture();
 
@@ -121,7 +124,7 @@
     let sprite = new mmGL.Sprite(material);
 
 
-    sprite.scale.set(canvas.width/canvas.height, 1, 1).multiplyScalar(10);
+    sprite.scale.set(canvas.width/canvas.height, 1, 1).multiplyScalar(20);
 
 
     scene.add(sprite);

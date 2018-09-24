@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>text test</title>
+
+    <script id="vertexShader" type="x-shader/x-vertex">
+        attribute vec2 position;
+        attribute vec2 uv;
+        
+        uniform mat4 modelViewMatrix;
+		uniform mat4 projectionMatrix;
+        uniform vec2 u_texsize;
+        
+        varying vec2 v_texcoord;
+        
+        void main() {
+            gl_Position = projectionMatrix *  modelViewMatrix * vec4(position.xy, 0, 1);
+            v_texcoord = uv / u_texsize;
+        }
+    </script>
+
+    <script id="fragmentShader" type="x-shader/x-fragment">
+        precision highp float;
+        precision highp int;
+        precision highp sampler2D;
+        
+        uniform sampler2D map;
+        uniform vec4 u_color;
+        uniform float u_buffer;
+        uniform float u_gamma;
+
+        varying vec2 v_texcoord;
+
+        void main() {
+            float dist = texture2D(map, v_texcoord).r;
+            float alpha = smoothstep(u_buffer - u_gamma, u_buffer + u_gamma, dist);
+            gl_FragColor =vec4(u_color.rgb, alpha * u_color.a);
+        }
+    </script>
+
+</head>
+
+<body>
+
+</body>
+
+</html>
+<script src="../../build/mmGL.js"></script>
+
+<script type="module">
+
+    import { SDFImage } from './sdfImage.js';
+    let chars = '杨彦龙';
+    var fontSize = 60;
+    var fontWeight = 400;
+    var buffer = fontSize / 8;
+    var radius = fontSize / 3;
+
+    let sdfImg = new SDFImage({ fontSize, radius }, chars);
+    sdfImg.updateSDF();
+    document.body.appendChild(sdfImg.canvas);
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    let renderer = new mmGL.WebGLRenderer({
+        antialias: true
+    })
+
+
+    let camera = new mmGL.PerspectiveCamera(45, 1, 0.1, 1000);
+
+    camera.position.set(0, 0, 100);
+
+
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(window.devicePixelRatio);
+
+    document.body.appendChild(renderer.domElement);
+
+    let scene = new mmGL.Scene();
+    scene.background = new mmGL.Color(0xffffff);
+
+
+    // var textCtx = document.createElement("canvas").getContext("2d");
+
+    // // Puts text in center of canvas.
+    // function makeTextCanvas(text, width, height) {
+    //     textCtx.canvas.width = width;
+    //     textCtx.canvas.height = height;
+    //     textCtx.font = "20px monospace";
+    //     textCtx.textAlign = "center";
+    //     textCtx.textBaseline = "middle";
+    //     textCtx.fillStyle = "white";
+    //     textCtx.clearRect(0, 0, textCtx.canvas.width, textCtx.canvas.height);
+    //     textCtx.fillText(text, width / 2, height / 2);
+    //     return textCtx.canvas;
+    // }
+
+    let str = chars;
+    let bufferGeometry = new mmGL.BufferGeometry();
+    function drawText(size) {
+        var vertexElements = [];
+        var textureElements = [];
+
+        var fontsize = 24;
+        var buf = fontsize / 8;
+        var width = fontsize + buf * 2; // glyph width
+        var height = fontsize + buf * 2; // glyph height
+        var bx = 0; // bearing x
+        var by = fontsize / 2 + buf; // bearing y
+        var advance = fontsize; // advance
+
+        var scale = size / fontsize;
+        var lineWidth = str.length * fontsize * scale;
+
+        let sdfs = sdfImg.sdfs;
+
+        var pen = { x: width / 2 - lineWidth / 2, y: height / 2 };
+        for (var i = 0; i < str.length; i++) {
+            var posX = sdfs[str[i]].x; // pos in sprite x
+            var posY = sdfs[str[i]].y; // pos in sprite y
+
+            vertexElements.push(
+                pen.x + ((bx - buf) * scale), pen.y - by * scale,
+                pen.x + ((bx - buf + width) * scale), pen.y - by * scale,
+                0,
+                pen.x + ((bx - buf) * scale), pen.y + (height - by) * scale,
+
+                pen.x + ((bx - buf + width) * scale), pen.y - by * scale,
+                0,
+                pen.x + ((bx - buf) * scale), pen.y + (height - by) * scale,
+                pen.x + ((bx - buf + width) * scale), pen.y + (height - by) * scale,
+                0
+            );
+
+            textureElements.push(
+                posX, posY,
+                posX + width, posY,
+                posX, posY + height,
+                posX + width, posY,
+                posX, posY + height,
+                posX + width, posY + height
+            );
+
+            pen.x = pen.x + advance * scale;
+        }
+
+        let positionBuffer = new mmGL.Float32BufferAttribute(vertexElements, 3);
+        bufferGeometry.addAttribute('position', positionBuffer);
+
+        let uvBuffer = new mmGL.Float32BufferAttribute(textureElements, 2);
+        bufferGeometry.addAttribute('uv', uvBuffer);
+
+    }
+
+
+    let texture = new mmGL.Texture();
+
+    var material = new mmGL.RawShaderMaterial({
+        //depthWrite: false,
+         // color: 'red',
+        // transparent: true,
+        // blendSrc: mmGL.OneFactor,
+        // blendDst: mmGL.OneMinusSrcAlphaFactor,
+        uniforms: {
+            u_texsize: { value: new mmGL.Vector2(sdfImg.canvas.width, sdfImg.canvas.height) },
+            u_buffer: { value: 0.75 },
+            u_gamma: { value: 0 },
+            map: { value: texture },
+            diffuse: { value: new mmGL.Color(0xeeeeee) },
+            
+        },
+        vertexShader: document.getElementById('vertexShader').textContent,
+        fragmentShader: document.getElementById('fragmentShader').textContent,
+
+    });
+
+
+    var textCanvas = sdfImg.canvas;
+    var textWidth = textCanvas.width;
+    var textHeight = textCanvas.height;
+    texture.image = textCanvas;
+    texture.premultiplyAlpha = true;
+    texture.minFilter = mmGL.LinearFilter;
+    texture.needsUpdate = true;
+    material.map = texture;
+    material.needsUpdate = true;
+
+
+    drawText(5);
+    let mesh = new mmGL.Mesh(bufferGeometry, material);
+
+
+    // sprite.scale.set(textCanvas.width / textCanvas.height, 1, 1).multiplyScalar(10);
+
+
+    scene.add(mesh);
+
+
+    let lastTime = (new Date()).getTime();
+    (function tick() {
+        let now = (new Date()).getTime();
+        renderer.render(scene, camera);
+        //scene.position.z+=-0.1;
+        window.requestAnimationFrame(tick)
+    })()
+
+</script>
