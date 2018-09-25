@@ -16,7 +16,7 @@
         varying vec2 v_texcoord;
         
         void main() {
-            gl_Position = projectionMatrix *  modelViewMatrix * vec4(position.xy, 0, 1);
+            gl_Position = projectionMatrix *  modelViewMatrix * vec4(position.xy, 0.0,1.0);
             v_texcoord = uv / u_texsize;
         }
     </script>
@@ -52,35 +52,37 @@
 <script type="module">
 
     import { SDFImage } from './sdfImage.js';
-    let chars = '杨彦龙';
-    var fontSize = 60;
+    let chars = '杨';
+    var fontSize = 24;
     var fontWeight = 400;
     var buffer = fontSize / 8;
     var radius = fontSize / 3;
 
     let sdfImg = new SDFImage({ fontSize, radius }, chars);
     sdfImg.updateSDF();
-    document.body.appendChild(sdfImg.canvas);
+    //document.body.appendChild(sdfImg.canvas);
 
-    let width = window.innerWidth;
-    let height = window.innerHeight;
+    let allWidth = window.innerWidth;
+    let allHeight = window.innerHeight;
     let renderer = new mmGL.WebGLRenderer({
         antialias: true
     })
 
 
-    let camera = new mmGL.PerspectiveCamera(45, 1, 0.1, 1000);
+    let camera = new mmGL.PerspectiveCamera(75, allWidth / allHeight, 0.1, 10000);
 
-    camera.position.set(0, 0, 100);
+    //camera = new mmGL.OrthographicCamera(-allWidth/2, allWidth/2, allHeight/2, -allHeight/2, 0, -1)
+
+    camera.position.set(0, 0, 2000);
 
 
-    renderer.setSize(width, height);
+    renderer.setSize(allWidth, allHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
 
     document.body.appendChild(renderer.domElement);
 
     let scene = new mmGL.Scene();
-    scene.background = new mmGL.Color(0xffffff);
+    scene.background = new mmGL.Color(0xeeeeee);
 
 
     // var textCtx = document.createElement("canvas").getContext("2d");
@@ -104,7 +106,7 @@
         var vertexElements = [];
         var textureElements = [];
 
-        var fontsize = 24;
+        var fontsize = 64;
         var buf = fontsize / 8;
         var width = fontsize + buf * 2; // glyph width
         var height = fontsize + buf * 2; // glyph height
@@ -117,7 +119,7 @@
 
         let sdfs = sdfImg.sdfs;
 
-        var pen = { x: width / 2 - lineWidth / 2, y: height / 2 };
+        var pen = { x: allWidth / 2 - lineWidth / 2, y: allHeight / 2 };
         for (var i = 0; i < str.length; i++) {
             var posX = sdfs[str[i]].x; // pos in sprite x
             var posY = sdfs[str[i]].y; // pos in sprite y
@@ -125,29 +127,28 @@
             vertexElements.push(
                 pen.x + ((bx - buf) * scale), pen.y - by * scale,
                 pen.x + ((bx - buf + width) * scale), pen.y - by * scale,
-                0,
                 pen.x + ((bx - buf) * scale), pen.y + (height - by) * scale,
-
+                
+                pen.x + ((bx - buf) * scale), pen.y + (height - by) * scale,
                 pen.x + ((bx - buf + width) * scale), pen.y - by * scale,
-                0,
-                pen.x + ((bx - buf) * scale), pen.y + (height - by) * scale,
-                pen.x + ((bx - buf + width) * scale), pen.y + (height - by) * scale,
-                0
+                
+                pen.x + ((bx - buf + width) * scale), pen.y + (height - by) * scale
             );
 
             textureElements.push(
                 posX, posY,
-                posX + width, posY,
-                posX, posY + height,
-                posX + width, posY,
-                posX, posY + height,
-                posX + width, posY + height
+            posX + width, posY,
+            posX, posY + height,
+
+            posX, posY + height,
+            posX + width, posY,
+            posX + width, posY + height
             );
 
             pen.x = pen.x + advance * scale;
         }
 
-        let positionBuffer = new mmGL.Float32BufferAttribute(vertexElements, 3);
+        let positionBuffer = new mmGL.Float32BufferAttribute(vertexElements, 2);
         bufferGeometry.addAttribute('position', positionBuffer);
 
         let uvBuffer = new mmGL.Float32BufferAttribute(textureElements, 2);
@@ -160,17 +161,18 @@
 
     var material = new mmGL.RawShaderMaterial({
         //depthWrite: false,
-         // color: 'red',
+        // color: 'red',
         // transparent: true,
         // blendSrc: mmGL.OneFactor,
         // blendDst: mmGL.OneMinusSrcAlphaFactor,
+       // size: mmGL.Double,
         uniforms: {
             u_texsize: { value: new mmGL.Vector2(sdfImg.canvas.width, sdfImg.canvas.height) },
             u_buffer: { value: 0.75 },
-            u_gamma: { value: 0 },
+            u_gamma: { value: 0.02 },
             map: { value: texture },
-            diffuse: { value: new mmGL.Color(0xeeeeee) },
-            
+            u_color: { value: new mmGL.Color(0xFFFFFF) },
+
         },
         vertexShader: document.getElementById('vertexShader').textContent,
         fragmentShader: document.getElementById('fragmentShader').textContent,
@@ -178,18 +180,34 @@
     });
 
 
+
+ //var image = document.createElementNS('http://www.w3.org/1999/xhtml', 'img');
+
+// image.addEventListener('load', function () {
+
+//     texture.image = this;
+//     texture.needsUpdate = true;
+//     material.map = texture;
+//     material.needsUpdate = true;
+// }, false);
+
+// image.src = '../assets/0005082044980897_b.jpg';
+
+    drawText(128);
+
     var textCanvas = sdfImg.canvas;
     var textWidth = textCanvas.width;
     var textHeight = textCanvas.height;
     texture.image = textCanvas;
-    texture.premultiplyAlpha = true;
-    texture.minFilter = mmGL.LinearFilter;
+    texture.minFilter= mmGL.LinearFilter;
+    // texture.premultiplyAlpha = true;
+    // texture.minFilter = mmGL.LinearFilter;
     texture.needsUpdate = true;
     material.map = texture;
     material.needsUpdate = true;
 
 
-    drawText(5);
+   
     let mesh = new mmGL.Mesh(bufferGeometry, material);
 
 
@@ -202,9 +220,17 @@
     let lastTime = (new Date()).getTime();
     (function tick() {
         let now = (new Date()).getTime();
+
+        // material.uniformsNeedUpdate = true;
+        // material.uniforms.u_buffer.value = 0.75;
+        // material.uniforms.u_texsize.value = new mmGL.Vector2(sdfImg.canvas.width, sdfImg.canvas.height);
+        // material.uniforms.u_gamma.value = 0.02;
+        // material.uniforms.u_color.value = new mmGL.Color(0xFFFFFF);
+        material.needsUpdate = true;
         renderer.render(scene, camera);
-        //scene.position.z+=-0.1;
         window.requestAnimationFrame(tick)
+        //scene.position.z+=-0.1;
+
     })()
 
 </script>

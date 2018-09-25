@@ -9,6 +9,7 @@ class SDFImage {
         this.ctx = document.createElement('canvas').getContext('2d');
         this.ctx.font = this._sdf.font;
         this.canvas = this.ctx.canvas;
+        this.canvas.width=this.canvas.height=512;
         this.sdfs = {};
         this.chars = chars;
     }

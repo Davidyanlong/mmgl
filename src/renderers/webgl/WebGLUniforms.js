@@ -473,6 +473,17 @@ function setValue4fv(v) {
 
         }
 
+    }else if(v.r !==undefined){ //rgba
+        if (cache[0] !== v.r || cache[1] !== v.g || cache[2] !== v.b || cache[3]!==v.a) {
+
+            this._gl.uniform4f(this.addr, v.r, v.g, v.b,v.a);
+
+            cache[0] = v.r;
+            cache[1] = v.g;
+            cache[2] = v.b;
+            cache[2] = v.a;
+
+        }
     } else { //arr[4]
 
         if (arrayUtils.arraysEqual(cache, v)) return;
