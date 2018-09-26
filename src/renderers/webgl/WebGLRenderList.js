@@ -118,7 +118,7 @@ class WebGLRenderLists {
 
         if (list === undefined) {
 
-            console.log('WebGLRenderLists:', hash);
+            //console.log('WebGLRenderLists:', hash);
 
             list = new WebGLRenderList();
             this._lists[hash] = list;

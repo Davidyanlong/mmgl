@@ -188,7 +188,7 @@
 	    return Events;
 	}();
 
-	var version = "0.0.24";
+	var version = "0.0.26";
 
 	var REVISION = version;
 
@@ -7881,7 +7881,7 @@
 
 	            if (list === undefined) {
 
-	                console.log('WebGLRenderLists:', hash);
+	                //console.log('WebGLRenderLists:', hash);
 
 	                list = new WebGLRenderList();
 	                this._lists[hash] = list;
@@ -9183,8 +9183,8 @@
 	        key: 'dispose',
 	        value: function dispose() {
 
-	            this._canvas.removeEventListener('webglcontextlost', onContextLost, false);
-	            this._canvas.removeEventListener('webglcontextrestored', onContextRestore, false);
+	            this.domElement.removeEventListener('webglcontextlost', onContextLost, false);
+	            this.domElement.removeEventListener('webglcontextrestored', onContextRestore, false);
 
 	            this._renderLists.dispose();
 	            this._renderStates.dispose();

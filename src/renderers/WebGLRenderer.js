@@ -144,14 +144,14 @@ class WebGLRenderer extends Events {
             _canvas.addEventListener('webglcontextrestored', onContextRestore.bind(me), false);
 
             // Some experimental-webgl implementations do not have getShaderPrecisionFormat
-            if ( _gl.getShaderPrecisionFormat === undefined ) {
+            if (_gl.getShaderPrecisionFormat === undefined) {
 
                 _gl.getShaderPrecisionFormat = function () {
-    
+
                     return { 'rangeMin': 1, 'rangeMax': 1, 'precision': 1 };
-    
+
                 };
-    
+
             }
 
         } catch (error) {
@@ -219,8 +219,8 @@ class WebGLRenderer extends Events {
         this._info = new WebGLInfo(_gl);
         this._properties = new WebGLProperties();
         this._capabilities = new WebGLCapabilities(_gl, parameters);
-        this._state = new WebGLState(_gl, this._extensions,this._capabilities);
-        this._renderStates = new WebGLRenderStates();  
+        this._state = new WebGLState(_gl, this._extensions, this._capabilities);
+        this._renderStates = new WebGLRenderStates();
         this._textures = new WebGLTextures(_gl, this._extensions, this._state, this._properties, this._capabilities, this._utils, this._info);
         this._attributes = new WebGLAttributes(_gl);
         this._geometries = new WebGLGeometries(_gl, this._attributes, this._info);
@@ -297,9 +297,9 @@ class WebGLRenderer extends Events {
 
         //if (this._currentViewport.equals(viewport) === false) {
 
-            this._currentViewport.copy(viewport).multiplyScalar(this._pixelRatio);
+        this._currentViewport.copy(viewport).multiplyScalar(this._pixelRatio);
 
-            this._state.viewport(this._currentViewport);
+        this._state.viewport(this._currentViewport);
         //}
 
     }
@@ -598,8 +598,8 @@ class WebGLRenderer extends Events {
 
     dispose() {
 
-        this._canvas.removeEventListener('webglcontextlost', onContextLost, false);
-        this._canvas.removeEventListener('webglcontextrestored', onContextRestore, false);
+        this.domElement.removeEventListener('webglcontextlost', onContextLost, false);
+        this.domElement.removeEventListener('webglcontextrestored', onContextRestore, false);
 
         this._renderLists.dispose();
         this._renderStates.dispose();
