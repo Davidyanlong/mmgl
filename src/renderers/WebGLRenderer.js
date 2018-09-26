@@ -160,29 +160,7 @@ class WebGLRenderer extends Events {
 
         }
 
-        /**
-            * @private
-            * @description 上下文丢失
-            * @param {*} event 
-            */
-        function onContextLost(event) {
 
-            event.preventDefault();
-            console.log('WebGLRenderer: Context Lost.');
-            this._isContextLost = true;
-            this.fire({ type: 'contextlost' });
-        }
-        /**
-        * @private
-        * @description 上下文恢复
-        */
-        function onContextRestore() {
-
-            console.log('WebGLRenderer: Context Restored.');
-            this._isContextLost = true;
-            this._initGLContext(parametersÎ);
-            this.fire({ type: 'contextrestore' })
-        }
 
     }
     _initGLContext(parameters) {
@@ -1202,6 +1180,30 @@ function markUniformsLightsNeedsUpdate(uniforms, value) {
     uniforms.pointLights.needsUpdate = value;
     uniforms.spotLights.needsUpdate = value;
 
+}
+
+/**
+* @private
+* @description 上下文丢失
+* @param {*} event 
+*/
+function onContextLost(event) {
+
+    event.preventDefault();
+    console.log('WebGLRenderer: Context Lost.');
+    this._isContextLost = true;
+    this.fire({ type: 'contextlost' });
+}
+/**
+* @private
+* @description 上下文恢复
+*/
+function onContextRestore() {
+
+    console.log('WebGLRenderer: Context Restored.');
+    this._isContextLost = true;
+    this._initGLContext(parametersÎ);
+    this.fire({ type: 'contextrestore' })
 }
 
 
