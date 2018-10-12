@@ -1,6 +1,7 @@
 import { Object3D } from '../core/Object3D';
 import { Matrix4 } from '../maths/Matrix4';
 import { Quaternion } from '../maths/Quaternion'
+import { Vector3 } from '../maths/Vector3';
 
 
 class Camera extends Object3D {
