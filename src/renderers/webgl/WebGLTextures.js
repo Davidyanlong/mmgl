@@ -53,7 +53,9 @@ class WebGLTextures {
 
             textureProperties.__webglInit = true;
 
-            texture.on('dispose', onTextureDispose.bind(this));
+            this._onTextureDisposeBind = onTextureDispose.bind(this);
+
+            texture.on('dispose', this._onTextureDisposeBind);
 
             textureProperties.__webglTexture = _gl.createTexture();
 
@@ -133,7 +135,9 @@ function onTextureDispose(event) {
 
     var texture = event.target;
 
-    texture.off('dispose', onTextureDispose);
+    texture.off('dispose', this._onTextureDisposeBind);
+
+    this._onTextureDisposeBind = null;
 
     deallocateTexture.call(this, texture);
 

@@ -25,7 +25,8 @@ class WebGLGeometries {
 
         if (buffergeometry) return buffergeometry;
 
-        geometry.on('dispose', onGeometryDispose.bind(this));
+        this._onGeometryDisposeBind = onGeometryDispose.bind(this);
+        geometry.on('dispose', this._onGeometryDisposeBind);
 
         if (geometry.isBufferGeometry) {
 
@@ -149,8 +150,10 @@ function onGeometryDispose(event) {
 
     }
 
-    geometry.off('dispose', onGeometryDispose);
+    geometry.off('dispose', this._onGeometryDisposeBind);
 
+    this._onGeometryDisposeBind = null;
+    
     delete this._geometries[geometry.id];
 
     // TODO Remove duplicate code

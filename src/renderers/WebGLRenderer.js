@@ -140,8 +140,10 @@ class WebGLRenderer extends Events {
 
             me.gl = _gl;
 
-            _canvas.addEventListener('webglcontextlost', onContextLost.bind(me), false);
-            _canvas.addEventListener('webglcontextrestored', onContextRestore.bind(me), false);
+            me._onContextLostBind = onContextLost.bind(me);
+            me._onContextRestoreBind = onContextRestore.bind(me);
+            _canvas.addEventListener('webglcontextlost', me._onContextLostBind, false);
+            _canvas.addEventListener('webglcontextrestored', me._onContextRestoreBind, false);
 
             // Some experimental-webgl implementations do not have getShaderPrecisionFormat
             if (_gl.getShaderPrecisionFormat === undefined) {
@@ -576,9 +578,11 @@ class WebGLRenderer extends Events {
 
     dispose() {
 
-        this.domElement.removeEventListener('webglcontextlost', onContextLost, false);
-        this.domElement.removeEventListener('webglcontextrestored', onContextRestore, false);
+        this.domElement.removeEventListener('webglcontextlost', me._onContextLostBind, false);
+        this.domElement.removeEventListener('webglcontextrestored', me._onContextRestoreBind, false);
 
+        me._onContextLostBind = null;
+        me._onContextRestoreBind = null;
         this._renderLists.dispose();
         this._renderStates.dispose();
         this._properties.dispose();
@@ -925,7 +929,10 @@ function initMaterial(material, fog, object) {
     if (program === undefined) {
 
         // new material
-        material.on('dispose', onMaterialDispose.bind(this));
+
+        this._onMaterialDispose = onMaterialDispose.bind(this);
+
+        material.on('dispose', );
 
     } else if (program.code !== code) {
 
@@ -1016,7 +1023,9 @@ function onMaterialDispose(event) {
     let me = this;
     let material = event.target;
 
-    material.off('dispose', onMaterialDispose.bind(me));
+    material.off('dispose', this._onMaterialDispose);
+
+    this._onMaterialDispose = null;
 
     deallocateMaterial.call(this, material);
 }
