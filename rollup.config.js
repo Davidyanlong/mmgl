@@ -40,7 +40,6 @@ export default {
         json(),
         resolve({ jsnext: true, main: true, browser: true }),
         babel({
-            "presets": ["es2015-loose-rollup"],
             exclude: 'node_modules/**' // 只编译我们的源代码
         })
     ],

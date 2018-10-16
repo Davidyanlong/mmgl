@@ -1,5 +1,8 @@
 import { Mesh } from "./Mesh";
 import { Vector3 } from '../maths/Vector3';
+import { LineGeometry } from '../geometries/LineGeometry';
+import { LineMeshMaterial } from '../materials/LineMeshMaterial'
+
 import { InterleavedBufferAttribute } from '../core/InterleavedBufferAttribute';
 import { InstancedInterleavedBuffer } from '../core/InstancedInterleavedBuffer';
 
@@ -9,10 +12,10 @@ class Line2 extends Mesh {
 
         super(geometry, material);
 
-        this.geometry = geometry !== undefined ? geometry : new THREE.LineGeometry();
-        this.material = material !== undefined ? material : new THREE.LineMaterial({ color: Math.random() * 0xffffff });
+        this.geometry = geometry !== undefined ? geometry : new LineGeometry();
+        this.material = material !== undefined ? material : new LineMeshMaterial({ color: Math.random() * 0xffffff });
     }
-    
+
     get isLine2() {
         return true;
     }
