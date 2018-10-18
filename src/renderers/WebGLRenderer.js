@@ -578,11 +578,11 @@ class WebGLRenderer extends Events {
 
     dispose() {
 
-        this.domElement.removeEventListener('webglcontextlost', me._onContextLostBind, false);
-        this.domElement.removeEventListener('webglcontextrestored', me._onContextRestoreBind, false);
+        this.domElement.removeEventListener('webglcontextlost', this._onContextLostBind, false);
+        this.domElement.removeEventListener('webglcontextrestored', this._onContextRestoreBind, false);
 
-        me._onContextLostBind = null;
-        me._onContextRestoreBind = null;
+        this._onContextLostBind = null;
+        this._onContextRestoreBind = null;
         this._renderLists.dispose();
         this._renderStates.dispose();
         this._properties.dispose();
