@@ -191,7 +191,7 @@
 	    return Events;
 	}();
 
-	var version = "0.0.29";
+	var version = "0.0.31";
 
 	var REVISION = version;
 
@@ -474,7 +474,7 @@
 	// var v1 = new Vector3();
 	// var v2 = new Vector3();
 
-	var Vector3$1 = function () {
+	var Vector3 = function () {
 	    function Vector3(x, y, z) {
 	        classCallCheck(this, Vector3);
 
@@ -1592,12 +1592,12 @@
 	// var vector = new Vector3();
 	// var matrix = new Matrix4();
 
-	var v1 = new Vector3$1();
-	var v2 = new Vector3$1();
+	var v1 = new Vector3();
+	var v2 = new Vector3();
 
-	var x = new Vector3$1();
-	var y = new Vector3$1();
-	var z = new Vector3$1();
+	var x = new Vector3();
+	var y = new Vector3();
+	var z = new Vector3();
 
 	var Matrix4 = function () {
 	    function Matrix4() {
@@ -2411,7 +2411,7 @@
 
 	var _decompose2 = function () {
 
-	    var vector = new Vector3$1();
+	    var vector = new Vector3();
 	    var matrix = new Matrix4();
 
 	    return function decompose(position, quaternion, scale) {
@@ -2464,8 +2464,8 @@
 	        classCallCheck(this, Box3);
 
 
-	        this.min = min !== undefined ? min : new Vector3$1(+Infinity, +Infinity, +Infinity);
-	        this.max = max !== undefined ? max : new Vector3$1(-Infinity, -Infinity, -Infinity);
+	        this.min = min !== undefined ? min : new Vector3(+Infinity, +Infinity, +Infinity);
+	        this.max = max !== undefined ? max : new Vector3(-Infinity, -Infinity, -Infinity);
 	        this.isBox3 = true;
 	    }
 
@@ -2605,14 +2605,14 @@
 	        key: 'getCenter',
 	        value: function getCenter(optionalTarget) {
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 	            return this.isEmpty() ? result.set(0, 0, 0) : result.addVectors(this.min, this.max).multiplyScalar(0.5);
 	        }
 	    }, {
 	        key: 'getSize',
 	        value: function getSize(optionalTarget) {
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 	            return this.isEmpty() ? result.set(0, 0, 0) : result.subVectors(this.max, this.min);
 	        }
 	    }, {
@@ -2666,7 +2666,7 @@
 	            // This can potentially have a divide by zero if the box
 	            // has a size dimension of 0.
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 
 	            return result.set((point.x - this.min.x) / (this.max.x - this.min.x), (point.y - this.min.y) / (this.max.y - this.min.y), (point.z - this.min.z) / (this.max.z - this.min.z));
 	        }
@@ -2727,7 +2727,7 @@
 	        key: 'clampPoint',
 	        value: function clampPoint(point, optionalTarget) {
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 	            return result.copy(point).clamp(this.min, this.max);
 	        }
 	    }, {
@@ -2787,7 +2787,7 @@
 
 	var _setFromCenterAndSize = function () {
 
-	    var v1 = new Vector3$1();
+	    var v1 = new Vector3();
 
 	    return function setFromCenterAndSize(center, size) {
 
@@ -2805,7 +2805,7 @@
 	    // Computes the world-axis-aligned bounding box of an object (including its children),
 	    // accounting for both the object's, and children's, world transforms
 
-	    var v1 = new Vector3$1();
+	    var v1 = new Vector3();
 
 	    return function expandByObject(object) {
 
@@ -2855,7 +2855,7 @@
 
 	var _intersectsSphere = function () {
 
-	    var closestPoint = new Vector3$1();
+	    var closestPoint = new Vector3();
 
 	    return function intersectsSphere(sphere) {
 
@@ -2869,7 +2869,7 @@
 
 	var _distanceToPoint = function () {
 
-	    var v1 = new Vector3$1();
+	    var v1 = new Vector3();
 
 	    return function distanceToPoint(point) {
 
@@ -2880,7 +2880,7 @@
 
 	var _getBoundingSphere = function () {
 
-	    var v1 = new Vector3$1();
+	    var v1 = new Vector3();
 
 	    return function getBoundingSphere(optionalTarget) {
 
@@ -2896,7 +2896,7 @@
 
 	var _applyMatrix = function () {
 
-	    var points = [new Vector3$1(), new Vector3$1(), new Vector3$1(), new Vector3$1(), new Vector3$1(), new Vector3$1(), new Vector3$1(), new Vector3$1()];
+	    var points = [new Vector3(), new Vector3(), new Vector3(), new Vector3(), new Vector3(), new Vector3(), new Vector3(), new Vector3()];
 
 	    return function applyMatrix4(matrix) {
 
@@ -2923,7 +2923,7 @@
 	    function Sphere(center, radius) {
 	        classCallCheck(this, Sphere);
 
-	        this.center = center !== undefined ? center : new Vector3$1();
+	        this.center = center !== undefined ? center : new Vector3();
 	        this.radius = radius !== undefined ? radius : 0;
 	    }
 
@@ -3021,7 +3021,7 @@
 
 	            var deltaLengthSq = this.center.distanceToSquared(point);
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 
 	            result.copy(point);
 
@@ -3071,7 +3071,7 @@
 	    return Sphere;
 	}();
 
-	var v1$2 = new Vector3$1();
+	var v1$2 = new Vector3();
 
 	var Matrix3 = function () {
 	    function Matrix3() {
@@ -3392,12 +3392,12 @@
 	    return Matrix3;
 	}();
 
-	var v1$1 = new Vector3$1();
-	var v2$1 = new Vector3$1();
+	var v1$1 = new Vector3();
+	var v2$1 = new Vector3();
 
-	var v3 = new Vector3$1();
+	var v3 = new Vector3();
 
-	var v4 = new Vector3$1();
+	var v4 = new Vector3();
 	var m1 = new Matrix3();
 
 	var Plane = function () {
@@ -3406,7 +3406,7 @@
 
 	        // normal is assumed to be normalized
 
-	        this.normal = normal !== undefined ? normal : new Vector3$1(1, 0, 0);
+	        this.normal = normal !== undefined ? normal : new Vector3(1, 0, 0);
 	        this.constant = constant !== undefined ? constant : 0;
 	    }
 
@@ -3501,7 +3501,7 @@
 	        key: 'projectPoint',
 	        value: function projectPoint(point, optionalTarget) {
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 
 	            return result.copy(this.normal).multiplyScalar(-this.distanceToPoint(point)).add(point);
 	        }
@@ -3509,7 +3509,7 @@
 	        key: 'intersectLine',
 	        value: function intersectLine(line, optionalTarget) {
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 
 	            var direction = line.delta(v3);
 
@@ -3563,7 +3563,7 @@
 	        key: 'coplanarPoint',
 	        value: function coplanarPoint(optionalTarget) {
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 
 	            return result.copy(this.normal).multiplyScalar(-this.constant);
 	        }
@@ -3762,8 +3762,8 @@
 
 	var _intersectsBox = function () {
 
-	    var p1 = new Vector3$1(),
-	        p2 = new Vector3$1();
+	    var p1 = new Vector3(),
+	        p2 = new Vector3();
 
 	    return function intersectsBox(box) {
 
@@ -5198,7 +5198,7 @@
 	                if (vector === undefined) {
 
 	                    console.warn('BufferAttribute.copyVector3sArray(): vector is undefined', i);
-	                    vector = new Vector3$1();
+	                    vector = new Vector3();
 	                }
 
 	                array[offset++] = vector.x;
@@ -6058,7 +6058,7 @@
 	var _computeBoundingSphere = function () {
 
 	    var box = new Box3();
-	    var vector = new Vector3$1();
+	    var vector = new Vector3();
 
 	    return function computeBoundingSphere() {
 
@@ -8350,7 +8350,7 @@
 	}
 
 	var webglLightsCount = 0;
-	var _webGLLightsVector3 = new Vector3$1();
+	var _webGLLightsVector3 = new Vector3();
 
 	var WebGLLights = function () {
 	    function WebGLLights() {
@@ -8493,15 +8493,15 @@
 
 	                case 'DirectionalLight':
 	                    uniforms = {
-	                        direction: new Vector3$1(),
+	                        direction: new Vector3(),
 	                        color: new Color$1()
 	                    };
 	                    break;
 
 	                case 'SpotLight':
 	                    uniforms = {
-	                        position: new Vector3$1(),
-	                        direction: new Vector3$1(),
+	                        position: new Vector3(),
+	                        direction: new Vector3(),
 	                        color: new Color$1(),
 	                        distance: 0,
 	                        coneCos: 0,
@@ -8512,7 +8512,7 @@
 
 	                case 'PointLight':
 	                    uniforms = {
-	                        position: new Vector3$1(),
+	                        position: new Vector3(),
 	                        color: new Color$1(),
 	                        distance: 0,
 	                        decay: 0
@@ -8664,7 +8664,7 @@
 	        _this._sortObjects = true; // scene graph
 
 	        _this._projScreenMatrix = new Matrix4();
-	        _this._vector3 = new Vector3$1();
+	        _this._vector3 = new Vector3();
 	        _this._frustum = new Frustum();
 
 	        _this._init(params);
@@ -9468,7 +9468,7 @@
 
 	        this._onMaterialDispose = onMaterialDispose.bind(this);
 
-	        material.on('dispose');
+	        material.on('dispose', this._onMaterialDispose);
 	    } else if (program.code !== code) {
 
 	        // changed glsl or parameters
@@ -9719,7 +9719,7 @@
 	    this.fire({ type: 'contextrestore' });
 	}
 
-	var v1$3 = new Vector3$1();
+	var v1$3 = new Vector3();
 	var r;
 
 	var EPS = 0.000001;
@@ -9924,7 +9924,7 @@
 	        key: 'setFromUnitVectors',
 	        value: function setFromUnitVectors(vFrom, vTo) {
 
-	            if (v1$3 === undefined) v1$3 = new Vector3$1();
+	            if (v1$3 === undefined) v1$3 = new Vector3();
 
 	            r = vFrom.dot(vTo) + 1;
 
@@ -10492,7 +10492,7 @@
 	                return optionalResult.set(this._x, this._y, this._z);
 	            } else {
 
-	                return new Vector3$1(this._x, this._y, this._z);
+	                return new Vector3(this._x, this._y, this._z);
 	            }
 	        }
 	    }, {
@@ -10580,10 +10580,10 @@
 
 	        _this.up = Object3D.DefaultUp.clone();
 
-	        var position = new Vector3$1();
+	        var position = new Vector3();
 	        var rotation = new Euler();
 	        var quaternion = new Quaternion();
-	        var scale = new Vector3$1(1, 1, 1);
+	        var scale = new Vector3(1, 1, 1);
 
 	        function onRotationChange() {
 
@@ -10824,7 +10824,7 @@
 	        key: 'rotateX',
 	        value: function rotateX(angle) {
 
-	            var v1 = new Vector3$1(1, 0, 0);
+	            var v1 = new Vector3(1, 0, 0);
 
 	            this.rotateOnAxis(v1, angle);
 
@@ -10836,7 +10836,7 @@
 	        key: 'rotateY',
 	        value: function rotateY(angle) {
 
-	            var v1 = new Vector3$1(0, 1, 0);
+	            var v1 = new Vector3(0, 1, 0);
 
 	            this.rotateOnAxis(v1, angle);
 
@@ -10848,7 +10848,7 @@
 	        key: 'rotateZ',
 	        value: function rotateZ(angle) {
 
-	            var v1 = new Vector3$1(0, 0, 1);
+	            var v1 = new Vector3(0, 0, 1);
 
 	            this.rotateOnAxis(v1, angle);
 
@@ -10896,7 +10896,7 @@
 	            // translate object by distance along axis in object space
 	            // axis is assumed to be normalized
 
-	            var v1 = new Vector3$1();
+	            var v1 = new Vector3();
 
 	            v1.copy(axis).applyQuaternion(this.quaternion);
 
@@ -10910,7 +10910,7 @@
 	        key: 'translateX',
 	        value: function translateX(distance) {
 
-	            var v1 = new Vector3$1(1, 0, 0);
+	            var v1 = new Vector3(1, 0, 0);
 
 	            this.translateOnAxis(v1, distance);
 
@@ -10922,7 +10922,7 @@
 	        key: 'translateY',
 	        value: function translateY(distance) {
 
-	            var v1 = new Vector3$1(0, 1, 0);
+	            var v1 = new Vector3(0, 1, 0);
 
 	            this.translateOnAxis(v1, distance);
 
@@ -10934,7 +10934,7 @@
 	        key: 'translateZ',
 	        value: function translateZ(distance) {
 
-	            var v1 = new Vector3$1(0, 0, 1);
+	            var v1 = new Vector3(0, 0, 1);
 	            this.translateOnAxis(v1, distance);
 
 	            v1 = null;
@@ -10960,7 +10960,7 @@
 	            if (target === undefined) {
 
 	                console.warn('Object3D: .getWorldPosition() target is now required');
-	                target = new Vector3$1();
+	                target = new Vector3();
 	            }
 
 	            this.updateMatrixWorld(true);
@@ -10996,7 +10996,7 @@
 	    return Object3D;
 	}(Events);
 
-	Object3D.DefaultUp = new Vector3$1(0, 1, 0);
+	Object3D.DefaultUp = new Vector3(0, 1, 0);
 	Object3D.DefaultMatrixAutoUpdate = true;
 
 	var _lookAt = function () {
@@ -11004,7 +11004,7 @@
 	    // This method does not support objects with rotated and/or translated parent(s)
 
 	    var m1 = new Matrix4();
-	    var vector = new Vector3$1();
+	    var vector = new Vector3();
 
 	    return function lookAt(x, y, z) {
 
@@ -11030,8 +11030,8 @@
 
 	var _getWorldQuaternion = function () {
 
-	    var position = new Vector3$1();
-	    var scale = new Vector3$1();
+	    var position = new Vector3();
+	    var scale = new Vector3();
 
 	    return function getWorldQuaternion(target) {
 
@@ -11051,7 +11051,7 @@
 
 	var _getWorldScale = function () {
 
-	    var position = new Vector3$1();
+	    var position = new Vector3();
 	    var quaternion = new Quaternion();
 
 	    return function getWorldScale(target) {
@@ -11059,7 +11059,7 @@
 	        if (target === undefined) {
 
 	            console.warn('Object3D: .getWorldScale() target is now required');
-	            target = new Vector3$1();
+	            target = new Vector3();
 	        }
 
 	        this.updateMatrixWorld(true);
@@ -11079,7 +11079,7 @@
 	        if (target === undefined) {
 
 	            console.warn('Object3D: .getWorldDirection() target is now required');
-	            target = new Vector3$1();
+	            target = new Vector3();
 	        }
 
 	        this.getWorldQuaternion(quaternion);
@@ -11137,26 +11137,26 @@
 	    return Group;
 	}(Object3D);
 
-	var v = new Vector3$1();
-	var v1$4 = new Vector3$1();
-	var v2$2 = new Vector3$1();
-	var v3$1 = new Vector3$1();
+	var v = new Vector3();
+	var v1$4 = new Vector3();
+	var v2$2 = new Vector3();
+	var v3$1 = new Vector3();
 
-	var segCenter = new Vector3$1();
-	var segDir = new Vector3$1();
-	var diff = new Vector3$1();
+	var segCenter = new Vector3();
+	var segDir = new Vector3();
+	var diff = new Vector3();
 
-	var diff = new Vector3$1();
-	var edge1 = new Vector3$1();
-	var edge2 = new Vector3$1();
-	var normal = new Vector3$1();
+	var diff = new Vector3();
+	var edge1 = new Vector3();
+	var edge2 = new Vector3();
+	var normal = new Vector3();
 
 	var Ray = function () {
 	    function Ray(origin, direction) {
 	        classCallCheck(this, Ray);
 
-	        this.origin = origin !== undefined ? origin : new Vector3$1();
-	        this.direction = direction !== undefined ? direction : new Vector3$1();
+	        this.origin = origin !== undefined ? origin : new Vector3();
+	        this.direction = direction !== undefined ? direction : new Vector3();
 	    }
 
 	    createClass(Ray, [{
@@ -11187,7 +11187,7 @@
 	        key: 'at',
 	        value: function at(t, optionalTarget) {
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 
 	            return result.copy(this.direction).multiplyScalar(t).add(this.origin);
 	        }
@@ -11211,7 +11211,7 @@
 	        key: 'closestPointToPoint',
 	        value: function closestPointToPoint(point, optionalTarget) {
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 	            result.subVectors(point, this.origin);
 	            var directionDistance = result.dot(this.direction);
 
@@ -11606,15 +11606,15 @@
 	    return Ray;
 	}();
 
-	var startP = new Vector3$1();
-	var startEnd = new Vector3$1();
+	var startP = new Vector3();
+	var startEnd = new Vector3();
 
 	var Line3 = function () {
 	    function Line3(start, end) {
 	        classCallCheck(this, Line3);
 
-	        this.start = start !== undefined ? start : new Vector3$1();
-	        this.end = end !== undefined ? end : new Vector3$1();
+	        this.start = start !== undefined ? start : new Vector3();
+	        this.end = end !== undefined ? end : new Vector3();
 	    }
 
 	    createClass(Line3, [{
@@ -11645,14 +11645,14 @@
 	        key: 'getCenter',
 	        value: function getCenter(optionalTarget) {
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 	            return result.addVectors(this.start, this.end).multiplyScalar(0.5);
 	        }
 	    }, {
 	        key: 'delta',
 	        value: function delta(optionalTarget) {
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 	            return result.subVectors(this.end, this.start);
 	        }
 	    }, {
@@ -11671,7 +11671,7 @@
 	        key: 'at',
 	        value: function at(t, optionalTarget) {
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 
 	            return this.delta(result).multiplyScalar(t).add(this.start);
 	        }
@@ -11700,7 +11700,7 @@
 
 	            var t = this.closestPointToPointParameter(point, clampToLine);
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 
 	            return this.delta(result).multiplyScalar(t).add(this.start);
 	        }
@@ -11723,29 +11723,29 @@
 	    return Line3;
 	}();
 
-	var v$1 = new Vector3$1();
+	var v$1 = new Vector3();
 
-	var v0 = new Vector3$1();
-	var v1$5 = new Vector3$1();
-	var v2$3 = new Vector3$1();
+	var v0 = new Vector3();
+	var v1$5 = new Vector3();
+	var v2$3 = new Vector3();
 
-	var v4$1 = new Vector3$1();
+	var v4$1 = new Vector3();
 
-	var v5 = new Vector3$1();
-	var v6 = new Vector3$1();
+	var v5 = new Vector3();
+	var v6 = new Vector3();
 
 	var plane = new Plane();
 	var edgeList = [new Line3(), new Line3(), new Line3()];
-	var projectedPoint = new Vector3$1();
-	var closestPoint = new Vector3$1();
+	var projectedPoint = new Vector3();
+	var closestPoint = new Vector3();
 
 	var Triangle = function () {
 	    function Triangle(a, b, c) {
 	        classCallCheck(this, Triangle);
 
-	        this.a = a !== undefined ? a : new Vector3$1();
-	        this.b = b !== undefined ? b : new Vector3$1();
-	        this.c = c !== undefined ? c : new Vector3$1();
+	        this.a = a !== undefined ? a : new Vector3();
+	        this.b = b !== undefined ? b : new Vector3();
+	        this.c = c !== undefined ? c : new Vector3();
 	    }
 
 	    createClass(Triangle, [{
@@ -11801,7 +11801,7 @@
 	        key: 'midpoint',
 	        value: function midpoint(optionalTarget) {
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 	            return result.addVectors(this.a, this.b).add(this.c).multiplyScalar(1 / 3);
 	        }
 	    }, {
@@ -11834,7 +11834,7 @@
 	        key: 'closestPointToPoint',
 	        value: function closestPointToPoint(point, optionalTarget) {
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 	            var minDistance = Infinity;
 
 	            // project the point onto the plane of the triangle
@@ -11884,7 +11884,7 @@
 	        key: 'normal',
 	        value: function normal(a, b, c, optionalTarget) {
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 
 	            result.subVectors(c, b);
 	            v$1.subVectors(a, b);
@@ -11923,7 +11923,7 @@
 
 	            var denom = dot00 * dot11 - dot01 * dot01;
 
-	            var result = optionalTarget || new Vector3$1();
+	            var result = optionalTarget || new Vector3();
 
 	            // collinear or singular triangle
 	            if (denom === 0) {
@@ -11959,9 +11959,9 @@
 
 	var _getBarycoord = function () {
 
-	    var v0 = new Vector3$1();
-	    var v1 = new Vector3$1();
-	    var v2 = new Vector3$1();
+	    var v0 = new Vector3();
+	    var v1 = new Vector3();
+	    var v2 = new Vector3();
 
 	    return function getBarycoord(point, a, b, c, target) {
 
@@ -11980,7 +11980,7 @@
 	        if (target === undefined) {
 
 	            console.warn('Triangle: .getBarycoord() target is now required');
-	            target = new Vector3$1();
+	            target = new Vector3();
 	        }
 
 	        // collinear or singular triangle
@@ -12002,14 +12002,14 @@
 
 	var _getNormal = function () {
 
-	    var v0 = new Vector3$1();
+	    var v0 = new Vector3();
 
 	    return function getNormal(a, b, c, target) {
 
 	        if (target === undefined) {
 
 	            console.warn('THREE.Triangle: .getNormal() target is now required');
-	            target = new Vector3$1();
+	            target = new Vector3();
 	        }
 
 	        target.subVectors(c, b);
@@ -12034,7 +12034,7 @@
 	        this.b = b;
 	        this.c = c;
 
-	        this.normal = normal && normal.isVector3 ? normal : new Vector3$1();
+	        this.normal = normal && normal.isVector3 ? normal : new Vector3();
 	        this.vertexNormals = Array.isArray(normal) ? normal : [];
 
 	        this.color = color && color.isColor ? color : new Color$1();
@@ -12334,22 +12334,22 @@
 	    var ray = new Ray();
 	    var sphere = new Sphere();
 
-	    var vA = new Vector3$1();
-	    var vB = new Vector3$1();
-	    var vC = new Vector3$1();
+	    var vA = new Vector3();
+	    var vB = new Vector3();
+	    var vC = new Vector3();
 
-	    var tempA = new Vector3$1();
-	    var tempB = new Vector3$1();
-	    var tempC = new Vector3$1();
+	    var tempA = new Vector3();
+	    var tempB = new Vector3();
+	    var tempC = new Vector3();
 
 	    var uvA = new Vector2();
 	    var uvB = new Vector2();
 	    var uvC = new Vector2();
 
-	    var barycoord = new Vector3$1();
+	    var barycoord = new Vector3();
 
-	    var intersectionPoint = new Vector3$1();
-	    var intersectionPointWorld = new Vector3$1();
+	    var intersectionPoint = new Vector3();
+	    var intersectionPointWorld = new Vector3();
 
 	    function uvIntersection(point, p1, p2, p3, uv1, uv2, uv3) {
 
@@ -12663,8 +12663,8 @@
 
 	var _computeLineDistances = function () {
 
-	    var start = new Vector3$1();
-	    var end = new Vector3$1();
+	    var start = new Vector3();
+	    var end = new Vector3();
 
 	    return function computeLineDistances() {
 
@@ -12737,10 +12737,10 @@
 	        inverseMatrix.getInverse(matrixWorld);
 	        ray.copy(raycaster.ray).applyMatrix4(inverseMatrix);
 
-	        var vStart = new Vector3$1();
-	        var vEnd = new Vector3$1();
-	        var interSegment = new Vector3$1();
-	        var interRay = new Vector3$1();
+	        var vStart = new Vector3();
+	        var vEnd = new Vector3();
+	        var interSegment = new Vector3();
+	        var interRay = new Vector3();
 	        var step = 1;
 
 	        if (geometry.isBufferGeometry) {
@@ -13256,7 +13256,7 @@
 
 	var _computeBoundingSphere$1 = function () {
 
-	    var vector = new Vector3$1();
+	    var vector = new Vector3();
 
 	    return function computeBoundingSphere() {
 
@@ -13469,8 +13469,8 @@
 	var _computeLineDistances$1 = function () {
 	    // for backwards-compatability, but could be a method of LineSegmentsGeometry...
 
-	    var start = new Vector3$1();
-	    var end = new Vector3$1();
+	    var start = new Vector3();
+	    var end = new Vector3();
 
 	    return function computeLineDistances() {
 
@@ -13603,8 +13603,8 @@
 
 	        var localThreshold = threshold / ((this.scale.x + this.scale.y + this.scale.z) / 3);
 	        var localThresholdSq = localThreshold * localThreshold;
-	        var position = new Vector3$1();
-	        var intersectPoint = new Vector3$1();
+	        var position = new Vector3();
+	        var intersectPoint = new Vector3();
 
 	        function testPoint(point, index) {
 
@@ -13784,17 +13784,17 @@
 
 	var _raycast$3 = function _raycast() {
 
-	    var intersectPoint = new Vector3$1();
-	    var worldScale = new Vector3$1();
-	    var mvPosition = new Vector3$1();
+	    var intersectPoint = new Vector3();
+	    var worldScale = new Vector3();
+	    var mvPosition = new Vector3();
 
 	    var alignedPosition = new Vector2();
 	    var rotatedPosition = new Vector2();
 	    var viewWorldMatrix = new Matrix4();
 
-	    var vA = new Vector3$1();
-	    var vB = new Vector3$1();
-	    var vC = new Vector3$1();
+	    var vA = new Vector3();
+	    var vB = new Vector3();
+	    var vC = new Vector3();
 
 	    var uvA = new Vector2();
 	    var uvB = new Vector2();
@@ -14300,11 +14300,11 @@
 	            if (camera.isOrthographicCamera) {
 	                height = camera.top - camera.bottom;
 	            } else {
-	                var cameraWorldPos = new Vector3$1();
+	                var cameraWorldPos = new Vector3();
 	                camera.updateMatrixWorld(true);
 	                cameraWorldPos.applyMatrix4(camera.matrixWorld);
 
-	                var pos = new Vector3$1();
+	                var pos = new Vector3();
 	                this.updateMatrixWorld(true);
 	                pos.applyMatrix4(this.matrixWorld);
 
@@ -14366,9 +14366,9 @@
 	}(Sprite);
 
 	var getOptimalFontSize = function () {
-	    var objectWorldPosition = new Vector3$1();
-	    var cameraWorldPosition = new Vector3$1();
-	    var objectWorldScale = new Vector3$1();
+	    var objectWorldPosition = new Vector3();
+	    var cameraWorldPosition = new Vector3();
+	    var objectWorldScale = new Vector3();
 	    return function getOptimalFontSize(object, renderer, camera) {
 	        if (renderer.domElement.width && renderer.domElement.height && object.material.map.textLines.length) {
 	            var distance = object.getWorldPosition(objectWorldPosition).distanceTo(camera.getWorldPosition(cameraWorldPosition));
@@ -14448,11 +14448,11 @@
 
 	            for (var i = 0, j = 0; i < positions.length; i += 3, j += 2) {
 
-	                scope.vertices.push(new Vector3$1(positions[i], positions[i + 1], positions[i + 2]));
+	                scope.vertices.push(new Vector3(positions[i], positions[i + 1], positions[i + 2]));
 
 	                if (normals !== undefined) {
 
-	                    tempNormals.push(new Vector3$1(normals[i], normals[i + 1], normals[i + 2]));
+	                    tempNormals.push(new Vector3(normals[i], normals[i + 1], normals[i + 2]));
 	                }
 
 	                if (colors !== undefined) {
@@ -14570,8 +14570,8 @@
 	        key: 'computeFaceNormals',
 	        value: function computeFaceNormals() {
 
-	            var cb = new Vector3$1(),
-	                ab = new Vector3$1();
+	            var cb = new Vector3(),
+	                ab = new Vector3();
 
 	            for (var f = 0, fl = this.faces.length; f < fl; f++) {
 
@@ -14859,7 +14859,7 @@
 	        // helper variables
 
 	        var i, s;
-	        var vertex = new Vector3$1();
+	        var vertex = new Vector3();
 	        var uv = new Vector2();
 
 	        // center point
@@ -15130,7 +15130,7 @@
 
 	            var ix, iy;
 
-	            var vector = new Vector3$1();
+	            var vector = new Vector3();
 
 	            // generate vertices, normals and uvs
 
@@ -15288,8 +15288,8 @@
 	        var index = 0;
 	        var grid = [];
 
-	        var vertex = new Vector3$1();
-	        var normal = new Vector3$1();
+	        var vertex = new Vector3();
+	        var normal = new Vector3();
 
 	        // buffers
 
@@ -15464,8 +15464,8 @@
 	        function generateTorso() {
 
 	            var x, y;
-	            var normal = new Vector3$1();
-	            var vertex = new Vector3$1();
+	            var normal = new Vector3();
+	            var vertex = new Vector3();
 
 	            var groupCount = 0;
 
@@ -15557,7 +15557,7 @@
 	            var x, centerIndexStart, centerIndexEnd;
 
 	            var uv = new Vector2();
-	            var vertex = new Vector3$1();
+	            var vertex = new Vector3();
 
 	            var groupCount = 0;
 
@@ -16489,7 +16489,7 @@
 	exports.Line3 = Line3;
 	exports.Euler = Euler;
 	exports.Vector4 = Vector4;
-	exports.Vector3 = Vector3$1;
+	exports.Vector3 = Vector3;
 	exports.Vector2 = Vector2;
 	exports.Quaternion = Quaternion;
 	exports.Color = Color$1;

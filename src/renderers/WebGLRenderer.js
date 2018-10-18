@@ -932,7 +932,7 @@ function initMaterial(material, fog, object) {
 
         this._onMaterialDispose = onMaterialDispose.bind(this);
 
-        material.on('dispose', );
+        material.on('dispose', this._onMaterialDispose);
 
     } else if (program.code !== code) {
 
