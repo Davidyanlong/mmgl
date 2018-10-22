@@ -52,5 +52,7 @@ export { Vector2 } from './maths/Vector2.js';
 export { Quaternion } from './maths/Quaternion.js';
 export { Color } from './maths/Color.js';
 
+export {CatmullRomCurve3} from './extras/curves/CatmullRomCurve3';
+
 export * from './constants.js';
 

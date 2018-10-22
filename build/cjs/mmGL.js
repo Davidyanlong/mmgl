@@ -189,7 +189,7 @@ var Events = function () {
     return Events;
 }();
 
-var version = "0.0.31";
+var version = "0.0.32";
 
 var REVISION = version;
 
@@ -9169,11 +9169,11 @@ var WebGLRenderer = function (_Events) {
         key: 'dispose',
         value: function dispose() {
 
-            this.domElement.removeEventListener('webglcontextlost', me._onContextLostBind, false);
-            this.domElement.removeEventListener('webglcontextrestored', me._onContextRestoreBind, false);
+            this.domElement.removeEventListener('webglcontextlost', this._onContextLostBind, false);
+            this.domElement.removeEventListener('webglcontextrestored', this._onContextRestoreBind, false);
 
-            me._onContextLostBind = null;
-            me._onContextRestoreBind = null;
+            this._onContextLostBind = null;
+            this._onContextRestoreBind = null;
             this._renderLists.dispose();
             this._renderStates.dispose();
             this._properties.dispose();
@@ -16449,6 +16449,664 @@ var Spherical = function () {
     return Spherical;
 }();
 
+/**
+ * @author zz85 / http://www.lab4games.net/zz85/blog
+ * Extensible curve object
+ *
+ * Some common of curve methods:
+ * .getPoint( t, optionalTarget ), .getTangent( t )
+ * .getPointAt( u, optionalTarget ), .getTangentAt( u )
+ * .getPoints(), .getSpacedPoints()
+ * .getLength()
+ * .updateArcLengths()
+ *
+ * This following curves inherit from THREE.Curve:
+ *
+ * -- 2D curves --
+ * THREE.ArcCurve
+ * THREE.CubicBezierCurve
+ * THREE.EllipseCurve
+ * THREE.LineCurve
+ * THREE.QuadraticBezierCurve
+ * THREE.SplineCurve
+ *
+ * -- 3D curves --
+ * THREE.CatmullRomCurve3
+ * THREE.CubicBezierCurve3
+ * THREE.LineCurve3
+ * THREE.QuadraticBezierCurve3
+ *
+ * A series of curves can be represented as a THREE.CurvePath.
+ *
+ **/
+
+/**************************************************************
+ *	Abstract Curve base class
+ **************************************************************/
+
+var Curve = function () {
+	function Curve() {
+		classCallCheck(this, Curve);
+
+		this.type = 'Curve';
+
+		this.arcLengthDivisions = 200;
+	}
+
+	// Virtual base class method to overwrite and implement in subclasses
+	//	- t [0 .. 1]
+
+	createClass(Curve, [{
+		key: 'getPoint',
+		value: function getPoint() /* t, optionalTarget */{
+
+			console.warn('THREE.Curve: .getPoint() not implemented.');
+			return null;
+		}
+
+		// Get point at relative position in curve according to arc length
+		// - u [0 .. 1]
+
+	}, {
+		key: 'getPointAt',
+		value: function getPointAt(u, optionalTarget) {
+
+			var t = this.getUtoTmapping(u);
+			return this.getPoint(t, optionalTarget);
+		}
+
+		// Get sequence of points using getPoint( t )
+
+	}, {
+		key: 'getPoints',
+		value: function getPoints(divisions) {
+
+			if (divisions === undefined) divisions = 5;
+
+			var points = [];
+
+			for (var d = 0; d <= divisions; d++) {
+
+				points.push(this.getPoint(d / divisions));
+			}
+
+			return points;
+		}
+
+		// Get sequence of points using getPointAt( u )
+
+	}, {
+		key: 'getSpacedPoints',
+		value: function getSpacedPoints(divisions) {
+
+			if (divisions === undefined) divisions = 5;
+
+			var points = [];
+
+			for (var d = 0; d <= divisions; d++) {
+
+				points.push(this.getPointAt(d / divisions));
+			}
+
+			return points;
+		}
+
+		// Get total curve arc length
+
+	}, {
+		key: 'getLength',
+		value: function getLength() {
+
+			var lengths = this.getLengths();
+			return lengths[lengths.length - 1];
+		}
+
+		// Get list of cumulative segment lengths
+
+	}, {
+		key: 'getLengths',
+		value: function getLengths(divisions) {
+
+			if (divisions === undefined) divisions = this.arcLengthDivisions;
+
+			if (this.cacheArcLengths && this.cacheArcLengths.length === divisions + 1 && !this.needsUpdate) {
+
+				return this.cacheArcLengths;
+			}
+
+			this.needsUpdate = false;
+
+			var cache = [];
+			var current,
+			    last = this.getPoint(0);
+			var p,
+			    sum = 0;
+
+			cache.push(0);
+
+			for (p = 1; p <= divisions; p++) {
+
+				current = this.getPoint(p / divisions);
+				sum += current.distanceTo(last);
+				cache.push(sum);
+				last = current;
+			}
+
+			this.cacheArcLengths = cache;
+
+			return cache; // { sums: cache, sum: sum }; Sum is in the last element.
+		}
+	}, {
+		key: 'updateArcLengths',
+		value: function updateArcLengths() {
+
+			this.needsUpdate = true;
+			this.getLengths();
+		}
+
+		// Given u ( 0 .. 1 ), get a t to find p. This gives you points which are equidistant
+
+	}, {
+		key: 'getUtoTmapping',
+		value: function getUtoTmapping(u, distance) {
+
+			var arcLengths = this.getLengths();
+
+			var i = 0,
+			    il = arcLengths.length;
+
+			var targetArcLength; // The targeted u distance value to get
+
+			if (distance) {
+
+				targetArcLength = distance;
+			} else {
+
+				targetArcLength = u * arcLengths[il - 1];
+			}
+
+			// binary search for the index with largest value smaller than target u distance
+
+			var low = 0,
+			    high = il - 1,
+			    comparison;
+
+			while (low <= high) {
+
+				i = Math.floor(low + (high - low) / 2); // less likely to overflow, though probably not issue here, JS doesn't really have integers, all numbers are floats
+
+				comparison = arcLengths[i] - targetArcLength;
+
+				if (comparison < 0) {
+
+					low = i + 1;
+				} else if (comparison > 0) {
+
+					high = i - 1;
+				} else {
+
+					high = i;
+					break;
+
+					// DONE
+				}
+			}
+
+			i = high;
+
+			if (arcLengths[i] === targetArcLength) {
+
+				return i / (il - 1);
+			}
+
+			// we could get finer grain at lengths, or use simple interpolation between two points
+
+			var lengthBefore = arcLengths[i];
+			var lengthAfter = arcLengths[i + 1];
+
+			var segmentLength = lengthAfter - lengthBefore;
+
+			// determine where we are between the 'before' and 'after' points
+
+			var segmentFraction = (targetArcLength - lengthBefore) / segmentLength;
+
+			// add that fractional amount to t
+
+			var t = (i + segmentFraction) / (il - 1);
+
+			return t;
+		}
+
+		// Returns a unit vector tangent at t
+		// In case any sub curve does not implement its tangent derivation,
+		// 2 points a small delta apart will be used to find its gradient
+		// which seems to give a reasonable approximation
+
+	}, {
+		key: 'getTangent',
+		value: function getTangent(t) {
+
+			var delta = 0.0001;
+			var t1 = t - delta;
+			var t2 = t + delta;
+
+			// Capping in case of danger
+
+			if (t1 < 0) t1 = 0;
+			if (t2 > 1) t2 = 1;
+
+			var pt1 = this.getPoint(t1);
+			var pt2 = this.getPoint(t2);
+
+			var vec = pt2.clone().sub(pt1);
+			return vec.normalize();
+		}
+	}, {
+		key: 'getTangentAt',
+		value: function getTangentAt(u) {
+
+			var t = this.getUtoTmapping(u);
+			return this.getTangent(t);
+		}
+	}, {
+		key: 'computeFrenetFrames',
+		value: function computeFrenetFrames(segments, closed) {
+
+			// see http://www.cs.indiana.edu/pub/techreports/TR425.pdf
+
+			var normal = new Vector3();
+
+			var tangents = [];
+			var normals = [];
+			var binormals = [];
+
+			var vec = new Vector3();
+			var mat = new Matrix4();
+
+			var i, u, theta;
+
+			// compute the tangent vectors for each segment on the curve
+
+			for (i = 0; i <= segments; i++) {
+
+				u = i / segments;
+
+				tangents[i] = this.getTangentAt(u);
+				tangents[i].normalize();
+			}
+
+			// select an initial normal vector perpendicular to the first tangent vector,
+			// and in the direction of the minimum tangent xyz component
+
+			normals[0] = new Vector3();
+			binormals[0] = new Vector3();
+			var min = Number.MAX_VALUE;
+			var tx = Math.abs(tangents[0].x);
+			var ty = Math.abs(tangents[0].y);
+			var tz = Math.abs(tangents[0].z);
+
+			if (tx <= min) {
+
+				min = tx;
+				normal.set(1, 0, 0);
+			}
+
+			if (ty <= min) {
+
+				min = ty;
+				normal.set(0, 1, 0);
+			}
+
+			if (tz <= min) {
+
+				normal.set(0, 0, 1);
+			}
+
+			vec.crossVectors(tangents[0], normal).normalize();
+
+			normals[0].crossVectors(tangents[0], vec);
+			binormals[0].crossVectors(tangents[0], normals[0]);
+
+			// compute the slowly-varying normal and binormal vectors for each segment on the curve
+
+			for (i = 1; i <= segments; i++) {
+
+				normals[i] = normals[i - 1].clone();
+
+				binormals[i] = binormals[i - 1].clone();
+
+				vec.crossVectors(tangents[i - 1], tangents[i]);
+
+				if (vec.length() > Number.EPSILON) {
+
+					vec.normalize();
+
+					theta = Math.acos(_Math.clamp(tangents[i - 1].dot(tangents[i]), -1, 1)); // clamp for floating pt errors
+
+					normals[i].applyMatrix4(mat.makeRotationAxis(vec, theta));
+				}
+
+				binormals[i].crossVectors(tangents[i], normals[i]);
+			}
+
+			// if the curve is closed, postprocess the vectors so the first and last normal vectors are the same
+
+			if (closed === true) {
+
+				theta = Math.acos(_Math.clamp(normals[0].dot(normals[segments]), -1, 1));
+				theta /= segments;
+
+				if (tangents[0].dot(vec.crossVectors(normals[0], normals[segments])) > 0) {
+
+					theta = -theta;
+				}
+
+				for (i = 1; i <= segments; i++) {
+
+					// twist a little...
+					normals[i].applyMatrix4(mat.makeRotationAxis(tangents[i], theta * i));
+					binormals[i].crossVectors(tangents[i], normals[i]);
+				}
+			}
+
+			return {
+				tangents: tangents,
+				normals: normals,
+				binormals: binormals
+			};
+		}
+	}, {
+		key: 'clone',
+		value: function clone() {
+
+			return new this.constructor().copy(this);
+		}
+	}, {
+		key: 'copy',
+		value: function copy(source) {
+
+			this.arcLengthDivisions = source.arcLengthDivisions;
+
+			return this;
+		}
+	}, {
+		key: 'toJSON',
+		value: function toJSON() {
+
+			var data = {
+				metadata: {
+					version: 4.5,
+					type: 'Curve',
+					generator: 'Curve.toJSON'
+				}
+			};
+
+			data.arcLengthDivisions = this.arcLengthDivisions;
+			data.type = this.type;
+
+			return data;
+		}
+	}, {
+		key: 'fromJSON',
+		value: function fromJSON(json) {
+
+			this.arcLengthDivisions = json.arcLengthDivisions;
+
+			return this;
+		}
+	}]);
+	return Curve;
+}();
+
+/**
+ * @author zz85 https://github.com/zz85
+ *
+ * Centripetal CatmullRom Curve - which is useful for avoiding
+ * cusps and self-intersections in non-uniform catmull rom curves.
+ * http://www.cemyuksel.com/research/catmullrom_param/catmullrom.pdf
+ *
+ * curve.type accepts centripetal(default), chordal and catmullrom
+ * curve.tension is used for catmullrom which defaults to 0.5
+ */
+
+/*
+Based on an optimized c++ solution in
+ - http://stackoverflow.com/questions/9489736/catmull-rom-curve-with-no-cusps-and-no-self-intersections/
+ - http://ideone.com/NoEbVM
+
+This CubicPoly class could be used for reusing some variables and calculations,
+but for three.js curve use, it could be possible inlined and flatten into a single function call
+which can be placed in CurveUtils.
+*/
+
+function CubicPoly() {
+
+    var c0 = 0,
+        c1 = 0,
+        c2 = 0,
+        c3 = 0;
+
+    /*
+     * Compute coefficients for a cubic polynomial
+     *   p(s) = c0 + c1*s + c2*s^2 + c3*s^3
+     * such that
+     *   p(0) = x0, p(1) = x1
+     *  and
+     *   p'(0) = t0, p'(1) = t1.
+     */
+    function init(x0, x1, t0, t1) {
+
+        c0 = x0;
+        c1 = t0;
+        c2 = -3 * x0 + 3 * x1 - 2 * t0 - t1;
+        c3 = 2 * x0 - 2 * x1 + t0 + t1;
+    }
+
+    return {
+
+        initCatmullRom: function initCatmullRom(x0, x1, x2, x3, tension) {
+
+            init(x1, x2, tension * (x2 - x0), tension * (x3 - x1));
+        },
+
+        initNonuniformCatmullRom: function initNonuniformCatmullRom(x0, x1, x2, x3, dt0, dt1, dt2) {
+
+            // compute tangents when parameterized in [t1,t2]
+            var t1 = (x1 - x0) / dt0 - (x2 - x0) / (dt0 + dt1) + (x2 - x1) / dt1;
+            var t2 = (x2 - x1) / dt1 - (x3 - x1) / (dt1 + dt2) + (x3 - x2) / dt2;
+
+            // rescale tangents for parametrization in [0,1]
+            t1 *= dt1;
+            t2 *= dt1;
+
+            init(x1, x2, t1, t2);
+        },
+
+        calc: function calc(t) {
+
+            var t2 = t * t;
+            var t3 = t2 * t;
+            return c0 + c1 * t + c2 * t2 + c3 * t3;
+        }
+
+    };
+}
+
+//
+
+var tmp = new Vector3();
+var px = new CubicPoly();
+var py = new CubicPoly();
+var pz = new CubicPoly();
+
+var CatmullRomCurve3 = function (_Curve) {
+    inherits(CatmullRomCurve3, _Curve);
+
+    function CatmullRomCurve3() {
+        var points = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+        var closed = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+        var curveType = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'centripetal';
+        var tension = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0.5;
+        classCallCheck(this, CatmullRomCurve3);
+
+        var _this = possibleConstructorReturn(this, (CatmullRomCurve3.__proto__ || Object.getPrototypeOf(CatmullRomCurve3)).call(this));
+
+        _this.type = 'CatmullRomCurve3';
+
+        _this.points = points;
+        _this.closed = closed;
+        _this.curveType = curveType;
+        _this.tension = tension;
+        return _this;
+    }
+
+    createClass(CatmullRomCurve3, [{
+        key: 'getPoint',
+        value: function getPoint() {
+            var t = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+            var optionalTarget = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : new Vector3();
+
+
+            var point = optionalTarget;
+
+            var points = this.points;
+            var l = points.length;
+
+            var p = (l - (this.closed ? 0 : 1)) * t;
+            var intPoint = Math.floor(p);
+            var weight = p - intPoint;
+
+            if (this.closed) {
+
+                intPoint += intPoint > 0 ? 0 : (Math.floor(Math.abs(intPoint) / l) + 1) * l;
+            } else if (weight === 0 && intPoint === l - 1) {
+
+                intPoint = l - 2;
+                weight = 1;
+            }
+
+            var p0, p1, p2, p3; // 4 points
+
+            if (this.closed || intPoint > 0) {
+
+                p0 = points[(intPoint - 1) % l];
+            } else {
+
+                // extrapolate first point
+                tmp.subVectors(points[0], points[1]).add(points[0]);
+                p0 = tmp;
+            }
+
+            p1 = points[intPoint % l];
+            p2 = points[(intPoint + 1) % l];
+
+            if (this.closed || intPoint + 2 < l) {
+
+                p3 = points[(intPoint + 2) % l];
+            } else {
+
+                // extrapolate last point
+                tmp.subVectors(points[l - 1], points[l - 2]).add(points[l - 1]);
+                p3 = tmp;
+            }
+
+            if (this.curveType === 'centripetal' || this.curveType === 'chordal') {
+
+                // init Centripetal / Chordal Catmull-Rom
+                var pow = this.curveType === 'chordal' ? 0.5 : 0.25;
+                var dt0 = Math.pow(p0.distanceToSquared(p1), pow);
+                var dt1 = Math.pow(p1.distanceToSquared(p2), pow);
+                var dt2 = Math.pow(p2.distanceToSquared(p3), pow);
+
+                // safety check for repeated points
+                if (dt1 < 1e-4) dt1 = 1.0;
+                if (dt0 < 1e-4) dt0 = dt1;
+                if (dt2 < 1e-4) dt2 = dt1;
+
+                px.initNonuniformCatmullRom(p0.x, p1.x, p2.x, p3.x, dt0, dt1, dt2);
+                py.initNonuniformCatmullRom(p0.y, p1.y, p2.y, p3.y, dt0, dt1, dt2);
+                pz.initNonuniformCatmullRom(p0.z, p1.z, p2.z, p3.z, dt0, dt1, dt2);
+            } else if (this.curveType === 'catmullrom') {
+
+                px.initCatmullRom(p0.x, p1.x, p2.x, p3.x, this.tension);
+                py.initCatmullRom(p0.y, p1.y, p2.y, p3.y, this.tension);
+                pz.initCatmullRom(p0.z, p1.z, p2.z, p3.z, this.tension);
+            }
+
+            point.set(px.calc(weight), py.calc(weight), pz.calc(weight));
+
+            return point;
+        }
+    }, {
+        key: 'copy',
+        value: function copy(source) {
+
+            get(CatmullRomCurve3.prototype.__proto__ || Object.getPrototypeOf(CatmullRomCurve3.prototype), 'copy', this).call(this, source);
+
+            this.points = [];
+
+            for (var i = 0, l = source.points.length; i < l; i++) {
+
+                var point = source.points[i];
+
+                this.points.push(point.clone());
+            }
+
+            this.closed = source.closed;
+            this.curveType = source.curveType;
+            this.tension = source.tension;
+
+            return this;
+        }
+    }, {
+        key: 'toJSON',
+        value: function toJSON() {
+
+            var data = get(CatmullRomCurve3.prototype.__proto__ || Object.getPrototypeOf(CatmullRomCurve3.prototype), 'toJSON', this).call(this);
+
+            data.points = [];
+
+            for (var i = 0, l = this.points.length; i < l; i++) {
+
+                var point = this.points[i];
+                data.points.push(point.toArray());
+            }
+
+            data.closed = this.closed;
+            data.curveType = this.curveType;
+            data.tension = this.tension;
+
+            return data;
+        }
+    }, {
+        key: 'fromJSON',
+        value: function fromJSON(json) {
+
+            get(CatmullRomCurve3.prototype.__proto__ || Object.getPrototypeOf(CatmullRomCurve3.prototype), 'fromJSON', this).call(this, json);
+
+            this.points = [];
+
+            for (var i = 0, l = json.points.length; i < l; i++) {
+
+                var point = json.points[i];
+                this.points.push(new Vector3().fromArray(point));
+            }
+
+            this.closed = json.closed;
+            this.curveType = json.curveType;
+            this.tension = json.tension;
+
+            return this;
+        }
+    }, {
+        key: 'isCatmullRomCurve3',
+        get: function get$$1() {
+            return true;
+        }
+    }]);
+    return CatmullRomCurve3;
+}(Curve);
+
 exports.Events = Events;
 exports.WebGLRenderer = WebGLRenderer;
 exports.Scene = Scene;
@@ -16491,6 +17149,7 @@ exports.Vector3 = Vector3;
 exports.Vector2 = Vector2;
 exports.Quaternion = Quaternion;
 exports.Color = Color$1;
+exports.CatmullRomCurve3 = CatmullRomCurve3;
 exports.CircleGeometry = CircleGeometry;
 exports.CircleBufferGeometry = CircleBufferGeometry;
 exports.PlaneGeometry = PlaneGeometry;
