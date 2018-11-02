@@ -75,6 +75,14 @@ class WebGLRenderer extends Events {
         this._vector3 = new Vector3();
         this._frustum = new Frustum();
 
+        // clearing
+
+        this.autoClear = true;
+        this.autoClearColor = true;
+        this.autoClearDepth = true;
+        this.autoClearStencil = true;
+
+
         this._init(params);
         this._initGLContext(params);
     }
@@ -327,7 +335,7 @@ class WebGLRenderer extends Events {
         this.clear(false, false, true);
     }
 
-    render(scene, camera) {
+    render(scene, camera, forceClear) {
 
         if (!(camera && camera.isCamera)) {
 
@@ -371,7 +379,10 @@ class WebGLRenderer extends Events {
         if (this._info.autoReset) this._info.reset();
 
         scene.background === null ? this.setClearColor(this._currClearColor) : this.setClearColor(scene.background);
-        this.clearColor(true);
+        if (this.autoClear || forceClear) {
+            this.clear(this.autoClearColor, this.autoClearDepth, this.autoClearStencil);
+        }
+
 
         let opaqueObjects = this._currentRenderList.opaque;
         let transparentObjects = this._currentRenderList.transparent;

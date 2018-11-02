@@ -191,7 +191,7 @@
 	    return Events;
 	}();
 
-	var version = "0.0.32";
+	var version = "0.0.33";
 
 	var REVISION = version;
 
@@ -8667,6 +8667,13 @@
 	        _this._vector3 = new Vector3();
 	        _this._frustum = new Frustum();
 
+	        // clearing
+
+	        _this.autoClear = true;
+	        _this.autoClearColor = true;
+	        _this.autoClearDepth = true;
+	        _this.autoClearStencil = true;
+
 	        _this._init(params);
 	        _this._initGLContext(params);
 	        return _this;
@@ -8942,7 +8949,7 @@
 	        }
 	    }, {
 	        key: 'render',
-	        value: function render(scene, camera) {
+	        value: function render(scene, camera, forceClear) {
 
 	            if (!(camera && camera.isCamera)) {
 
@@ -8985,7 +8992,9 @@
 	            if (this._info.autoReset) this._info.reset();
 
 	            scene.background === null ? this.setClearColor(this._currClearColor) : this.setClearColor(scene.background);
-	            this.clearColor(true);
+	            if (this.autoClear || forceClear) {
+	                this.clear(this.autoClearColor, this.autoClearDepth, this.autoClearStencil);
+	            }
 
 	            var opaqueObjects = this._currentRenderList.opaque;
 	            var transparentObjects = this._currentRenderList.transparent;

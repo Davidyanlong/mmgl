@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>catmullRomCurve</title>
+</head>
+
+<body>
+</body>
+
+</html>
+<script src="../build/mmGL.js"></script>
+
+<script>
+    // scene
+
+    const scene = new mmGL.Scene();
+
+    // camera
+
+    const camera = new mmGL.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+    camera.position.set(0, 0, 30);
+
+    // curve
+
+    const points = [
+        new mmGL.Vector3(-10, 0, 10),
+        new mmGL.Vector3(-5, 5, 5),
+        new mmGL.Vector3(0, 0, 0),
+        new mmGL.Vector3(5, -5, 5),
+        new mmGL.Vector3(10, 0, 10)
+    ]
+
+    const curve = new mmGL.CatmullRomCurve3(points);
+    // create curve mesh
+
+    let DIVISONS = 200;
+
+    //const geometry = new mmGL.Geometry();
+    //geometry.vertices = curve.getSpacedPoints(DIVISONS);
+
+
+    // const material = new mmGL.LineBasicMaterial({ color: 0xff0000, linewidth: 2 });
+    // const curveObject = new mmGL.Line(geometry, material);
+
+
+    let lineMeshGeometry = new mmGL.LineGeometry();
+    let vertices = curve.getSpacedPoints(DIVISONS);
+    let triangleVertices = [];
+    vertices.forEach(element => {
+        triangleVertices = triangleVertices.concat(element.toArray())
+    });
+    lineMeshGeometry.setPositions(triangleVertices);
+    //lineMeshGeometry.setColors(color);
+    //lineMeshGeometry.setIndex(index);
+
+
+    let matLine = new mmGL.LineMeshMaterial({
+        color: 0xf000f0,
+        linewidth: 5, // in pixels
+        dashSize: 1,
+        gapSize: 1,
+        scale: 3,
+        vertexColors: mmGL.FaceColors,
+        resolution: new mmGL.Vector2(window.innerWidth, window.innerHeight),
+        dashed: false
+
+    });
+
+    let line2 = new mmGL.Line2(lineMeshGeometry, matLine);
+    line2.drawMode = mmGL.TriangleStripDrawMode;
+    line2.computeLineDistances();
+    line2.scale.set(1, 1, 1);
+    scene.add(line2);
+
+
+
+
+    //默认是LineMode ,需要设置一下
+    //curveObject.drawMode = mmGL.LineStripMode
+    // scene.add(curveObject);
+
+    // visualize spaced points 
+
+    const sphereGeomtry = new mmGL.SphereBufferGeometry(0.5);
+    // const sphereMaterial = new mmGL.MeshBasicMaterial( { color: 0xff0000 } );
+
+    // const spacedPoints = curve.getPoints( 6 );
+
+    // for ( point of spacedPoints ) {
+
+    // 	const helper = new mmGL.Mesh( sphereGeomtry, sphereMaterial );
+    // 	helper.position.copy( point );
+    // 	scene.add( helper );
+
+    // }
+    const sphereMaterialBlue = new mmGL.MeshBasicMaterial({ color: 0x0000ff });
+    for (let p = 0; p < points.length; p++) {
+        const pp = new mmGL.Mesh(sphereGeomtry, sphereMaterialBlue);
+        pp.position.copy(points[p]);
+        scene.add(pp);
+    }
+
+    // renderer
+
+    const renderer = new mmGL.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x20252f);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    document.body.appendChild(renderer.domElement);
+
+    animate();
+
+    window.addEventListener('resize', onResize);
+
+    function onResize() {
+
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+    }
+
+
+    document.addEventListener('keyup', function (e) {
+        if (e.keyCode == 38) {
+            camera.position.y += 1;
+        }
+        if (e.keyCode == 40) {
+
+            camera.position.y -= 1;
+        }
+
+        if (e.keyCode == 39) {
+
+            camera.position.x -= 1;
+        }
+
+        if (e.keyCode == 37) {
+
+            camera.position.x += 1;
+        }
+
+        if (e.keyCode == 187) {
+
+            camera.position.z -= 1;
+        }
+
+        if (e.keyCode == 189) {
+
+            camera.position.z += 1;
+        }
+    })
+
+
+    function animate() {
+
+        requestAnimationFrame(animate);
+
+        render();
+
+    }
+
+    function render() {
+
+        renderer.render(scene, camera);
+
+    }
+</script>
