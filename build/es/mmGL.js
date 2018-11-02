@@ -185,7 +185,7 @@ var Events = function () {
     return Events;
 }();
 
-var version = "0.0.33";
+var version = "0.0.35";
 
 var REVISION = version;
 
@@ -8985,8 +8985,8 @@ var WebGLRenderer = function (_Events) {
 
             if (this._info.autoReset) this._info.reset();
 
-            scene.background === null ? this.setClearColor(this._currClearColor) : this.setClearColor(scene.background);
             if (this.autoClear || forceClear) {
+                scene.background === null ? this.setClearColor(this._currClearColor) : this.setClearColor(scene.background);
                 this.clear(this.autoClearColor, this.autoClearDepth, this.autoClearStencil);
             }
 
