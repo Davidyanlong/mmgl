@@ -314,7 +314,7 @@ class Vector3 {
     unproject(camera,matrix) {
 
         matrix.multiplyMatrices(camera.matrixWorld, matrix1.getInverse(camera.projectionMatrix));
-        return this.applyMatrix4(matrix1);
+        return this.applyMatrix4(matrix);
 
     }
 
