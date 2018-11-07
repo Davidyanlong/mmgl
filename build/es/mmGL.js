@@ -453,13 +453,13 @@ var _Math = {
     }
 };
 
-// import { Matrix4 } from './Matrix4';
+//import { Matrix4 } from './Matrix4';
 // import { Quaternion } from './Quaternion';
 
 // var quaternion = new Quaternion();
 // var quaternion1 = new Quaternion();
 
-// var matrix = new Matrix4();
+
 // var matrix1 = new Matrix4();
 
 // var min = new Vector3();
@@ -772,22 +772,20 @@ var Vector3 = function () {
 
             return this;
         }
-        // project(camera) {
+    }, {
+        key: 'project',
+        value: function project(camera, matrix) {
 
-        //     matrix.multiplyMatrices(camera.projectionMatrix, matrix.getInverse(camera.matrixWorld));
-        //     return this.applyMatrix4(matrix);
+            matrix.multiplyMatrices(camera.projectionMatrix, matrix.getInverse(camera.matrixWorld));
+            return this.applyMatrix4(matrix);
+        }
+    }, {
+        key: 'unproject',
+        value: function unproject(camera, matrix) {
 
-        // }
-
-
-        // unproject(camera) {
-
-        //     matrix1.multiplyMatrices(camera.matrixWorld, matrix1.getInverse(camera.projectionMatrix));
-        //     return this.applyMatrix4(matrix1);
-
-        // }
-
-
+            matrix.multiplyMatrices(camera.matrixWorld, matrix1.getInverse(camera.projectionMatrix));
+            return this.applyMatrix4(matrix1);
+        }
     }, {
         key: 'transformDirection',
         value: function transformDirection(m) {
