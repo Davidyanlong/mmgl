@@ -189,7 +189,7 @@ var Events = function () {
     return Events;
 }();
 
-var version = "0.0.37";
+var version = "0.0.38";
 
 var REVISION = version;
 
