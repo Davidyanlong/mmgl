@@ -191,7 +191,7 @@
 	    return Events;
 	}();
 
-	var version = "0.0.36";
+	var version = "0.0.37";
 
 	var REVISION = version;
 
@@ -789,7 +789,7 @@
 	        key: 'unproject',
 	        value: function unproject(camera, matrix) {
 
-	            matrix.multiplyMatrices(camera.matrixWorld, matrix1.getInverse(camera.projectionMatrix));
+	            matrix.multiplyMatrices(camera.matrixWorld, matrix.getInverse(camera.projectionMatrix));
 	            return this.applyMatrix4(matrix);
 	        }
 	    }, {
