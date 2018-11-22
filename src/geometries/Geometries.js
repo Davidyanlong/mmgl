@@ -8,6 +8,8 @@ export { BoxGeometry, BoxBufferGeometry } from './BoxGeometry';
 export { SphereGeometry, SphereBufferGeometry } from './SphereGeometry';
 export { CylinderGeometry, CylinderBufferGeometry } from './CylinderGeometry';
 
+export { DoughnutGeometry, DoughnutBufferGeometry } from './DoughnutGeometry';
+
 
 export { LineSegmentsGeometry } from './LineSegmentsGeometry'
 export { LineGeometry } from './LineGeometry';

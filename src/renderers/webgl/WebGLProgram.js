@@ -148,8 +148,8 @@ class WebGLProgram {
         let vertexGlsl = prefixVertex + vertexShader;
         let fragmentGlsl = prefixFragment + fragmentShader;
 
-        console.log('*VERTEX*', vertexGlsl);
-        console.log('*FRAGMENT*', fragmentGlsl);
+        // console.log('*VERTEX*', vertexGlsl);
+        // console.log('*FRAGMENT*', fragmentGlsl);
 
         let glVertexShader = this.vertexShader = WebGLShader(gl, gl.VERTEX_SHADER, vertexGlsl);
         let glFragmentShader = this.fragmentShader = WebGLShader(gl, gl.FRAGMENT_SHADER, fragmentGlsl);
@@ -215,7 +215,7 @@ class WebGLProgram {
                 var info = gl.getActiveAttrib(program, i);
                 var name = info.name;
 
-                console.log('WebGLProgram: ACTIVE VERTEX ATTRIBUTE:', name, i);
+                //console.log('WebGLProgram: ACTIVE VERTEX ATTRIBUTE:', name, i);
 
                 this._cachedAttributes[name] = gl.getAttribLocation(program, name);
 

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Geometry</title>
+</head>
+
+<body>
+    <canvas id="cas"></canvas>
+</body>
+<p>
+    测试:简单几何体的绘制
+
+</p>
+
+</html>
+<script src="../build/mmGL.js"></script>
+<script>
+    let canvas = document.getElementById('cas');
+    let renderer = new mmGL.WebGLRenderer({
+        canvas: canvas,
+        antialias: true
+    })
+
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.setSize(400, 400, true);
+
+    let scene = new mmGL.Scene();
+
+    let group = new mmGL.Group();
+
+    let geometry = new mmGL.DoughnutGeometry(80, 20,20,60,0,Math.PI/3);
+
+    let geometry2 = new mmGL.DoughnutGeometry(80, 20,20,60,Math.PI/3,Math.PI);
+
+
+    // geometry.vertices.forEach(vec => {
+    //     vec.addScalar(0.5);
+    // })
+
+   // geometry.computeBoundingBox();
+
+
+    let materialLine = new mmGL.MeshPhongMaterial({
+        color: 'red',
+        side: mmGL.DoubleSide
+        // vertexColors: mmGL.VertexColors,
+        // wireframe: true
+    });
+
+     let materialLine2 = new mmGL.MeshPhongMaterial({
+        color: 'blue',
+        side: mmGL.DoubleSide
+        // vertexColors: mmGL.VertexColors,
+        // wireframe: true
+    });
+
+    let ambientLight = new mmGL.AmbientLight('#eeeeee', 0.8);
+
+    scene.add(ambientLight);
+
+    let pointLight = new mmGL.PointLight('white');
+
+    pointLight.position.set(0, 1000, 0);
+
+    scene.add(pointLight);
+
+
+    // let cloneGeometry = geometry.clone();
+    //cloneGeometry.renderOrder=1;
+
+    let mesh = new mmGL.Mesh(geometry, materialLine);
+
+    scene.add(mesh);
+
+    let mesh2 = new mmGL.Mesh(geometry2, materialLine2);
+
+    scene.add(mesh2);
+
+    let camera = new mmGL.PerspectiveCamera(45, 1, 0.1, 2000);
+    camera.position.set(0, 100, 200);
+
+    camera.lookAt(0, 0, 0);
+
+    (function tick() {
+        renderer.render(scene, camera);
+
+         mesh.rotation.y += 0.01;
+         mesh2.rotation.y += 0.01;
+        // mesh.rotation.x += 0.01;
+        // mesh.rotation.z += 0.01;
+
+        window.requestAnimationFrame(tick)
+    })()
+
+
+
+
+
+
+</script>
