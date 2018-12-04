@@ -20,7 +20,7 @@ class DoughnutGeometry extends Geometry {
 
         super();
 
-        this.type = 'CylinderGeometry';
+        this.type = 'DoughnutGeometry';
 
         this.parameters = {
             outterRadius,
@@ -84,7 +84,7 @@ class DoughnutBufferGeometry extends BufferGeometry {
 
         this.setIndex(indices);
         this.addAttribute('position', new Float32BufferAttribute(vertices, 3));
-        this.addAttribute('normal', new Float32BufferAttribute(normals, 3));
+      //  this.addAttribute('normal', new Float32BufferAttribute(normals, 3));
         this.addAttribute('uv', new Float32BufferAttribute(uvs, 2));
 
 

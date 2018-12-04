@@ -52,7 +52,14 @@ export { Vector2 } from './maths/Vector2.js';
 export { Quaternion } from './maths/Quaternion.js';
 export { Color } from './maths/Color.js';
 
-export {CatmullRomCurve3} from './extras/curves/CatmullRomCurve3';
+export * from './extras/curves/Curves.js';
+export { Shape } from './extras/core/Shape.js';
+export { Path } from './extras/core/Path.js';
+export { ShapePath } from './extras/core/ShapePath.js';
+
+export { CurvePath } from './extras/core/CurvePath.js';
+export { Curve } from './extras/core/Curve.js';
+export { ShapeUtils } from './extras/ShapeUtils.js';
 
 export * from './constants.js';
 

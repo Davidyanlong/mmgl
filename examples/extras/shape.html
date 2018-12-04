@@ -15,7 +15,7 @@
 </p>
 
 </html>
-<script src="../build/mmGL.js"></script>
+<script src="../../build/mmGL.js"></script>
 <script>
     let canvas = document.getElementById('cas');
     let renderer = new mmGL.WebGLRenderer({
@@ -24,22 +24,48 @@
     })
 
     renderer.setPixelRatio(window.devicePixelRatio || 1);
-    renderer.setSize(400, 400, true);
+    renderer.setSize(1000, 800, true);
 
     let scene = new mmGL.Scene();
 
     let group = new mmGL.Group();
 
-    let geometry = new mmGL.DoughnutGeometry(80, 20,60,32,Math.PI/2,Math.PI/3);
+    var x = 0, y = 0;
+    var heartShape = new mmGL.Shape();
 
-    let geometry2 = new mmGL.DoughnutGeometry(80, 20,60,32,Math.PI/3+Math.PI/2,Math.PI);
+    heartShape.moveTo(x + 25, y + 25);
+    heartShape.bezierCurveTo(x + 25, y + 25, x + 20, y, x, y);
+    heartShape.bezierCurveTo(x - 30, y, x - 30, y + 35, x - 30, y + 35);
+    heartShape.bezierCurveTo(x - 30, y + 55, x - 10, y + 77, x + 25, y + 95);
+    heartShape.bezierCurveTo(x + 60, y + 77, x + 80, y + 55, x + 80, y + 35);
+    heartShape.bezierCurveTo(x + 80, y + 35, x + 80, y, x + 50, y);
+    heartShape.bezierCurveTo(x + 35, y, x + 25, y + 25, x + 25, y + 25);
 
+    var extrudeSettings = { amount: 8, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 1, bevelThickness: 1 };
+
+    var geometry = new mmGL.ExtrudeGeometry(heartShape, extrudeSettings);
+
+
+
+   	// Fish
+       var x = y = 0;
+				var fishShape = new mmGL.Shape();
+				fishShape.moveTo( x, y );
+				fishShape.quadraticCurveTo( x + 50, y - 80, x + 90, y - 10 );
+				fishShape.quadraticCurveTo( x + 100, y - 10, x + 115, y - 40 );
+				fishShape.quadraticCurveTo( x + 115, y, x + 115, y + 40 );
+				fishShape.quadraticCurveTo( x + 100, y + 10, x + 90, y + 10 );
+				fishShape.quadraticCurveTo( x + 50, y + 80, x, y );
+
+  var extrudeSettings = { amount: 8, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 1, bevelThickness: 1 };
+
+var geometry2 = new mmGL.ExtrudeGeometry(fishShape, extrudeSettings);
 
     // geometry.vertices.forEach(vec => {
     //     vec.addScalar(0.5);
     // })
 
-   // geometry.computeBoundingBox();
+    // geometry.computeBoundingBox();
 
 
     let materialLine = new mmGL.MeshPhongMaterial({
@@ -49,7 +75,7 @@
         // wireframe: true
     });
 
-     let materialLine2 = new mmGL.MeshPhongMaterial({
+    let materialLine2 = new mmGL.MeshPhongMaterial({
         color: 'blue',
         side: mmGL.DoubleSide
         // vertexColors: mmGL.VertexColors,
@@ -76,6 +102,9 @@
 
     let mesh2 = new mmGL.Mesh(geometry2, materialLine2);
 
+    mesh2.position.set(30,-30,0)
+
+
     scene.add(mesh2);
 
     let camera = new mmGL.PerspectiveCamera(45, 1, 0.1, 2000);
@@ -86,8 +115,8 @@
     (function tick() {
         renderer.render(scene, camera);
 
-         mesh.rotation.y += 0.01;
-         mesh2.rotation.y += 0.01;
+        mesh.rotation.y += 0.01;
+        mesh2.rotation.y += 0.01;
         // mesh.rotation.x += 0.01;
         // mesh.rotation.z += 0.01;
 

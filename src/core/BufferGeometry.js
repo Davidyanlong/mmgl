@@ -286,6 +286,145 @@ class BufferGeometry extends Events {
 
         computeBoundingSphere.call(this);
     }
+    computeVertexNormals() {
+
+        var index = this.index;
+        var attributes = this.attributes;
+        var groups = this.groups;
+
+        if (attributes.position) {
+
+            var positions = attributes.position.array;
+
+            if (attributes.normal === undefined) {
+
+                this.addAttribute('normal', new BufferAttribute(new Float32Array(positions.length), 3));
+
+            } else {
+
+                // reset existing normals to zero
+
+                var array = attributes.normal.array;
+
+                for (var i = 0, il = array.length; i < il; i++) {
+
+                    array[i] = 0;
+
+                }
+
+            }
+
+            var normals = attributes.normal.array;
+
+            var vA, vB, vC;
+            var pA = new Vector3(), pB = new Vector3(), pC = new Vector3();
+            var cb = new Vector3(), ab = new Vector3();
+
+            // indexed elements
+
+            if (index) {
+
+                var indices = index.array;
+
+                if (groups.length === 0) {
+
+                    this.addGroup(0, indices.length);
+
+                }
+
+                for (var j = 0, jl = groups.length; j < jl; ++j) {
+
+                    var group = groups[j];
+
+                    var start = group.start;
+                    var count = group.count;
+
+                    for (var i = start, il = start + count; i < il; i += 3) {
+
+                        vA = indices[i + 0] * 3;
+                        vB = indices[i + 1] * 3;
+                        vC = indices[i + 2] * 3;
+
+                        pA.fromArray(positions, vA);
+                        pB.fromArray(positions, vB);
+                        pC.fromArray(positions, vC);
+
+                        cb.subVectors(pC, pB);
+                        ab.subVectors(pA, pB);
+                        cb.cross(ab);
+
+                        normals[vA] += cb.x;
+                        normals[vA + 1] += cb.y;
+                        normals[vA + 2] += cb.z;
+
+                        normals[vB] += cb.x;
+                        normals[vB + 1] += cb.y;
+                        normals[vB + 2] += cb.z;
+
+                        normals[vC] += cb.x;
+                        normals[vC + 1] += cb.y;
+                        normals[vC + 2] += cb.z;
+
+                    }
+
+                }
+
+            } else {
+
+                // non-indexed elements (unconnected triangle soup)
+
+                for (var i = 0, il = positions.length; i < il; i += 9) {
+
+                    pA.fromArray(positions, i);
+                    pB.fromArray(positions, i + 3);
+                    pC.fromArray(positions, i + 6);
+
+                    cb.subVectors(pC, pB);
+                    ab.subVectors(pA, pB);
+                    cb.cross(ab);
+
+                    normals[i] = cb.x;
+                    normals[i + 1] = cb.y;
+                    normals[i + 2] = cb.z;
+
+                    normals[i + 3] = cb.x;
+                    normals[i + 4] = cb.y;
+                    normals[i + 5] = cb.z;
+
+                    normals[i + 6] = cb.x;
+                    normals[i + 7] = cb.y;
+                    normals[i + 8] = cb.z;
+
+                }
+
+            }
+
+            this.normalizeNormals();
+
+            attributes.normal.needsUpdate = true;
+
+        }
+
+    }
+
+    normalizeNormals() {
+        var vector = new Vector3();
+        var normals = this.attributes.normal;
+
+        for (var i = 0, il = normals.count; i < il; i++) {
+
+            vector.x = normals.getX(i);
+            vector.y = normals.getY(i);
+            vector.z = normals.getZ(i);
+
+            vector.normalize();
+
+            normals.setXYZ(i, vector.x, vector.y, vector.z);
+
+        }
+        vector = null;
+
+    }
 
     addGroup(start, count, materialIndex) {
 

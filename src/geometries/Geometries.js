@@ -9,6 +9,8 @@ export { SphereGeometry, SphereBufferGeometry } from './SphereGeometry';
 export { CylinderGeometry, CylinderBufferGeometry } from './CylinderGeometry';
 
 export { DoughnutGeometry, DoughnutBufferGeometry } from './DoughnutGeometry';
+export { ExtrudeGeometry, ExtrudeBufferGeometry } from './ExtrudeGeometry';
+
 
 
 export { LineSegmentsGeometry } from './LineSegmentsGeometry'

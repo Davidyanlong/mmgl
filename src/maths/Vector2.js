@@ -185,6 +185,11 @@ class Vector2 {
 		return this;
 
 	}
+	equals(v) {
+
+        return ((v.x === this.x) && (v.y === this.y));
+
+    }
 
 
 }
