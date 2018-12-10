@@ -189,7 +189,7 @@ var Events = function () {
     return Events;
 }();
 
-var version = "0.0.39";
+var version = "0.0.40";
 
 var REVISION = version;
 
@@ -20531,6 +20531,7 @@ exports.Path = Path;
 exports.ShapePath = ShapePath;
 exports.CurvePath = CurvePath;
 exports.Curve = Curve;
+exports.Earcut = Earcut;
 exports.ShapeUtils = ShapeUtils;
 exports.CircleGeometry = CircleGeometry;
 exports.CircleBufferGeometry = CircleBufferGeometry;

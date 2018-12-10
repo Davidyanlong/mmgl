@@ -59,7 +59,9 @@ export { ShapePath } from './extras/core/ShapePath.js';
 
 export { CurvePath } from './extras/core/CurvePath.js';
 export { Curve } from './extras/core/Curve.js';
+export { Earcut } from './extras/Earcut.js';
 export { ShapeUtils } from './extras/ShapeUtils.js';
+
 
 export * from './constants.js';
 
