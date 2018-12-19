@@ -230,9 +230,30 @@ class Triangle {
         return triangle.a.equals(this.a) && triangle.b.equals(this.b) && triangle.c.equals(this.c);
 
     }
+    static getUV(point, p1, p2, p3, uv1, uv2, uv3, target) {
+        return getUV.call(this, point, p1, p2, p3, uv1, uv2, uv3, target)
+    }
 
 }
 
+let getUV = (function () {
+
+    var barycoord = new Vector3();
+
+    return function getUV(point, p1, p2, p3, uv1, uv2, uv3, target) {
+
+        this.getBarycoord(point, p1, p2, p3, barycoord);
+
+        target.set(0, 0);
+        target.addScaledVector(uv1, barycoord.x);
+        target.addScaledVector(uv2, barycoord.y);
+        target.addScaledVector(uv3, barycoord.z);
+
+        return target;
+
+    };
+
+})();
 let getBarycoord = (function () {
 
     var v0 = new Vector3();

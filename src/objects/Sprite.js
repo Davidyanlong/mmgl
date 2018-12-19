@@ -69,7 +69,6 @@ class Sprite extends Object3D {
 }
 
 let raycast = (function () {
-
     var intersectPoint = new Vector3();
     var worldScale = new Vector3();
     var mvPosition = new Vector3();
@@ -172,6 +171,9 @@ let raycast = (function () {
 
     };
 
-})
+}
+)()
+
+
 
 export { Sprite };

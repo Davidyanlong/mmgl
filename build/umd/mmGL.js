@@ -191,7 +191,7 @@
 	    return Events;
 	}();
 
-	var version = "0.0.40";
+	var version = "0.0.41";
 
 	var REVISION = version;
 
@@ -12098,10 +12098,31 @@
 	        value: function getBarycoord(point, a, b, c, target) {
 	            return _getBarycoord.call(this, point, a, b, c, target);
 	        }
+	    }, {
+	        key: 'getUV',
+	        value: function getUV(point, p1, p2, p3, uv1, uv2, uv3, target) {
+	            return _getUV.call(this, point, p1, p2, p3, uv1, uv2, uv3, target);
+	        }
 	    }]);
 	    return Triangle;
 	}();
 
+	var _getUV = function () {
+
+	    var barycoord = new Vector3();
+
+	    return function getUV(point, p1, p2, p3, uv1, uv2, uv3, target) {
+
+	        this.getBarycoord(point, p1, p2, p3, barycoord);
+
+	        target.set(0, 0);
+	        target.addScaledVector(uv1, barycoord.x);
+	        target.addScaledVector(uv2, barycoord.y);
+	        target.addScaledVector(uv3, barycoord.z);
+
+	        return target;
+	    };
+	}();
 	var _getBarycoord = function () {
 
 	    var v0 = new Vector3();
@@ -13927,8 +13948,7 @@
 	    return Sprite;
 	}(Object3D);
 
-	var _raycast$3 = function _raycast() {
-
+	var _raycast$3 = function () {
 	    var intersectPoint = new Vector3();
 	    var worldScale = new Vector3();
 	    var mvPosition = new Vector3();
@@ -14022,7 +14042,7 @@
 
 	        });
 	    };
-	};
+	}();
 
 	var TextTexture = function (_Texture) {
 	    inherits(TextTexture, _Texture);
