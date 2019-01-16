@@ -26,72 +26,7 @@ class Triangle {
         this.c = (c !== undefined) ? c : new Vector3();
     }
 
-    static normal(a, b, c, optionalTarget) {
 
-        var result = optionalTarget || new Vector3();
-
-        result.subVectors(c, b);
-        v.subVectors(a, b);
-        result.cross(v);
-
-        var resultLengthSq = result.lengthSq();
-        if (resultLengthSq > 0) {
-
-            return result.multiplyScalar(1 / Math.sqrt(resultLengthSq));
-
-        }
-
-        return result.set(0, 0, 0);
-
-    }
-
-    static getNormal(a, b, c, target) {
-        return getNormal.call(this, a, b, c, target);
-    }
-
-    // static/instance method to calculate barycentric coordinates
-    // based on: http://www.blackpawn.com/texts/pointinpoly/default.html
-    static barycoordFromPoint(point, a, b, c, optionalTarget) {
-
-        v0.subVectors(c, a);
-        v1.subVectors(b, a);
-        v2.subVectors(point, a);
-
-        var dot00 = v0.dot(v0);
-        var dot01 = v0.dot(v1);
-        var dot02 = v0.dot(v2);
-        var dot11 = v1.dot(v1);
-        var dot12 = v1.dot(v2);
-
-        var denom = (dot00 * dot11 - dot01 * dot01);
-
-        var result = optionalTarget || new Vector3();
-
-        // collinear or singular triangle
-        if (denom === 0) {
-
-            // arbitrary location outside of triangle?
-            // not sure if this is the best idea, maybe should be returning undefined
-            return result.set(- 2, - 1, - 1);
-
-        }
-
-        var invDenom = 1 / denom;
-        var u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-        var v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-        // barycentric coordinates must always sum to 1
-        return result.set(1 - u - v, v, u);
-
-    }
-
-    static containsPoint(point, a, b, c) {
-
-        var result = Triangle.barycoordFromPoint(point, a, b, c, v4);
-
-        return (result.x >= 0) && (result.y >= 0) && ((result.x + result.y) <= 1);
-
-    }
 
     set(a, b, c) {
 
@@ -129,11 +64,8 @@ class Triangle {
 
     }
 
-    // static/instance method to calculate barycentric coordinates
     // based on: http://www.blackpawn.com/texts/pointinpoly/default.html
-    static getBarycoord(point, a, b, c, target) {
-        return getBarycoord.call(this, point, a, b, c, target)
-    }
+
 
     area() {
 
@@ -230,9 +162,7 @@ class Triangle {
         return triangle.a.equals(this.a) && triangle.b.equals(this.b) && triangle.c.equals(this.c);
 
     }
-    static getUV(point, p1, p2, p3, uv1, uv2, uv3, target) {
-        return getUV.call(this, point, p1, p2, p3, uv1, uv2, uv3, target)
-    }
+
 
 }
 
@@ -300,6 +230,80 @@ let getBarycoord = (function () {
     };
 
 }());
+
+Triangle.getUV = (point, p1, p2, p3, uv1, uv2, uv3, target) => {
+    return getUV.call(Triangle, point, p1, p2, p3, uv1, uv2, uv3, target)
+}
+
+Triangle.getBarycoord = (point, a, b, c, target) => {
+    return getBarycoord.call(Triangle, point, a, b, c, target)
+}
+Triangle.normal = (a, b, c, optionalTarget) => {
+
+    var result = optionalTarget || new Vector3();
+
+    result.subVectors(c, b);
+    v.subVectors(a, b);
+    result.cross(v);
+
+    var resultLengthSq = result.lengthSq();
+    if (resultLengthSq > 0) {
+
+        return result.multiplyScalar(1 / Math.sqrt(resultLengthSq));
+
+    }
+
+    return result.set(0, 0, 0);
+
+}
+
+Triangle.getNormal = (a, b, c, target) => {
+    return getNormal.call(Triangle, a, b, c, target);
+}
+
+
+// based on: http://www.blackpawn.com/texts/pointinpoly/default.html
+Triangle.barycoordFromPoint = (point, a, b, c, optionalTarget) => {
+
+    v0.subVectors(c, a);
+    v1.subVectors(b, a);
+    v2.subVectors(point, a);
+
+    var dot00 = v0.dot(v0);
+    var dot01 = v0.dot(v1);
+    var dot02 = v0.dot(v2);
+    var dot11 = v1.dot(v1);
+    var dot12 = v1.dot(v2);
+
+    var denom = (dot00 * dot11 - dot01 * dot01);
+
+    var result = optionalTarget || new Vector3();
+
+    // collinear or singular triangle
+    if (denom === 0) {
+
+        // arbitrary location outside of triangle?
+        // not sure if this is the best idea, maybe should be returning undefined
+        return result.set(- 2, - 1, - 1);
+
+    }
+
+    var invDenom = 1 / denom;
+    var u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    var v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+    // barycentric coordinates must always sum to 1
+    return result.set(1 - u - v, v, u);
+
+}
+
+Triangle.containsPoint = (point, a, b, c) => {
+
+    var result = Triangle.barycoordFromPoint(point, a, b, c, v4);
+
+    return (result.x >= 0) && (result.y >= 0) && ((result.x + result.y) <= 1);
+
+}
 
 
 let getNormal = (function () {

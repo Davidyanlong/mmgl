@@ -88,7 +88,7 @@ class TextTexture extends Texture {
             ctx.miterLimit = 1;
             ctx.lineWidth = this.lineWidthInPixels;
             ctx.strokeStyle = this.strokeStyle;
-            
+
             this.textLines.forEach(text => {
                 if (this.lineWidth) {
                     ctx.strokeText(text, left, top);
@@ -312,10 +312,11 @@ class TextTexture extends Texture {
         }
         return 1;
     }
-    static getTextWidth(textLines, font) {
-        return getTextWidth(textLines, font);
-    }
 
+
+}
+TextTexture.getTextWidth = (textLines, font) => {
+    return getTextWidth(textLines, font);
 }
 
 function Lang_isUndefined(value) {

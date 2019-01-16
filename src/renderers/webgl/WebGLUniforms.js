@@ -73,39 +73,42 @@ class WebGLUniforms {
         if (v !== undefined) this.setValue(name, v);
 
     }
-    static upload(gl, seq, values, renderer) {
+    
 
-        for (var i = 0, n = seq.length; i !== n; ++i) {
+}
 
-            var u = seq[i],
-                v = values[u.id];
+WebGLUniforms.upload=(gl, seq, values, renderer)=>{
 
-            if (v.needsUpdate !== false) {
+    for (var i = 0, n = seq.length; i !== n; ++i) {
 
-                // note: always updating when .needsUpdate is undefined
-                u.setValue(v.value, renderer);
+        var u = seq[i],
+            v = values[u.id];
 
-            }
+        if (v.needsUpdate !== false) {
 
-        }
-
-    }
-    static seqWithValue(seq, values) {
-
-        var r = [];
-
-        for (var i = 0, n = seq.length; i !== n; ++i) {
-
-            var u = seq[i];
-            if (u.id in values) r.push(u);
+            // note: always updating when .needsUpdate is undefined
+            u.setValue(v.value, renderer);
 
         }
-
-        return r;
 
     }
 
 }
+WebGLUniforms.seqWithValue=(seq, values)=>{
+
+    var r = [];
+
+    for (var i = 0, n = seq.length; i !== n; ++i) {
+
+        var u = seq[i];
+        if (u.id in values) r.push(u);
+
+    }
+
+    return r;
+
+}
+
 
 class StructuredUniform {
     constructor(gl, id) {
