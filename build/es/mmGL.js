@@ -185,7 +185,7 @@ var Events = function () {
     return Events;
 }();
 
-var version = "0.0.41";
+var version = "0.0.42";
 
 var REVISION = version;
 
@@ -782,9 +782,7 @@ var Vector3 = function () {
     }, {
         key: 'unproject',
         value: function unproject(camera, matrix) {
-
-            matrix.multiplyMatrices(camera.matrixWorld, matrix.getInverse(camera.projectionMatrix));
-            return this.applyMatrix4(matrix);
+            return this.applyMatrix4(matrix.getInverse(camera.projectionMatrix)).applyMatrix4(camera.matrixWorld);
         }
     }, {
         key: 'transformDirection',

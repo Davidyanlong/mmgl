@@ -22,7 +22,7 @@
 </pre>
 
 </html>
-<script src="../build/mmGL2.js"></script>
+<script src="../build/mmGL.js"></script>
 <script>
     let canvas = document.getElementById('cas');
     let renderer = new mmGL.WebGLRenderer({
@@ -84,7 +84,7 @@
 
     let sphereGeometry = new mmGL.SphereGeometry(100, 32, 32);
     let sphereMesh = new mmGL.Mesh(sphereGeometry, materialSphere);
-    sphereMesh.position.set(0, 0, 0)
+    sphereMesh.position.set(0, 0, 500)
     scene.add(sphereMesh);
 
     force = true;
@@ -123,7 +123,7 @@
         let lastTime = Date.now();
         let currTime = Date.now();
 
-        function update(tick,angle) {
+        function update(tick, angle) {
             currTime = Date.now();
             if (currTime - lastTime > tick) {
                 sphereMesh.rotateY(angle);
@@ -141,22 +141,59 @@
     }
 
     let ani = animation();
-
+    let pos = new mmGL.Vector2();
     function tick() {
 
 
         window.requestAnimationFrame(tick)
-        
-        ani.update(50,Math.PI/90);
+
+        ani.update(50, Math.PI / 90);
 
         if (!force) return;
         renderer.render(scene, camera);
+        let worldPos = screenToWorld(pos.x, pos.y);
+       // sphereMesh.position.copy(worldPos)
         force = false;
+        console.log(pos,worldPos)
 
     }
+
+
+
+    canvas.addEventListener('mousemove', (e) => {
+        pos.set(e.offsetX, e.offsetY);
+    })
+
+    let screenToWorld = (function () {
+        let matrix = new mmGL.Matrix4();
+        const widthHalf = 400 * 0.5;
+        const heightHalf = 400 * 0.5;
+
+        return function (dx, dy) {
+            let pCam = camera;
+            pCam.updateMatrixWorld();
+            let mouse = new mmGL.Vector2();
+            mouse.x = dx / widthHalf - 1;
+            mouse.y = -dy / heightHalf + 1;
+
+            //新建一个三维单位向量 假设z方向就是0.5
+            //根据照相机，把这个向量转换到视点坐标系
+
+            var target = new mmGL.Vector3(mouse.x, mouse.y, 0.5).unproject(pCam, matrix);
+
+
+
+            // let target = this.group.localToWorld(pos);
+
+            // target.project(pCam, matrix);
+
+            // target.x = (target.x * widthHalf) + widthHalf;
+            // target.y = (- (target.y * heightHalf) + heightHalf);
+            return target;
+        }
+    })();
+
     tick();
-
-
 
 
 

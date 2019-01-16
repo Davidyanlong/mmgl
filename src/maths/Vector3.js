@@ -302,8 +302,8 @@ class Vector3 {
         return this;
 
     }
-    project(camera,matrix) {
-          
+    project(camera, matrix) {
+
         matrix.multiplyMatrices(camera.projectionMatrix, matrix.getInverse(camera.matrixWorld));
         return this.applyMatrix4(matrix);
 
@@ -311,11 +311,8 @@ class Vector3 {
 
 
 
-    unproject(camera,matrix) {
-
-        matrix.multiplyMatrices(camera.matrixWorld, matrix.getInverse(camera.projectionMatrix));
-        return this.applyMatrix4(matrix);
-
+    unproject(camera, matrix) {
+        return this.applyMatrix4(matrix.getInverse(camera.projectionMatrix)).applyMatrix4(camera.matrixWorld);
     }
 
 
